@@ -7,10 +7,11 @@ Classifier guidance (stretch): add s * sigma^2 * grad_x log p_phi(y_centre = k |
 
 from __future__ import annotations
 
+import torch
 from torch import Tensor
 
 from glassdiff.models.base import Denoiser
-from glassdiff.types import Structures
+from glassdiff.types import LabelToken, Structures
 
 
 class CFGDenoiser(Denoiser):
@@ -18,11 +19,18 @@ class CFGDenoiser(Denoiser):
         super().__init__()
         self.model = model
         self.w = w
+        self.sigma_aware = model.sigma_aware
 
     def forward(
         self, s: Structures, sigma: Tensor, pin: Tensor | None = None, label: Tensor | None = None
     ) -> Tensor:
-        raise NotImplementedError("Ticket S-4")
+        cond = self.model(s, sigma, pin, label)
+        if self.w == 0 or label is None:
+            return cond
+        null = torch.where(
+            label == LabelToken.UNLABELLED, label, torch.full_like(label, int(LabelToken.NULL))
+        )
+        return (1 + self.w) * cond - self.w * self.model(s, sigma, pin, null)
 
 
 class ClassifierGuidance:

@@ -1,13 +1,10 @@
 """Acceptance tests for Ticket S-1 (DM2 score-dynamics sampler), using an oracle denoiser."""
 
-import pytest
 import torch
 
 from glassdiff.diffusion.sampler import ScoreDynamicsSchedule, random_init, sample
 from glassdiff.geometry import minimum_image
 from glassdiff.models.base import Denoiser
-
-pytestmark = pytest.mark.skip(reason="Ticket S-1: delete this line when implementing")
 
 
 class Oracle(Denoiser):
