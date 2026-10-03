@@ -1,0 +1,31 @@
+name: egnn_uncond_cpu_smoke
+seed: 0
+data: data/ka2d_256
+model: configs/model/egnn.yaml
+conditional: false
+noise:
+  sigma_min: 0.001
+  sigma_max: 0.5
+  distribution: uniform
+optim:
+  lr: 0.001
+  weight_decay: 0.0
+  batch_size: 8
+  n_updates: 100000
+  grad_clip: 1.0
+  ema: 0.99
+log_every: 50
+val_every: 250
+ckpt_every: 500
+model_args:
+  hidden: 64
+  n_layers: 3
+max_minutes: 80
+threads: 2
+resolved_model:
+  name: egnn_pbc
+  hidden: 64
+  n_layers: 3
+  cutoff: 2.5
+  k_max: 64
+  sigma_aware: true

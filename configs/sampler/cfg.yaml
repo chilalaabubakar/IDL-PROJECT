@@ -1,0 +1,6 @@
+schedule: {n_noisy: 2900, n_final: 100, sigma_start: 1.0, sigma_end: 1.0e-3, sigma_min: 1.0e-3}
+strategy: {name: pinned_label, guidance_w: 1.0}       # sweep w {0, 0.5, 1, 2, 4}
+request: {mode: centre}                               # centre | patch | host
+n_samples: 256
+batch_size: 64
+seed: 0

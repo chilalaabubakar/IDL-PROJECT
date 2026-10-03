@@ -1,0 +1,6 @@
+schedule: {n_noisy: 2900, n_final: 100, sigma_start: 1.0, sigma_end: 1.0e-3, sigma_min: 1.0e-3}
+strategy: {name: repaint, n_resample: 10, jump: 10}   # sweep n_resample {1,5,10}, jump {1,10}
+request: {mode: patch}
+n_samples: 256
+batch_size: 64
+seed: 0

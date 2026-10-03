@@ -1,0 +1,27 @@
+# Python
+__pycache__/
+*.py[cod]
+*.egg-info/
+.eggs/
+build/
+dist/
+.venv/
+venv/
+.pytest_cache/
+.ruff_cache/
+.ipynb_checkpoints/
+
+# Experiment outputs (summaries go to results/). The generated datasets in data/ are
+# committed (~20 MB) so the team can start without regenerating them.
+runs/*
+!runs/README.md
+
+# LAMMPS / visualisation scratch
+log.lammps
+*.lammpstrj
+*.extxyz
+
+# Editors / OS
+.vscode/
+.idea/
+.DS_Store

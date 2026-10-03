@@ -1,0 +1,6 @@
+name: egnn_pbc          # main backbone (src/glassdiff/models/egnn_pbc.py)
+hidden: 128
+n_layers: 4
+cutoff: 2.5             # sigma_AA; must be < L/2 (3.65 at N=64)
+k_max: 64               # ~24 neighbours expected within 2.5 at rho=1.2; random starts reach ~45
+sigma_aware: true
