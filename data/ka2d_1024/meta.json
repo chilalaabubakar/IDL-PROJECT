@@ -1,0 +1,71 @@
+{
+  "name": "ka2d_1024",
+  "n_atoms": 1024,
+  "protocol": {
+    "rho": 1.2,
+    "frac_a": 0.65,
+    "t_melt": 2.0,
+    "melt_steps": 20000,
+    "t_final": 0.01,
+    "rate": 0.01,
+    "dt": 0.005,
+    "tdamp": 0.1,
+    "min_ftol": 1e-08
+  },
+  "quality": {
+    "max_global_psi6": 0.3,
+    "min_pair_dist": 0.56,
+    "pe_max_z": 5.0
+  },
+  "lammps_version": 20250722,
+  "git": "18765b4c8c211f05cb0ba450bebaa5e897b46986 (dirty)",
+  "splits": {
+    "test": {
+      "n": 100,
+      "seeds": [
+        50000,
+        50099
+      ],
+      "pe_atom_mean": -3.6731817022032573,
+      "pe_atom_sd": 0.00738138230499111,
+      "rejected": [],
+      "wall_seconds": 506.5
+    }
+  },
+  "defects": {
+    "thresholds": {
+      "cn_factor": 1.4,
+      "d1_minus_max_cn": 5,
+      "d1_plus_min_cn": 8,
+      "d2_rc": 1.2,
+      "d2_min_bb": 2,
+      "d3_min_radius": 0.7655033909855835
+    },
+    "digest": "1c8714e00c26",
+    "fitted_on": "data/ka2d_256/train",
+    "config": {
+      "cn_factor": 1.4,
+      "d1_minus_max_cn": 5,
+      "d1_plus_min_cn": 8,
+      "d2_rc": 1.2,
+      "d2_min_bb": 2,
+      "d3_quantile": 0.999,
+      "patch_radius": 1.5,
+      "thresholds_from": "data/ka2d_256"
+    },
+    "rates": {
+      "test": {
+        "D1_MINUS_of_all": 0.006728515625,
+        "D1_MINUS_of_species": 0.010345345345345345,
+        "D1_MINUS_per_glass": 6.89,
+        "D1_PLUS_of_all": 0.005986328125,
+        "D1_PLUS_of_species": 0.009204204204204204,
+        "D1_PLUS_per_glass": 6.13,
+        "D2_of_all": 0.041162109375,
+        "D2_of_species": 0.11773743016759776,
+        "D2_per_glass": 42.15
+      }
+    },
+    "git": "cd403a1734e0f9db91d2b23b66fd70f4d34f7b39 (dirty)"
+  }
+}
