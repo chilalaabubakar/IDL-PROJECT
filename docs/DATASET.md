@@ -113,19 +113,43 @@ move.
 ```
 data/ka2d_256/
   train.npz  val.npz  test.npz
-     pos      float32 [M, 256, 2]   wrapped into [0, L)
-     types    int8    [M, 256]      0 = A, 1 = B
-     box      float32 [M, 2]
-     pe_atom  float32 [M, 256]
-     labels   int8    [M, 256]      0 none, 1 D1-, 2 D1+, 3 D2 (frozen thresholds)
-     seed     int64   [M]
-  meta.json   potential, protocol, LAMMPS version, thresholds, git commit, rejection log
-  patches_train.npz
-  extxyz/     optional export for OVITO visualisation
+     pos          float64 [M, 256, 2]   inherent structure, wrapped into [0, L)
+     types        int8    [M, 256]      0 = A, 1 = B
+     box          float64 [M, 2]
+     pe_atom      float64 [M, 256]      LAMMPS compute pe/atom
+     seed         int64   [M]
+     thermal_pos  float64 [M, 256, 2]   T = 0.01 snapshot before minimization
+     labels       int8    [M, 256]      0 none, 1 D1-, 2 D1+, 3 D2 (added when frozen)
+  meta.json          protocol, quality gates, LAMMPS version, git state, per-split
+                     stats and rejection log; "defects": frozen thresholds, digest, rates
+  patches_train.npz  rel_pos, types, defect, sizes (concatenated patches)
 ```
 
-The whole set takes about 3 MB, so it can live in the repo or in a GitHub release. It can
-always be regenerated exactly from the seeds plus `meta.json`.
+Positions are stored in float64 so that re-relaxing a dataset glass is a no-op. With the
+thermal snapshots the N = 256 set is about 10 MB. `data/` is gitignored: regenerate it
+exactly from the configs (same seeds give bit-identical glasses), or share it as a
+GitHub release asset.
+
+### 1.8 Generated sets (actual numbers)
+
+Generated with `scripts/make_dataset.py` (LAMMPS 22 Jul 2025, 3 worker processes):
+
+| Set | Splits | Rejected | PE/atom (train or test) | Wall time |
+|---|---|---|---|---|
+| `ka2d_256` | 800 / 100 / 100 | 0 | −3.6802 ± 0.0136 | 14 min (train) |
+| `ka2d_64` | 1600 / 200 / 200 | 4 (global \|Ψ6\| 0.30–0.36, finite-size fluctuations) | −3.6356 ± 0.0284 | 5 min (train) |
+| `ka2d_1024` | test 100 | 0 | −3.6732 ± 0.0074 | 8 min |
+| `ka2d_256_slow` | test 200 | see `meta.json` | see `meta.json` | ~18 min |
+
+Frozen defect thresholds for `ka2d_256` (digest `1c8714e00c26`, fitted on train):
+D1− = A with CN ≤ 5, D1+ = A with CN ≥ 8, D2 = B with ≥ 2 B neighbours within 1.2,
+D3 radius 0.766. Per glass on train: D1− 1.74, D1+ 1.43, D2 10.0 (1.05%, 0.86% of A and
+11.1% of B atoms, matching the pilot). The train patch library holds 10,545 patches
+(1,388 D1−, 1,146 D1+, 8,011 D2) of 6–11 atoms. `ka2d_64` (digest `cb3b93c7c030`):
+per glass D1− 0.53, D1+ 0.30, D2 2.09.
+
+The PyTorch potential reproduces the stored LAMMPS per-atom energies to 1e-5
+(`tests/test_potential.py`).
 
 ---
 
@@ -162,9 +186,24 @@ symmetry-ladder comparison has to be made at matching N.
   `LD_LIBRARY_PATH` (here it was `/usr/local/lib`). The wheel includes the `VORONOI`,
   `EXTRA-COMPUTE` and `OPENMP` packages. conda-forge `lammps` is an alternative.
 * Analysis uses `numpy` and `scipy` (Delaunay with periodic images; see `docs/pilot/pilot_ka2d.py`).
-* For evaluation we will add our own **PyTorch KA energy + FIRE minimizer** for batched
-  relaxation of thousands of generated samples on a GPU. A unit test must show it matches
-  LAMMPS per-atom energies to 1e-5.
+* Evaluation uses our own **PyTorch KA energy + batched FIRE minimizer**
+  (`glassdiff.physics`), tested against the LAMMPS per-atom energies to 1e-5.
+
+To regenerate the datasets:
+
+```bash
+pip install -e ".[dev,md]"
+export LD_LIBRARY_PATH=/usr/local/lib:$LD_LIBRARY_PATH   # wherever libmpi.so.12 landed
+for c in ka2d_256 ka2d_64 ka2d_1024 ka2d_256_slow; do
+  python scripts/make_dataset.py --config configs/data/$c.yaml workers=4
+done
+python scripts/freeze_thresholds.py --config configs/defects/v0.yaml data=data/ka2d_256
+python scripts/freeze_thresholds.py --config configs/defects/v0.yaml data=data/ka2d_64
+python scripts/freeze_thresholds.py --config configs/defects/v0.yaml data=data/ka2d_1024 thresholds_from=data/ka2d_256
+python scripts/freeze_thresholds.py --config configs/defects/v0.yaml data=data/ka2d_256_slow thresholds_from=data/ka2d_256
+python scripts/build_patches.py --config configs/defects/v0.yaml data=data/ka2d_256
+python scripts/build_patches.py --config configs/defects/v0.yaml data=data/ka2d_64
+```
 
 To reproduce the pilot:
 
