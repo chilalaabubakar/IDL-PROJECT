@@ -12,8 +12,6 @@ from glassdiff.analysis.descriptors import (
 )
 from glassdiff.types import Structures
 
-pytestmark = pytest.mark.skip(reason="Ticket E-1: delete this line when implementing")
-
 
 def test_triangular_lattice(make_triangular):
     s = make_triangular(8, 8, a=1.1)  # all A; 2nd neighbours at 1.905 > 1.4 cutoff
