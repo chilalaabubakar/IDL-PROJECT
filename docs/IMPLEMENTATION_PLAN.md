@@ -57,6 +57,7 @@ when that file passes.
 | Figures: `glassdiff/viz.py`, `scripts/plot_samples.py` (glasses or run samples, defects ringed, target and pins marked) | ✅ done |
 | End-to-end pipeline test (`tests/test_pipeline.py`) | ✅ runs every script on a tiny synthetic dataset in CI |
 | **E-5** report tables (`eval/report.py`; `aggregate_results.py` also writes `summary.md`), training curves (`scripts/plot_training.py`) | ✅ done |
+| End-to-end smoke run on real data (CPU) | ✅ `results/cpu_smoke/`: B1, B2, B5, B6 and the floor for D2; a pipeline check, not results |
 | B-1 Stage 0 (needs a GPU + the DM2 environment) | ⏳ open |
 | S-5 classifier guidance, M-7 NequIP-2D | ⏳ stretch |
 | **GPU training runs** (unconditional EGNN at full size, then conditional) | ⏳ next: needs a GPU |
