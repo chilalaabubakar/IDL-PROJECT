@@ -28,3 +28,19 @@ def test_batch_members_are_independent(make_lattice):
     both = fire_minimize(s, fmax=1e-6).structures.pos
     first = fire_minimize(type(s)(s.pos[:1], s.types[:1], s.box[:1]), fmax=1e-6).structures.pos
     assert torch.allclose(both[:1], first, atol=1e-6)
+
+
+def test_neighbor_list_forces_match_dense(make_lattice):
+    from glassdiff.geometry import neighbor_list
+    from glassdiff.physics.ka_potential import ka_forces, ka_forces_neighbors
+
+    s = make_lattice(2, 8, jitter=0.12, seed=4)
+    nl = neighbor_list(s.pos, s.box, 2.8, 64)
+    assert torch.allclose(ka_forces_neighbors(s, nl.idx, nl.mask), ka_forces(s), atol=1e-10)
+
+
+def test_neighbor_list_and_dense_relaxation_agree(make_lattice):
+    s = make_lattice(2, 8, jitter=0.1, seed=5)
+    dense = fire_minimize(s, fmax=1e-8, skin=None)
+    sparse = fire_minimize(s, fmax=1e-8, skin=0.3)
+    assert torch.allclose(dense.structures.pos, sparse.structures.pos, atol=1e-7)

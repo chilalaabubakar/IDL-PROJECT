@@ -11,7 +11,7 @@ from __future__ import annotations
 import torch
 from torch import Tensor
 
-from glassdiff.geometry import pair_vectors
+from glassdiff.geometry import minimum_image, pair_vectors
 from glassdiff.types import Structures
 
 # Plain floats: build tensors in the positions' dtype (torch.tensor(KA_SIGMA, dtype=pos.dtype)).
@@ -53,5 +53,24 @@ def ka_forces(s: Structures) -> Tensor:
     x3 = (sig2 / r2) ** 3
     # x3 = (sigma/r)^6: de/d(r^2) = -12 eps (2 x3^2 - x3) / r^2 ; F_i = sum_j 2 de/d(r^2) r_ij
     de_dr2 = -12 * eps * (2 * x3 * x3 - x3) / r2
+    coef = torch.where(mask, 2 * de_dr2, torch.zeros_like(de_dr2))
+    return (coef[..., None] * vec).sum(2)
+
+
+def ka_forces_neighbors(s: Structures, idx: Tensor, valid: Tensor) -> Tensor:
+    """Forces [B, N, 2] from a fixed neighbour list (idx, valid: [B, N, K]), e.g. a Verlet
+    list built with a skin. Equals ka_forces as long as every pair within the cutoff is in
+    the list; O(N K) instead of O(N^2)."""
+    bidx = torch.arange(s.batch_size, device=s.pos.device)[:, None, None]
+    vec = minimum_image(s.pos[bidx, idx] - s.pos[:, :, None, :], s.box)
+    r2 = (vec * vec).sum(-1)
+    sigma = torch.tensor(KA_SIGMA, dtype=s.pos.dtype, device=s.pos.device)
+    eps = torch.tensor(KA_EPSILON, dtype=s.pos.dtype, device=s.pos.device)
+    ti, tj = s.types[:, :, None], s.types[bidx, idx]
+    sig2, eps_ij = sigma[ti, tj] ** 2, eps[ti, tj]
+    mask = valid & (r2 < KA_CUTOFF_FACTOR**2 * sig2)
+    r2 = torch.where(mask, r2, torch.ones_like(r2))
+    x3 = (sig2 / r2) ** 3
+    de_dr2 = -12 * eps_ij * (2 * x3 * x3 - x3) / r2
     coef = torch.where(mask, 2 * de_dr2, torch.zeros_like(de_dr2))
     return (coef[..., None] * vec).sum(2)

@@ -41,7 +41,7 @@ when that file passes.
 | Foundations: `types.py`, `geometry.py`, `utils/` | ✅ done, tested |
 | **P-1** dataset generation (`md/lammps_quench.py`, `data/dataset.py`, `scripts/make_dataset.py`) | ✅ done; all four sets generated (DATASET.md §1.8) |
 | **P-2** KA potential | ✅ done; matches LAMMPS per-atom energies to 1e-5 |
-| **P-3** batched FIRE + `scripts/relax.py` | ✅ done; converges in ~1.5–3k steps. The dense O(N²) forces are slow on CPU (minutes per 32 samples); fine on a GPU. A neighbour-list force path is a possible optimisation. |
+| **P-3** batched FIRE + `scripts/relax.py` | ✅ done; converges in ~1.5–3k steps; Verlet neighbour-list forces (3.3× faster than dense on CPU, identical results) |
 | **E-1** descriptors | ✅ done, tested |
 | **E-2** detectors + `scripts/freeze_thresholds.py` | ✅ done; thresholds frozen (`1c8714e00c26` for `ka2d_256`) |
 | **E-3** patch library + `scripts/build_patches.py` | ✅ done; 10,545 train patches |
@@ -51,7 +51,9 @@ when that file passes.
 | **M-4** `RequestSampler` (centre / patch / host modes, CFG dropout) | ✅ done, tested |
 | **S-1** sampler, **S-2** clamp / noise patch, **S-3** RePaint, **S-4** pinned label + CFG | ✅ done, tested with an oracle denoiser |
 | **B-2** eval requests (Task A and Task B), hand insertion (`baselines.py`, `scripts/hand_insert.py`) | ✅ done |
-| P-4 local melt-quench, M-5 MPNN, M-6 MLP, B-1 Stage 0, B-3 results aggregation, E-5 report | ⏳ open |
+| **P-4** local melt-quench (`md/local_melt_quench.py`, `scripts/local_melt_quench.py`) | ✅ done; host atoms stay fixed to 1e-12 |
+| **M-5** MPNN, **M-6** flat MLP | ✅ done, tested (MPNN verified to lack rotation symmetry) |
+| B-1 Stage 0, B-3 results aggregation, E-5 report | ⏳ open |
 | S-5 classifier guidance, M-7 NequIP-2D | ⏳ stretch |
 | **GPU training runs** (unconditional EGNN at full size, then conditional) | ⏳ next: needs a GPU |
 

@@ -14,7 +14,8 @@ from dataclasses import dataclass
 import torch
 from torch import Tensor
 
-from glassdiff.physics.ka_potential import ka_forces
+from glassdiff.geometry import neighbor_list
+from glassdiff.physics.ka_potential import KA_CUTOFF_FACTOR, ka_forces, ka_forces_neighbors
 from glassdiff.types import Structures
 
 
@@ -45,8 +46,15 @@ def fire_minimize(
     alpha_start: float = 0.1,
     f_alpha: float = 0.99,
     max_move: float = 0.1,
+    skin: float | None = 0.3,
+    k_max: int = 96,
 ) -> FireResult:
-    """Minimize the Kob–Andersen energy of every structure in the batch."""
+    """Minimize the Kob–Andersen energy of every structure in the batch.
+
+    With ``skin`` set, forces use a Verlet neighbour list (cutoff 2.5 + skin), rebuilt
+    whenever an atom has moved more than skin / 2 since the last build; ``skin=None`` uses
+    dense all-pairs forces. Both give the same forces.
+    """
     batch = s.batch_size
     dev, dtype = s.pos.device, s.pos.dtype
     free = (
@@ -60,7 +68,19 @@ def fire_minimize(
     n_steps = torch.zeros(batch, dtype=torch.long, device=dev)
     active = torch.ones(batch, dtype=torch.bool, device=dev)
 
-    f = ka_forces(s.with_pos(pos)) * free
+    nl_state: dict = {}
+
+    def forces(pos: Tensor) -> Tensor:
+        cur = s.with_pos(pos)
+        if skin is None:
+            return ka_forces(cur) * free
+        ref = nl_state.get("pos")
+        if ref is None or (pos - ref).norm(dim=-1).max() > skin / 2:
+            nl = neighbor_list(pos, s.box, KA_CUTOFF_FACTOR * 1.0 + skin, k_max)
+            nl_state.update(pos=pos.clone(), idx=nl.idx, valid=nl.mask)
+        return ka_forces_neighbors(cur, nl_state["idx"], nl_state["valid"]) * free
+
+    f = forces(pos)
     for _ in range(max_steps):
         active &= _max_force(f) > fmax
         if not active.any():
@@ -89,7 +109,7 @@ def fire_minimize(
         dx = dx * active[:, None, None] * free
         v = v * active[:, None, None]
         pos = pos + dx
-        f = ka_forces(s.with_pos(pos)) * free
+        f = forces(pos)
 
     max_f = _max_force(f)
     return FireResult(
