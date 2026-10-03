@@ -5,8 +5,6 @@ import torch
 
 from glassdiff.diffusion.noise import add_noise, masked_displacement_loss, sample_sigma
 
-pytestmark = pytest.mark.skip(reason="Ticket M-3: delete this line when implementing")
-
 
 def test_sigma_range():
     g = torch.Generator().manual_seed(0)
