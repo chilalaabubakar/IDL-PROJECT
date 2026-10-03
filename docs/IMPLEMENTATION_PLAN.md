@@ -56,7 +56,8 @@ when that file passes.
 | **B-3** `scripts/aggregate_results.py` → summary CSV | ✅ done |
 | Figures: `glassdiff/viz.py`, `scripts/plot_samples.py` (glasses or run samples, defects ringed, target and pins marked) | ✅ done |
 | End-to-end pipeline test (`tests/test_pipeline.py`) | ✅ runs every script on a tiny synthetic dataset in CI |
-| B-1 Stage 0 (needs a GPU + DM2 environment), E-5 report tables | ⏳ open |
+| **E-5** report tables (`eval/report.py`; `aggregate_results.py` also writes `summary.md`), training curves (`scripts/plot_training.py`) | ✅ done |
+| B-1 Stage 0 (needs a GPU + the DM2 environment) | ⏳ open |
 | S-5 classifier guidance, M-7 NequIP-2D | ⏳ stretch |
 | **GPU training runs** (unconditional EGNN at full size, then conditional) | ⏳ next: needs a GPU |
 
