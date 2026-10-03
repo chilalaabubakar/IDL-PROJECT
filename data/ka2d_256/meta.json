@@ -1,0 +1,114 @@
+{
+  "name": "ka2d_256",
+  "n_atoms": 256,
+  "protocol": {
+    "rho": 1.2,
+    "frac_a": 0.65,
+    "t_melt": 2.0,
+    "melt_steps": 20000,
+    "t_final": 0.01,
+    "rate": 0.01,
+    "dt": 0.005,
+    "tdamp": 0.1,
+    "min_ftol": 1e-08
+  },
+  "quality": {
+    "max_global_psi6": 0.3,
+    "min_pair_dist": 0.56,
+    "pe_max_z": 5.0
+  },
+  "lammps_version": 20250722,
+  "git": "c115bf4e435cbae0b8b146f88aadae619ef8a84c (dirty)",
+  "splits": {
+    "train": {
+      "n": 800,
+      "seeds": [
+        0,
+        799
+      ],
+      "pe_atom_mean": -3.680217964618174,
+      "pe_atom_sd": 0.01360099113012317,
+      "rejected": [],
+      "wall_seconds": 831.4
+    },
+    "val": {
+      "n": 100,
+      "seeds": [
+        10000,
+        10099
+      ],
+      "pe_atom_mean": -3.6822803744505075,
+      "pe_atom_sd": 0.012872608138261582,
+      "rejected": [],
+      "wall_seconds": 77.7
+    },
+    "test": {
+      "n": 100,
+      "seeds": [
+        20000,
+        20099
+      ],
+      "pe_atom_mean": -3.6801117470059443,
+      "pe_atom_sd": 0.012589459945371582,
+      "rejected": [],
+      "wall_seconds": 77.9
+    }
+  },
+  "defects": {
+    "thresholds": {
+      "cn_factor": 1.4,
+      "d1_minus_max_cn": 5,
+      "d1_plus_min_cn": 8,
+      "d2_rc": 1.2,
+      "d2_min_bb": 2,
+      "d3_min_radius": 0.7655033909855835
+    },
+    "digest": "1c8714e00c26",
+    "fitted_on": "data/ka2d_256/train",
+    "config": {
+      "cn_factor": 1.4,
+      "d1_minus_max_cn": 5,
+      "d1_plus_min_cn": 8,
+      "d2_rc": 1.2,
+      "d2_min_bb": 2,
+      "d3_quantile": 0.999,
+      "patch_radius": 1.5
+    },
+    "rates": {
+      "train": {
+        "D1_MINUS_of_all": 0.00677734375,
+        "D1_MINUS_of_species": 0.010451807228915663,
+        "D1_MINUS_per_glass": 1.735,
+        "D1_PLUS_of_all": 0.005595703125,
+        "D1_PLUS_of_species": 0.008629518072289157,
+        "D1_PLUS_per_glass": 1.4325,
+        "D2_of_all": 0.0391162109375,
+        "D2_of_species": 0.11126388888888888,
+        "D2_per_glass": 10.01375
+      },
+      "val": {
+        "D1_MINUS_of_all": 0.0064453125,
+        "D1_MINUS_of_species": 0.009939759036144578,
+        "D1_MINUS_per_glass": 1.65,
+        "D1_PLUS_of_all": 0.006796875,
+        "D1_PLUS_of_species": 0.010481927710843374,
+        "D1_PLUS_per_glass": 1.74,
+        "D2_of_all": 0.0377734375,
+        "D2_of_species": 0.10744444444444444,
+        "D2_per_glass": 9.67
+      },
+      "test": {
+        "D1_MINUS_of_all": 0.0060546875,
+        "D1_MINUS_of_species": 0.009337349397590362,
+        "D1_MINUS_per_glass": 1.55,
+        "D1_PLUS_of_all": 0.0052734375,
+        "D1_PLUS_of_species": 0.008132530120481927,
+        "D1_PLUS_per_glass": 1.35,
+        "D2_of_all": 0.039453125,
+        "D2_of_species": 0.11222222222222222,
+        "D2_per_glass": 10.1
+      }
+    },
+    "git": "41107b2fad4763a77973336fb3febb5883d63bbb (dirty)"
+  }
+}
