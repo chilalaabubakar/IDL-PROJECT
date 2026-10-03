@@ -1,0 +1,5 @@
+reference: data/ka2d_256/test.npz     # natural defects (never the train split)
+relax: {fmax: 1.0e-6, max_steps: 100000}
+success: {r_tol: 0.5}
+local: {r_loc: 3.0}
+bootstrap: {n_resamples: 10000, alpha: 0.05, seed: 0}

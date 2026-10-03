@@ -1,0 +1,28 @@
+# Python
+__pycache__/
+*.py[cod]
+*.egg-info/
+.eggs/
+build/
+dist/
+.venv/
+venv/
+.pytest_cache/
+.ruff_cache/
+.ipynb_checkpoints/
+
+# Generated data and experiment outputs (regenerate from configs; share via GitHub releases)
+data/*
+!data/README.md
+runs/*
+!runs/README.md
+
+# LAMMPS / visualisation scratch
+log.lammps
+*.lammpstrj
+*.extxyz
+
+# Editors / OS
+.vscode/
+.idea/
+.DS_Store

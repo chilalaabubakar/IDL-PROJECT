@@ -1,0 +1,10 @@
+rate=0.001/tau  quench_steps=398000  glasses=4  L=14.606
+wall time per glass: 16.4 s (1 core)
+PE/atom (inherent structure): -3.7036 +- 0.0071
+psi6 (A atoms) mean=0.528  frac>0.7=0.378
+Voronoi coordination: {4: np.float64(0.0049), 5: np.float64(0.2705), 6: np.float64(0.4443), 7: np.float64(0.2803)}
+B atoms: # B neighbours (r<1.2): {0: np.float64(0.5833), 1: np.float64(0.3111), 2: np.float64(0.1056)}
+global |Psi6| per glass: [0.019 0.024 0.052 0.024]  frac psi6>0.9 (A): 0.131
+cutoff CN (A): {5: np.float64(0.009), 6: np.float64(0.5422), 7: np.float64(0.4413), 8: np.float64(0.0075)}
+cutoff CN (B): {4: np.float64(0.1611), 5: np.float64(0.7028), 6: np.float64(0.1361)}
+Delaunay circumradius quantiles 50/95/99/99.9%: [0.571 0.671 0.701 0.772]
