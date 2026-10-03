@@ -126,9 +126,9 @@ data/ka2d_256/
 ```
 
 Positions are stored in float64 so that re-relaxing a dataset glass is a no-op. With the
-thermal snapshots the N = 256 set is about 10 MB. `data/` is gitignored: regenerate it
-exactly from the configs (same seeds give bit-identical glasses), or share it as a
-GitHub release asset.
+thermal snapshots the N = 256 set is about 10 MB. All four sets are committed in `data/`
+(~20 MB); they can also be regenerated exactly from the configs (same seeds give
+bit-identical glasses).
 
 ### 1.8 Generated sets (actual numbers)
 

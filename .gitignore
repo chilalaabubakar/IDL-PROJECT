@@ -11,9 +11,8 @@ venv/
 .ruff_cache/
 .ipynb_checkpoints/
 
-# Generated data and experiment outputs (regenerate from configs; share via GitHub releases)
-data/*
-!data/README.md
+# Experiment outputs (summaries go to results/). The generated datasets in data/ are
+# committed (~20 MB) so the team can start without regenerating them.
 runs/*
 !runs/README.md
 

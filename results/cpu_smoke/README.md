@@ -54,6 +54,14 @@ machine, so compare them only to each other.
   2,289-update run; at the end the model removes 55% of the noise at σ = 0.02, 70% at 0.1,
   32% at 0.3 and 11% at 0.5, and it was still improving
 
+## Model files
+
+`model/` holds the CPU-trained EGNN: `ckpt_step1000.pt` (used for the samples above),
+`ckpt_step2289.pt` (end of the run), with the run's `config.yaml`, `log.csv` and
+`git.txt`. Load either with `glassdiff.models.registry.load_denoiser(path)` or pass it as
+`ckpt=` to `scripts/sample.py`. They exist so the sampling and evaluation scripts can be
+tried without training first; they are not models to report results with.
+
 ## Reproduce
 
 ```bash

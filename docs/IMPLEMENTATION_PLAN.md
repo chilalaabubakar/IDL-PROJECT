@@ -20,7 +20,7 @@ when that file passes.
 | Randomness | Any function that samples takes `generator: torch.Generator | None`. Scripts call `seed_everything(cfg["seed"])`. |
 | Precision | Physics code must work in float64 (the tests use it). Build constant tensors in the input's dtype. |
 | Configs | YAML in `configs/`, overridden on the command line as `key.sub=value`. Scripts save the resolved config into their run directory. |
-| Runs | `make_run_dir(name, cfg)` → `runs/<timestamp>_<name>/` containing `config.yaml`, `git.txt`, logs, checkpoints, samples and `metrics.json`. `runs/` and `data/` are gitignored; only small summary tables go in `results/`. |
+| Runs | `make_run_dir(name, cfg)` → `runs/<timestamp>_<name>/` containing `config.yaml`, `git.txt`, logs, checkpoints, samples and `metrics.json`. `runs/` is gitignored; small summary tables and figures go in `results/`. The datasets in `data/` are committed and frozen. |
 | Train/test hygiene | Thresholds and patches come from **train** only. Natural-defect references and Task B hosts come from **test** only. Val is for tuning. |
 | Style | `ruff check` and `ruff format` (line length 100). Type hints on public functions. |
 | Tests | CPU-only and fast in CI. Tests needing LAMMPS, a GPU or the dataset skip themselves when those are missing. |
