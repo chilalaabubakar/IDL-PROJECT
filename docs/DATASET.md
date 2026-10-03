@@ -139,14 +139,16 @@ Generated with `scripts/make_dataset.py` (LAMMPS 22 Jul 2025, 3 worker processes
 | `ka2d_256` | 800 / 100 / 100 | 0 | −3.6802 ± 0.0136 | 14 min (train) |
 | `ka2d_64` | 1600 / 200 / 200 | 4 (global \|Ψ6\| 0.30–0.36, finite-size fluctuations) | −3.6356 ± 0.0284 | 5 min (train) |
 | `ka2d_1024` | test 100 | 0 | −3.6732 ± 0.0074 | 8 min |
-| `ka2d_256_slow` | test 200 | see `meta.json` | see `meta.json` | ~18 min |
+| `ka2d_256_slow` | test 200 | 0 | −3.7059 ± 0.0105 | 30 min |
 
 Frozen defect thresholds for `ka2d_256` (digest `1c8714e00c26`, fitted on train):
 D1− = A with CN ≤ 5, D1+ = A with CN ≥ 8, D2 = B with ≥ 2 B neighbours within 1.2,
 D3 radius 0.766. Per glass on train: D1− 1.74, D1+ 1.43, D2 10.0 (1.05%, 0.86% of A and
 11.1% of B atoms, matching the pilot). The train patch library holds 10,545 patches
 (1,388 D1−, 1,146 D1+, 8,011 D2) of 6–11 atoms. `ka2d_64` (digest `cb3b93c7c030`):
-per glass D1− 0.53, D1+ 0.30, D2 2.09.
+per glass D1− 0.53, D1+ 0.30, D2 2.09. The slow-cooled set, labelled with the `ka2d_256`
+thresholds, has fewer defects (D1− 0.69% of A, D2 9.7% of B, against 0.93% and 11.2% for
+the fast-cooled test split), as expected for a better-annealed glass.
 
 The PyTorch potential reproduces the stored LAMMPS per-atom energies to 1e-5
 (`tests/test_potential.py`).
