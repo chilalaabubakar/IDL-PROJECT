@@ -4,7 +4,7 @@ from __future__ import annotations
 
 import random
 import subprocess
-from datetime import datetime
+from datetime import datetime, timezone
 from pathlib import Path
 from typing import Any
 
@@ -32,8 +32,8 @@ def git_state() -> str:
 
 
 def make_run_dir(name: str, cfg: dict[str, Any], root: str | Path = "runs") -> Path:
-    """Create runs/<timestamp>_<name>/ holding the resolved config and git state."""
-    run_dir = Path(root) / f"{datetime.now():%Y%m%d-%H%M%S}_{name}"
+    """Create runs/<UTC timestamp>_<name>/ holding the resolved config and git state."""
+    run_dir = Path(root) / f"{datetime.now(timezone.utc):%Y%m%d-%H%M%SZ}_{name}"
     run_dir.mkdir(parents=True, exist_ok=False)
     (run_dir / "config.yaml").write_text(yaml.safe_dump(cfg, sort_keys=False))
     (run_dir / "git.txt").write_text(git_state() + "\n")
