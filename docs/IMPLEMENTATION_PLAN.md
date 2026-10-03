@@ -1,7 +1,7 @@
 # Implementation plan
 
 This document turns [`PROJECT_PLAN.md`](PROJECT_PLAN.md) into work items. Every module in
-`src/glassdiff/` either works already (marked ✅) or is a stub naming the ticket that owns
+`src/glassdiff/` either works already (see §2) or is a stub naming the ticket that owns
 it. Every ticket that has an acceptance test has a skipped test file in `tests/`: delete the
 `pytestmark = pytest.mark.skip(...)` line when you start the ticket, and the ticket is done
 when that file passes.
@@ -34,15 +34,26 @@ when that file passes.
 
 ---
 
-## 2. Status of the scaffold
+## 2. Implementation status
 
-| Module | Status |
+| Ticket | Status |
 |---|---|
-| `types.py`: `Structures`, `Request`, `Species`, `DefectClass`, `LabelToken` | ✅ implemented and tested |
-| `geometry.py`: minimum image, pair vectors, padded neighbour list | ✅ implemented and tested (brute-force check, translation, permutation, overflow) |
-| `utils/config.py`, `utils/runs.py`: YAML + overrides, seeding, run directories | ✅ implemented and tested |
-| `configs/`: data, defects, model, train, sampler and eval | ✅ written with the plan's starting values |
-| Everything else | Stub with its interface, docstring and ticket number |
+| Foundations: `types.py`, `geometry.py`, `utils/` | ✅ done, tested |
+| **P-1** dataset generation (`md/lammps_quench.py`, `data/dataset.py`, `scripts/make_dataset.py`) | ✅ done; all four sets generated (DATASET.md §1.8) |
+| **P-2** KA potential | ✅ done; matches LAMMPS per-atom energies to 1e-5 |
+| **P-3** batched FIRE + `scripts/relax.py` | ✅ done; converges in ~1.5–3k steps. The dense O(N²) forces are slow on CPU (minutes per 32 samples); fine on a GPU. A neighbour-list force path is a possible optimisation. |
+| **E-1** descriptors | ✅ done, tested |
+| **E-2** detectors + `scripts/freeze_thresholds.py` | ✅ done; thresholds frozen (`1c8714e00c26` for `ka2d_256`) |
+| **E-3** patch library + `scripts/build_patches.py` | ✅ done; 10,545 train patches |
+| **E-4** metrics, bootstrap, `scripts/evaluate.py` (incl. floor mode) | ✅ done; diversity/memorization use simple histogram descriptors (could be upgraded) |
+| **M-1** embeddings, **M-2** EGNN-PBC | ✅ done; symmetry tests pass (translation incl. wrap, 90° and arbitrary rotation, permutation) |
+| **M-3** noise/loss + `scripts/train.py` | ✅ done; CPU smoke run learns (val loss below the predict-zero baseline) |
+| **M-4** `RequestSampler` (centre / patch / host modes, CFG dropout) | ✅ done, tested |
+| **S-1** sampler, **S-2** clamp / noise patch, **S-3** RePaint, **S-4** pinned label + CFG | ✅ done, tested with an oracle denoiser |
+| **B-2** eval requests (Task A and Task B), hand insertion (`baselines.py`, `scripts/hand_insert.py`) | ✅ done |
+| P-4 local melt-quench, M-5 MPNN, M-6 MLP, B-1 Stage 0, B-3 results aggregation, E-5 report | ⏳ open |
+| S-5 classifier guidance, M-7 NequIP-2D | ⏳ stretch |
+| **GPU training runs** (unconditional EGNN at full size, then conditional) | ⏳ next: needs a GPU |
 
 Install and check:
 
@@ -159,21 +170,35 @@ five people can start in week 1.
 
 ---
 
-## 6. Running each stage (once the tickets land)
+## 6. Running each stage
 
 ```bash
-# data (WS1, WS2)
-python scripts/make_dataset.py      --config configs/data/ka2d_256.yaml
+# data (WS1, WS2): see docs/DATASET.md §4 for all four sets
+python scripts/make_dataset.py      --config configs/data/ka2d_256.yaml workers=4
 python scripts/freeze_thresholds.py --config configs/defects/v0.yaml data=data/ka2d_256
 python scripts/build_patches.py     --config configs/defects/v0.yaml data=data/ka2d_256
-# model (WS3)
-python scripts/train.py  --config configs/train/uncond.yaml
-# sampling + evaluation (WS4, WS2, WS5)
-python scripts/sample.py   --config configs/sampler/dm2.yaml ckpt=runs/<run>/ema.pt
-python scripts/relax.py    --config configs/eval/default.yaml samples=runs/<run>/samples.npz
-python scripts/evaluate.py --config configs/eval/default.yaml run=runs/<run>
-python scripts/aggregate_results.py --config configs/eval/default.yaml runs_dir=runs
+
+# model (WS3): full size on a GPU; add model_args.hidden=64 max_minutes=60 for a CPU smoke run
+python scripts/train.py --config configs/train/uncond.yaml
+python scripts/train.py --config configs/train/cond.yaml
+
+# sampling (WS4). Task A: request.mode=centre|patch. Task B: request.mode=host
+python scripts/sample.py --config configs/sampler/dm2.yaml     ckpt=runs/<uncond>/ckpt.pt data=data/ka2d_256 defect=D2
+python scripts/sample.py --config configs/sampler/repaint.yaml ckpt=runs/<uncond>/ckpt.pt data=data/ka2d_256 defect=D2
+python scripts/sample.py --config configs/sampler/cfg.yaml     ckpt=runs/<cond>/ckpt.pt   data=data/ka2d_256 defect=D2 request.mode=host
+
+# baseline B2 (no model)
+python scripts/hand_insert.py --config configs/eval/default.yaml data=data/ka2d_256 defect=D2
+
+# relaxation + metrics, for every run above (WS2, WS5)
+python scripts/relax.py    --config configs/eval/default.yaml run=runs/<run>
+python scripts/evaluate.py --config configs/eval/default.yaml run=runs/<run> data=data/ka2d_256 [also_unrelaxed=true]
+python scripts/evaluate.py --config configs/eval/default.yaml floor=true defect=D2 data=data/ka2d_256
 ```
+
+Every script accepts dotted overrides (`key.sub=value`) and `threads=` / `device=`.
+On CPU, keep `threads` at or below the number of free cores: tiny tensors get much slower
+when threads compete.
 
 ---
 

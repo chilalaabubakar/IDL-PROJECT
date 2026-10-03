@@ -5,8 +5,6 @@ import pytest
 
 from glassdiff.eval.bootstrap import bootstrap_ci
 
-pytestmark = pytest.mark.skip(reason="Ticket E-4: delete this line when implementing")
-
 
 def test_constant_sample_has_zero_width():
     est, lo, hi = bootstrap_ci(np.full(256, 0.3))
