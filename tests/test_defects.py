@@ -1,12 +1,9 @@
 """Acceptance tests for Ticket E-2 (defect detectors), on hand-built configurations."""
 
-import pytest
 import torch
 
 from glassdiff.analysis.defects import DefectThresholds, detect_defects
 from glassdiff.types import DefectClass, Structures
-
-pytestmark = pytest.mark.skip(reason="Ticket E-2: delete this line when implementing")
 
 NX = NY = 8
 
