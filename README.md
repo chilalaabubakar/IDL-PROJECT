@@ -30,7 +30,7 @@ status.
 pip install torch                       # CUDA build
 pip install -e ".[dev,md]"
 export LD_LIBRARY_PATH=/usr/local/lib:$LD_LIBRARY_PATH   # directory holding libmpi.so.12
-# 1. data (~30 CPU-minutes on 4 cores; identical on every machine for the same seeds)
+# 1. data: already committed in data/. To regenerate (~30 CPU-minutes on 4 cores, bit-identical):
 python scripts/make_dataset.py      --config configs/data/ka2d_256.yaml
 python scripts/freeze_thresholds.py --config configs/defects/v0.yaml data=data/ka2d_256
 python scripts/build_patches.py     --config configs/defects/v0.yaml data=data/ka2d_256
@@ -51,7 +51,7 @@ and `docs/DATASET.md` §4.
 ## Layout
 ```
 configs/        YAML configs: data, defects, model, train, sampler, eval
-data/           generated datasets (gitignored)
+data/           generated datasets (committed, ~20 MB; see data/README.md)
 docs/           plans and the feasibility pilot
 notebooks/      Stage 0 notebook, figures
 results/        small summary tables and figures that go in the report
