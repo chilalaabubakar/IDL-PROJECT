@@ -9,7 +9,7 @@ baselines and the floor a first measurement. Real runs need a GPU (README quicks
 | Item | Smoke run | Planned GPU run |
 |---|---|---|
 | Model | EGNN-PBC, hidden 64, 3 layers (108k parameters) | hidden 128, 4 layers |
-| Training | 1,000 updates (batch 8, lr 1e-3, EMA 0.99), ~45 min on 2 busy threads | 40,000 updates (`configs/train/uncond.yaml`) |
+| Training | samples used the step-1,000 checkpoint (batch 8, lr 1e-3, EMA 0.99); the run continued to 2,289 updates in 80 min on 2 busy threads | 40,000 updates (`configs/train/uncond.yaml`) |
 | Sampling | 650 steps (600 noisy + 50 final), 8 samples | 3,000 steps, 256 samples |
 | Defect | D2 only | D1−, D1+, D2 |
 
@@ -50,7 +50,9 @@ machine, so compare them only to each other.
 * `hand_insert_D2.png`, `local_melt_quench_D2.png`, `B1_uncond_taskA.png`,
   `B5_repaint_taskB.png`: four relaxed samples per method, with the requested location
   (+ and the r_tol circle), pinned atoms hatched, defects ringed, and success per panel
-* `training_curve.png`: validation loss / σ² per noise level (1 = predicting zero)
+* `training_curve.png`: validation loss / σ² per noise level (1 = predicting zero), for the full
+  2,289-update run; at the end the model removes 55% of the noise at σ = 0.02, 70% at 0.1,
+  32% at 0.3 and 11% at 0.5, and it was still improving
 
 ## Reproduce
 
