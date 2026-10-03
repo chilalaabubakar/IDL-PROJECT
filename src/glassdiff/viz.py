@@ -154,3 +154,61 @@ def plot_structures(
     fig.savefig(path, dpi=150, facecolor=SURFACE)
     plt.close(fig)
     return path
+
+
+SERIES_COLOURS = ("#2a78d6", "#eb6834", "#1baf7a", "#eda100")  # categorical slots 1-4 (light)
+
+
+def plot_training(log_csv: str | Path, path: str | Path) -> Path:
+    """Validation loss / sigma^2 per noise level against training step.
+
+    Dividing by sigma^2 (the loss of predicting zero displacement) puts every noise level on
+    one scale: the fraction of the injected noise the model has not removed. Lines are
+    direct-labelled because two of the four colours are below 3:1 contrast.
+    """
+    import csv
+
+    with open(log_csv, newline="") as f:
+        rows = list(csv.DictReader(f))
+    steps = np.array([float(r["step"]) for r in rows])
+    sigmas = [k for k in rows[0] if k.startswith("val_")]
+    fig, ax = plt.subplots(figsize=(6.4, 3.8), facecolor=SURFACE)
+    y_max = 1.1
+    for colour, key in zip(SERIES_COLOURS, sigmas):
+        sigma = float(key.split("_", 1)[1])
+        y = np.array([float(r[key]) for r in rows]) / sigma**2
+        y_max = max(y_max, 1.05 * float(y.max()))
+        ax.plot(steps, y, color=colour, lw=2, marker="o", ms=4, label=f"σ = {sigma:g}")
+        ax.annotate(
+            f"σ = {sigma:g}",
+            (steps[-1], y[-1]),
+            xytext=(6, 0),
+            textcoords="offset points",
+            va="center",
+            fontsize=8,
+            color=INK,
+        )
+    ax.axhline(1.0, color=INK_SECONDARY, lw=1, ls="--")
+    ax.annotate(
+        "predict zero",
+        (steps[0], 1.0),
+        xytext=(0, 4),
+        textcoords="offset points",
+        fontsize=8,
+        color=INK_SECONDARY,
+    )
+    ax.set_xlabel("training step", color=INK)
+    ax.set_ylabel("val loss / σ²", color=INK)
+    ax.set_ylim(0, y_max)
+    ax.set_facecolor(SURFACE)
+    ax.grid(axis="y", color="#e4e3dd", lw=0.8)
+    for side in ("top", "right"):
+        ax.spines[side].set_visible(False)
+    ax.legend(frameon=False, fontsize=8, loc="lower left", labelcolor=INK)
+    ax.margins(x=0.12)
+    fig.tight_layout()
+    path = Path(path)
+    path.parent.mkdir(parents=True, exist_ok=True)
+    fig.savefig(path, dpi=150, facecolor=SURFACE)
+    plt.close(fig)
+    return path
