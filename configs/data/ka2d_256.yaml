@@ -1,0 +1,24 @@
+# Primary dataset (docs/DATASET.md §1). Generate with:
+#   python scripts/make_dataset.py --config configs/data/ka2d_256.yaml
+name: ka2d_256
+n_atoms: 256            # must be a perfect square (lattice start)
+out_dir: data/ka2d_256
+splits:                 # disjoint seed ranges per split
+  train: {n: 800, seed0: 0}
+  val:   {n: 100, seed0: 10000}
+  test:  {n: 100, seed0: 20000}
+protocol:
+  rho: 1.2
+  frac_a: 0.65
+  t_melt: 2.0
+  melt_steps: 20000
+  t_final: 0.01
+  rate: 1.0e-2          # temperature drop per tau
+  dt: 0.005
+  tdamp: 0.1
+  min_ftol: 1.0e-8
+save_thermal: true      # also keep the T=0.01 snapshot before minimization
+quality:
+  max_global_psi6: 0.3
+  min_pair_dist: 0.56   # 0.7 * sigma_AB
+  pe_max_z: 5.0

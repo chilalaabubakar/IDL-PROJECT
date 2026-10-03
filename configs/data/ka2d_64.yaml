@@ -1,0 +1,11 @@
+# N = 64 set for the MLP baseline and the matched-N symmetry ladder (docs/DATASET.md §2).
+name: ka2d_64
+n_atoms: 64
+out_dir: data/ka2d_64
+splits:
+  train: {n: 1600, seed0: 30000}
+  val:   {n: 200,  seed0: 40000}
+  test:  {n: 200,  seed0: 45000}
+protocol: {rho: 1.2, frac_a: 0.65, t_melt: 2.0, melt_steps: 20000, t_final: 0.01, rate: 1.0e-2, dt: 0.005, tdamp: 0.1, min_ftol: 1.0e-8}
+save_thermal: true
+quality: {max_global_psi6: 0.3, min_pair_dist: 0.56, pe_max_z: 5.0}

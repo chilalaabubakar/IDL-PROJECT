@@ -1,0 +1,5 @@
+name: flat_mlp          # no-symmetry baseline, N = 64 only (src/glassdiff/models/mlp.py)
+n_atoms: 64
+hidden: 512
+n_layers: 4
+sigma_aware: true
