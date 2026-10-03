@@ -9,6 +9,10 @@ import torch
 
 from glassdiff.types import Structures
 
+# Test tensors are tiny; extra intra-op threads only add overhead (30x slower when the
+# cores are busy), so keep the suite single-threaded.
+torch.set_num_threads(1)
+
 
 def random_structures(
     batch: int, n_atoms: int, rho: float = 1.2, seed: int = 0, dtype=torch.float64

@@ -1,12 +1,9 @@
 """Acceptance tests for Ticket P-3 (batched FIRE relaxation)."""
 
-import pytest
 import torch
 
 from glassdiff.physics.fire import fire_minimize
 from glassdiff.physics.ka_potential import ka_energy
-
-pytestmark = pytest.mark.skip(reason="Ticket P-3: delete this line when implementing")
 
 
 def test_relaxation_lowers_energy_and_converges(make_lattice):

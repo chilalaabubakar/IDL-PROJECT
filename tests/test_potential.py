@@ -8,8 +8,6 @@ import torch
 from glassdiff.physics.ka_potential import ka_energy, ka_forces
 from glassdiff.types import Structures
 
-pytestmark = pytest.mark.skip(reason="Ticket P-2: delete this line when implementing")
-
 DATA = Path("data/ka2d_256/test.npz")
 
 
