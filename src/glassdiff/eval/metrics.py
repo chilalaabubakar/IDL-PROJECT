@@ -100,6 +100,8 @@ def natural_windows(
 ) -> LocalFeatures:
     """Windows around naturally formed defects of one class (relaxation displacement 0)."""
     sites = torch.nonzero(split.labels == defect)[:max_windows]
+    if len(sites) == 0:
+        raise ValueError(f"no natural {DefectClass(defect).name} sites in this split")
     feats = None
     for i in range(0, len(sites), chunk):
         g, a = sites[i : i + chunk, 0], sites[i : i + chunk, 1]

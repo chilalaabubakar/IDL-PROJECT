@@ -53,7 +53,10 @@ when that file passes.
 | **B-2** eval requests (Task A and Task B), hand insertion (`baselines.py`, `scripts/hand_insert.py`) | ✅ done |
 | **P-4** local melt-quench (`md/local_melt_quench.py`, `scripts/local_melt_quench.py`) | ✅ done; host atoms stay fixed to 1e-12 |
 | **M-5** MPNN, **M-6** flat MLP | ✅ done, tested (MPNN verified to lack rotation symmetry) |
-| B-1 Stage 0, B-3 results aggregation, E-5 report | ⏳ open |
+| **B-3** `scripts/aggregate_results.py` → summary CSV | ✅ done |
+| Figures: `glassdiff/viz.py`, `scripts/plot_samples.py` (glasses or run samples, defects ringed, target and pins marked) | ✅ done |
+| End-to-end pipeline test (`tests/test_pipeline.py`) | ✅ runs every script on a tiny synthetic dataset in CI |
+| B-1 Stage 0 (needs a GPU + DM2 environment), E-5 report tables | ⏳ open |
 | S-5 classifier guidance, M-7 NequIP-2D | ⏳ stretch |
 | **GPU training runs** (unconditional EGNN at full size, then conditional) | ⏳ next: needs a GPU |
 
