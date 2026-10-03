@@ -1,0 +1,37 @@
+[build-system]
+requires = ["setuptools>=61.0", "wheel"]
+build-backend = "setuptools.build_meta"
+
+[project]
+name = "glassdiff"
+version = "0.0.1"
+description = "Controlled defect generation in 2D amorphous materials via conditional diffusion"
+readme = "README.md"
+license = { text = "MIT" }
+requires-python = ">=3.10"
+dependencies = [
+    "numpy",
+    "scipy",
+    "torch>=2.2",
+    "pyyaml",
+    "matplotlib",
+]
+
+[project.optional-dependencies]
+# Dataset generation and the local melt-quench baseline (LAMMPS Python wheel needs MPI).
+md = ["lammps", "mpich"]
+dev = ["pytest", "ruff"]
+
+[tool.setuptools.packages.find]
+where = ["src"]
+
+[tool.pytest.ini_options]
+testpaths = ["tests"]
+markers = [
+    "lammps: needs the LAMMPS Python module (skipped when unavailable)",
+    "slow: takes more than a few seconds",
+]
+
+[tool.ruff]
+line-length = 100
+target-version = "py310"

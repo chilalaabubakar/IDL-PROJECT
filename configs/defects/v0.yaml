@@ -1,0 +1,9 @@
+# Defect definitions (docs/DATASET.md §1.5). scripts/freeze_thresholds.py checks the rates
+# on the TRAIN split, fits d3_min_radius, and writes the frozen values to data/<set>/meta.json.
+cn_factor: 1.4          # coordination cutoff = cn_factor * sigma_ab
+d1_minus_max_cn: 5      # A atom with CN <= 5  -> D1-
+d1_plus_min_cn: 8       # A atom with CN >= 8  -> D1+
+d2_rc: 1.2              # B-B neighbour cutoff
+d2_min_bb: 2            # B atom with >= 2 B neighbours -> D2
+d3_quantile: 0.999      # stretch: void if circumradius above this train quantile
+patch_radius: 1.5       # reference-patch radius for the patch library

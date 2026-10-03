@@ -1,0 +1,19 @@
+name: egnn_uncond
+seed: 0
+data: data/ka2d_256
+model: configs/model/egnn.yaml
+conditional: false
+noise:
+  sigma_min: 1.0e-3
+  sigma_max: 0.5        # ~50% of a nearest-neighbour distance, as in DM2
+  distribution: uniform
+optim:
+  lr: 2.0e-4
+  weight_decay: 0.0
+  batch_size: 16
+  n_updates: 40000
+  grad_clip: 1.0
+  ema: 0.999
+log_every: 100
+val_every: 1000
+ckpt_every: 5000

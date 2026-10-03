@@ -1,0 +1,7 @@
+name: mpnn              # permutation-only ablation (src/glassdiff/models/mpnn.py)
+hidden: 128
+n_layers: 4
+cutoff: 2.5
+k_max: 48
+sigma_aware: true
+rotation_augmentation: false

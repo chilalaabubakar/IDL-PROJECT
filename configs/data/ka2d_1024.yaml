@@ -1,0 +1,9 @@
+# Size-transfer test set (docs/DATASET.md §2).
+name: ka2d_1024
+n_atoms: 1024
+out_dir: data/ka2d_1024
+splits:
+  test: {n: 100, seed0: 50000}
+protocol: {rho: 1.2, frac_a: 0.65, t_melt: 2.0, melt_steps: 20000, t_final: 0.01, rate: 1.0e-2, dt: 0.005, tdamp: 0.1, min_ftol: 1.0e-8}
+save_thermal: false
+quality: {max_global_psi6: 0.3, min_pair_dist: 0.56, pe_max_z: 5.0}
