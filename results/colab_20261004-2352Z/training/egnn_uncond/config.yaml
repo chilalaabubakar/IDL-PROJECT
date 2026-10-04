@@ -1,0 +1,28 @@
+name: egnn_uncond
+seed: 0
+data: data/ka2d_256
+model: configs/model/egnn.yaml
+conditional: false
+noise:
+  sigma_min: 0.001
+  sigma_max: 0.5
+  distribution: uniform
+optim:
+  lr: 0.0002
+  weight_decay: 0.0
+  batch_size: 16
+  n_updates: 40000
+  grad_clip: 1.0
+  ema: 0.999
+log_every: 100
+val_every: 1000
+ckpt_every: 1000
+max_minutes: 240
+runs_root: /content/drive/MyDrive/idl-project/runs
+resolved_model:
+  name: egnn_pbc
+  hidden: 128
+  n_layers: 4
+  cutoff: 2.5
+  k_max: 64
+  sigma_aware: true

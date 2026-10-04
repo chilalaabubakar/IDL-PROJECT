@@ -1,0 +1,33 @@
+name: ka2d_256
+n_atoms: 256
+out_dir: data/ka2d_256
+splits:
+  train:
+    n: 800
+    seed0: 0
+  val:
+    n: 100
+    seed0: 10000
+  test:
+    n: 100
+    seed0: 20000
+protocol:
+  rho: 1.2
+  frac_a: 0.65
+  t_melt: 2.0
+  melt_steps: 20000
+  t_final: 0.01
+  rate: 0.01
+  dt: 0.005
+  tdamp: 0.1
+  min_ftol: 1.0e-08
+save_thermal: true
+quality:
+  max_global_psi6: 0.3
+  min_pair_dist: 0.56
+  pe_max_z: 5.0
+data: data/ka2d_256
+defect: D2
+n_samples: 256
+workers: 2
+runs_root: /content/drive/MyDrive/idl-project/eval
