@@ -18,12 +18,13 @@ import torch
 from glassdiff.physics.fire import fire_minimize
 from glassdiff.types import Structures
 from glassdiff.utils.config import cli_config
+from glassdiff.utils.runs import pick_device
 
 
 def main() -> None:
     cfg = cli_config(__doc__)
     run = Path(cfg["run"])
-    device = torch.device(cfg.get("device") or ("cuda" if torch.cuda.is_available() else "cpu"))
+    device = pick_device(cfg.get("device", "auto"))
     if cfg.get("threads"):
         torch.set_num_threads(int(cfg["threads"]))
     relax = cfg.get("relax", {})
