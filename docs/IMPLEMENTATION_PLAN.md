@@ -60,7 +60,8 @@ when that file passes.
 | End-to-end smoke run on real data (CPU) | ✅ `results/cpu_smoke/`: B1, B2, B5, B6 and the floor for D2; a pipeline check, not results |
 | B-1 Stage 0 (needs a GPU + the DM2 environment) | ⏳ open |
 | S-5 classifier guidance, M-7 NequIP-2D | ⏳ stretch |
-| **GPU training runs** (unconditional EGNN at full size, then conditional) | ⏳ next: needs a GPU |
+| Colab workflow (`notebooks/colab_train.ipynb`): speed test, resumable training (`train.py resume=<run>`, atomic checkpoints), experiment matrix, summary | ✅ ready |
+| **GPU training runs** (unconditional EGNN at full size, then conditional) | ⏳ next: run the Colab notebook |
 
 Install and check:
 
