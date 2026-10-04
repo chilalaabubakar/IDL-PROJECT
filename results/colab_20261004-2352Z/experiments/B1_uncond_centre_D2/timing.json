@@ -1,0 +1,9 @@
+{
+  "sampling_seconds": 576.4677603244781,
+  "seconds_per_sample": 2.2518271887674928,
+  "device": "cuda",
+  "n_samples": 256,
+  "steps": 3000,
+  "relax_seconds": 66.11631870269775,
+  "relax_device": "cuda"
+}
