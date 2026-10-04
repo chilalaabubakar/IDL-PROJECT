@@ -35,6 +35,26 @@ from glassdiff.utils.config import cli_config
 from glassdiff.utils.runs import make_run_dir
 
 
+def cached_natural_windows(data_dir: Path, split_name: str, defect: int, r_loc: float):
+    """natural_windows for one split, cached under <data_dir>/.cache/ (gitignored).
+
+    The cache key includes the split file's size and modification time, so regenerated or
+    re-labelled data is never served stale. Saves ~1 min per evaluation on a CPU.
+    """
+    path = data_dir / f"{split_name}.npz"
+    st = path.stat()
+    key = f"{split_name}_{int(defect)}_{r_loc:g}_{st.st_size}_{int(st.st_mtime)}"
+    cache = data_dir / ".cache" / f"windows_{key}.pt"
+    if cache.exists():
+        return torch.load(cache, weights_only=False)
+    windows = natural_windows(load_split(path), int(defect), r_loc)
+    cache.parent.mkdir(exist_ok=True)
+    tmp = cache.with_suffix(".tmp")
+    torch.save(windows, tmp)
+    tmp.replace(cache)
+    return windows
+
+
 def _jsonable(d: dict) -> dict:
     return {k: (list(v) if isinstance(v, tuple) else v) for k, v in d.items()}
 
@@ -42,8 +62,8 @@ def _jsonable(d: dict) -> dict:
 def evaluate_floor(cfg: dict, data_dir: Path, r_loc: float, n_boot: int) -> dict:
     defect = DefectClass[cfg["defect"]] if isinstance(cfg["defect"], str) else cfg["defect"]
     train, test = load_split(data_dir / "train.npz"), load_split(data_dir / "test.npz")
-    gen = natural_windows(train, int(defect), r_loc)
-    ref = natural_windows(test, int(defect), r_loc)
+    gen = cached_natural_windows(data_dir, "train", int(defect), r_loc)
+    ref = cached_natural_windows(data_dir, "test", int(defect), r_loc)
     return {
         "kind": "floor (natural train vs natural test)",
         "defect": DefectClass(defect).name,
@@ -90,8 +110,8 @@ def main() -> None:
 
     ok_before = success(pre, request, th).double().numpy()
     ok_after = success(post, request, th).double().numpy()
-    test, train = load_split(data_dir / "test.npz"), load_split(data_dir / "train.npz")
-    ref = natural_windows(test, defect, r_loc)
+    test = load_split(data_dir / "test.npz")  # global-realism reference
+    ref = cached_natural_windows(data_dir, "test", defect, r_loc)
     gen = local_features(post, request.target, torch.from_numpy(rel["disp"]).double(), r_loc)
     seconds = float(timing.get("sampling_seconds", 0.0)) + float(timing.get("relax_seconds", 0.0))
     metrics = {
@@ -106,7 +126,7 @@ def main() -> None:
         "seconds_per_success": cost_per_success(seconds, int(ok_after.sum())),
         "local": _jsonable(local_realism(gen, ref, n_boot)),
         "global": global_realism(post, test.structures),
-        "diversity": diversity(gen, ref, natural_windows(train, defect, r_loc)),
+        "diversity": diversity(gen, ref, cached_natural_windows(data_dir, "train", defect, r_loc)),
     }
     if cfg.get("also_unrelaxed"):
         gen_pre = local_features(pre, request.target, None, r_loc)
