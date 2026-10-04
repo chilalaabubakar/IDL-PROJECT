@@ -1,0 +1,19 @@
+schedule:
+  n_noisy: 2900
+  n_final: 100
+  sigma_start: 1.0
+  sigma_end: 0.001
+  sigma_min: 0.001
+strategy:
+  name: pinned_label
+  guidance_w: 2
+request:
+  mode: centre
+n_samples: 256
+batch_size: 64
+seed: 0
+ckpt: /content/drive/MyDrive/idl-project/runs/20261004-121118Z_egnn_cond/ckpt.pt
+data: data/ka2d_256
+defect: D1_PLUS
+name: cond_w2_centre_D1_PLUS
+runs_root: /content/drive/MyDrive/idl-project/eval
