@@ -31,7 +31,9 @@ Open [`notebooks/colab_train.ipynb`](notebooks/colab_train.ipynb) in Colab:
 
 It checks the GPU, measures training speed, trains the unconditional and conditional EGNN
 (resuming automatically after a disconnect), runs every experiment and baseline, and builds
-the summary table. Runs and results are kept in Google Drive (`MyDrive/idl-project/`).
+the summary table. Runs and results are kept in Google Drive (`MyDrive/idl-project/`);
+the last cell pushes a compact copy (summary, metrics, figures, trained weights) to
+`results/colab_<date>/` in this repository, using a GitHub token stored in Colab Secrets.
 
 ## Quickstart (any GPU machine)
 
