@@ -15,6 +15,7 @@ venv/
 # committed (~20 MB) so the team can start without regenerating them.
 runs/*
 !runs/README.md
+data/**/.cache/
 
 # LAMMPS / visualisation scratch
 log.lammps

@@ -24,7 +24,16 @@ metrics with bootstrap CIs. Full-size training runs need a GPU. See
 [`docs/IMPLEMENTATION_PLAN.md`](docs/IMPLEMENTATION_PLAN.md) §2 for the ticket-by-ticket
 status.
 
-## Quickstart (GPU)
+## Run on Colab (GPU)
+
+Open [`notebooks/colab_train.ipynb`](notebooks/colab_train.ipynb) in Colab:
+<https://colab.research.google.com/github/chilalaabubakar/IDL-PROJECT/blob/main/notebooks/colab_train.ipynb>
+
+It checks the GPU, measures training speed, trains the unconditional and conditional EGNN
+(resuming automatically after a disconnect), runs every experiment and baseline, and builds
+the summary table. Runs and results are kept in Google Drive (`MyDrive/idl-project/`).
+
+## Quickstart (any GPU machine)
 
 ```bash
 pip install torch                       # CUDA build
