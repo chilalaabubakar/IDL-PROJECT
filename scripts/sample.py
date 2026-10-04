@@ -28,13 +28,13 @@ from glassdiff.diffusion.sampler import ScoreDynamicsSchedule, random_init, samp
 from glassdiff.models.registry import load_denoiser
 from glassdiff.types import DefectClass, Structures
 from glassdiff.utils.config import cli_config
-from glassdiff.utils.runs import make_run_dir, seed_everything
+from glassdiff.utils.runs import make_run_dir, pick_device, seed_everything
 
 
 def main() -> None:
     cfg = cli_config(__doc__)
     gen = seed_everything(int(cfg.get("seed", 0)))
-    device = torch.device(cfg.get("device") or ("cuda" if torch.cuda.is_available() else "cpu"))
+    device = pick_device(cfg.get("device", "auto"))
     if cfg.get("threads"):
         torch.set_num_threads(int(cfg["threads"]))
     defect = DefectClass[cfg["defect"]] if isinstance(cfg["defect"], str) else cfg["defect"]

@@ -80,6 +80,24 @@ def test_pipeline_end_to_end(tmp_path, make_lattice, monkeypatch):
         "strategy.guidance_w=1.0",
         monkeypatch=monkeypatch,
     )
+    for cfg_name, mode in (("clamp", "patch"), ("dm2", "centre")):
+        _run(
+            "sample",
+            "--config",
+            str(ROOT / f"configs/sampler/{cfg_name}.yaml"),
+            *common,
+            f"ckpt={ckpt}",
+            "defect=D2",
+            f"request.mode={mode}",
+            "n_samples=2",
+            "batch_size=2",
+            "schedule.n_noisy=3",
+            "schedule.n_final=1",
+            monkeypatch=monkeypatch,
+        )
+    assert next(runs.glob("*_sample_clamp_patch_D2")) and next(
+        runs.glob("*_sample_unconditional_centre_D2")
+    )
     run = next(runs.glob("*_sample_pinned_label_host_D2"))
     eval_cfg = str(ROOT / "configs/eval/default.yaml")
     _run("relax", "--config", eval_cfg, f"run={run}", "relax.fmax=1e-3", monkeypatch=monkeypatch)
@@ -105,3 +123,32 @@ def test_pipeline_end_to_end(tmp_path, make_lattice, monkeypatch):
         monkeypatch=monkeypatch,
     )
     assert out.exists()
+
+
+def test_training_resumes_after_interruption(tmp_path, make_lattice, monkeypatch):
+    data, runs = tmp_path / "data", tmp_path / "runs"
+    data.mkdir()
+    _fake_dataset(data, make_lattice)
+    args = [
+        "--config",
+        str(ROOT / "configs/train/uncond.yaml"),
+        f"data={data}",
+        f"runs_root={runs}",
+        "threads=1",
+        "model_args.hidden=16",
+        "model_args.n_layers=1",
+        "model_args.cutoff=2.0",
+        "optim.batch_size=2",
+        "optim.n_updates=4",
+        "val_every=100",
+    ]
+    # a session that is "disconnected" right after its first update
+    _run("train", *args, "max_minutes=1e-6", monkeypatch=monkeypatch)
+    run = next(runs.glob("*_egnn_uncond"))
+    assert torch.load(run / "ckpt.pt", weights_only=False)["step"] == 1
+    _run("train", *args, f"resume={run}", "max_minutes=0", monkeypatch=monkeypatch)
+    ckpt = torch.load(run / "ckpt.pt", weights_only=False)
+    assert ckpt["step"] == 4 and ckpt["cfg"]["optim"]["n_updates"] == 4
+    steps = [line.split(",")[0] for line in (run / "log.csv").read_text().splitlines()[1:]]
+    assert steps == ["1", "4"]  # one header, then one row per session end
+    assert not (run / "ckpt.pt.tmp").exists()
