@@ -21,6 +21,18 @@ def seed_everything(seed: int) -> torch.Generator:
     return torch.Generator().manual_seed(seed)
 
 
+def pick_device(name: str | None = "auto") -> torch.device:
+    """ "auto" -> CUDA when available, else CPU. On CUDA, allow TF32 matmuls (A100/L4 speed-up;
+    no effect on T4)."""
+    if name in (None, "", "auto"):
+        name = "cuda" if torch.cuda.is_available() else "cpu"
+    device = torch.device(name)
+    if device.type == "cuda":
+        torch.backends.cuda.matmul.allow_tf32 = True
+        torch.backends.cudnn.allow_tf32 = True
+    return device
+
+
 def git_state() -> str:
     """Current commit hash, with ' (dirty)' appended when there are uncommitted changes."""
     try:

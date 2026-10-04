@@ -149,7 +149,7 @@ def make_eval_request(
                 for rel, sp in zip(patch.rel_pos[1:], patch.types[1:].tolist()):
                     j = free[sp].pop(0)
                     pin[b, j] = True
-                    pin_pos[b, j] = target[b] + rel.to(dtype)
+                    pin_pos[b, j] = target[b] + rel.to(device=dev, dtype=dtype)
     elif mode == "host":
         if host is None:
             raise ValueError("host mode needs host structures")
@@ -187,8 +187,10 @@ def host_init(
     dist = minimum_image(host.pos - request.target[:, None, :], host.box).norm(dim=-1)
     radius = torch.where(request.pin_mask, torch.zeros_like(dist), dist).amax(-1)  # [B]
     shape = host.pos.shape[:2]
-    r = radius[:, None] * torch.rand(shape, generator=generator, dtype=host.pos.dtype).sqrt()
-    phi = 2 * torch.pi * torch.rand(shape, generator=generator, dtype=host.pos.dtype)
+    # random numbers come from a CPU generator (reproducible on any device), then move over
+    dev, dtype = host.pos.device, host.pos.dtype
+    r = radius[:, None] * torch.rand(shape, generator=generator, dtype=dtype).to(dev).sqrt()
+    phi = 2 * torch.pi * torch.rand(shape, generator=generator, dtype=dtype).to(dev)
     disk = request.target[:, None, :] + torch.stack([r * phi.cos(), r * phi.sin()], dim=-1)
     pos = torch.where(request.pin_mask[..., None], request.pin_pos, disk)
     return host.with_pos(pos)

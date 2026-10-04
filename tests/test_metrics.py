@@ -7,10 +7,12 @@ from glassdiff.baselines import hand_insert
 from glassdiff.data.dataset import GlassSplit
 from glassdiff.data.patches import PatchLibrary
 from glassdiff.eval.metrics import (
+    QUANTILE_LEVELS,
     global_realism,
     local_features,
     local_realism,
     natural_windows,
+    quantile_w1,
     success,
     wasserstein1,
 )
@@ -79,3 +81,15 @@ def test_hand_insert_keeps_count_and_composition(make_triangular):
     moved = (out.pos - host.pos).norm(dim=-1)[0] > 0
     assert int(moved.sum()) <= len(patch.types)
     assert torch.allclose(out.pos[0, 10], target[0])  # the centre atom lands on the target
+
+
+def test_quantile_w1_matches_exact_w1():
+    import numpy as np
+
+    rng = np.random.default_rng(0)
+    ref = rng.normal(0.0, 1.0, 100_000)
+    ref_q = np.quantile(ref, QUANTILE_LEVELS)
+    for shift, n in ((0.0, 7000), (0.1, 7000), (0.5, 500)):
+        x = rng.normal(shift, 1.2, n)
+        exact = wasserstein1(torch.from_numpy(x), torch.from_numpy(ref))
+        assert abs(quantile_w1(x, ref_q) - exact) < 0.01 * exact + 2e-3

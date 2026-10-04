@@ -117,8 +117,20 @@ def wasserstein1(x: Tensor, y: Tensor) -> float:
     return float(wasserstein_distance(x.detach().cpu().numpy(), y.detach().cpu().numpy()))
 
 
-def _pooled_w1(items: list[Tensor], ref: Tensor) -> float:
-    return wasserstein1(torch.cat(items), ref) if items else float("nan")
+QUANTILE_LEVELS = (np.arange(2048) + 0.5) / 2048
+
+
+def quantile_w1(x: np.ndarray, ref_quantiles: np.ndarray) -> float:
+    """W1 = integral over t of |Q_x(t) - Q_ref(t)|, on a fixed 2048-level grid.
+
+    The reference quantiles are computed once, so each bootstrap resample costs one quantile
+    pass over the generated values instead of a sort of the whole (much larger) reference
+    pool (about 10x faster evaluation). Agrees with the exact distance to within about 2%,
+    and closer for larger sample sets (tests/test_metrics.py).
+    """
+    if len(x) == 0:
+        return float("nan")
+    return float(np.abs(np.quantile(x, QUANTILE_LEVELS) - ref_quantiles).mean())
 
 
 def local_realism(
@@ -130,9 +142,13 @@ def local_realism(
     lists.update({f"pair_{k}": (gen.pair_dist[k], ref.pair_dist[k]) for k in SPECIES_PAIRS})
     lists["relax_disp"] = (gen.relax_disp, ref.relax_disp)
     for name, (g, r) in lists.items():
-        ref_pool = torch.cat(r)
+        ref_q = np.quantile(torch.cat(r).double().cpu().numpy(), QUANTILE_LEVELS)
+        items = [t.double().cpu().numpy() for t in g]
         out[f"w1_{name}"] = bootstrap_ci_items(
-            g, lambda sel, ref_pool=ref_pool: _pooled_w1(sel, ref_pool), n_resamples, seed=seed
+            items,
+            lambda sel, ref_q=ref_q: quantile_w1(np.concatenate(sel), ref_q),
+            n_resamples,
+            seed=seed,
         )
     pe_hi = torch.quantile(torch.cat(ref.pe_atom), 0.99)
     frac_hi = np.array([float((p > pe_hi).double().mean()) if len(p) else 0.0 for p in gen.pe_atom])

@@ -4,17 +4,24 @@
     python scripts/train.py --config configs/train/cond.yaml model=configs/model/mpnn.yaml
     python scripts/train.py --config configs/train/uncond.yaml model_args.hidden=64 \\
         optim.n_updates=2000 max_minutes=20          # CPU smoke run
+    python scripts/train.py --config configs/train/uncond.yaml resume=runs/<run> \\
+        max_minutes=600                              # continue after a disconnect (Colab)
 
 Loop: batch of clean glasses -> (conditional: RequestSampler) -> sample_sigma -> add_noise
 -> model -> masked_displacement_loss -> AdamW step -> EMA update. Everything goes into a
 run directory: config.yaml, git.txt, log.csv (train loss; val loss of the EMA model at
 fixed noise levels) and ckpt.pt (model, EMA, optimizer; load with
 glassdiff.models.registry.load_denoiser).
+
+``resume=<run dir>`` continues a run from its ckpt.pt with the run's own saved config; only
+the session settings (max_minutes, device, threads, log/val/ckpt intervals) can be changed.
+Checkpoints are written atomically, so a disconnect during a save cannot corrupt them.
 """
 
 from __future__ import annotations
 
 import copy
+import os
 import time
 from pathlib import Path
 
@@ -28,15 +35,10 @@ from glassdiff.diffusion.noise import add_noise, masked_displacement_loss, sampl
 from glassdiff.models.registry import build_model
 from glassdiff.types import Structures
 from glassdiff.utils.config import cli_config, load_config
-from glassdiff.utils.runs import make_run_dir, seed_everything
+from glassdiff.utils.runs import make_run_dir, pick_device, seed_everything
 
 VAL_SIGMAS = (0.02, 0.1, 0.3, 0.5)
-
-
-def pick_device(name: str) -> torch.device:
-    if name == "auto":
-        return torch.device("cuda" if torch.cuda.is_available() else "cpu")
-    return torch.device(name)
+SESSION_KEYS = ("max_minutes", "device", "threads", "log_every", "val_every", "ckpt_every")
 
 
 def rotate90(s: Structures, k: Tensor) -> Structures:
@@ -74,15 +76,29 @@ def validation_losses(model, val_loader, device, requests, n_batches: int = 8) -
 
 def main() -> None:
     cfg = cli_config(__doc__)
-    gen = seed_everything(int(cfg["seed"]))
     device = pick_device(cfg.get("device", "auto"))
+    ckpt = None
+    if cfg.get("resume"):
+        run_dir = Path(cfg["resume"])
+        ckpt = torch.load(run_dir / "ckpt.pt", map_location=device, weights_only=False)
+        session = {k: cfg[k] for k in SESSION_KEYS if k in cfg}
+        cfg = {**ckpt["cfg"], **session}
+        model_cfg = ckpt["model_cfg"]
+        print(f"resuming {run_dir} at step {ckpt['step']}", flush=True)
+    else:
+        model_cfg = (
+            load_config(cfg["model"]) if isinstance(cfg["model"], str) else dict(cfg["model"])
+        )
+        model_cfg.update(cfg.get("model_args", {}))
+        cfg["resolved_model"] = model_cfg
+        run_dir = make_run_dir(cfg["name"], cfg, root=cfg.get("runs_root", "runs"))
+        print(f"run directory: {run_dir}", flush=True)
+    start_step = 0 if ckpt is None else int(ckpt["step"])
+    seconds_before = 0.0 if ckpt is None else float(ckpt.get("seconds", 0.0))
+    # a fresh data order and noise stream per session, reproducible from (seed, start step)
+    gen = seed_everything(int(cfg["seed"]) + start_step)
     if cfg.get("threads"):
         torch.set_num_threads(int(cfg["threads"]))
-    model_cfg = load_config(cfg["model"]) if isinstance(cfg["model"], str) else dict(cfg["model"])
-    model_cfg.update(cfg.get("model_args", {}))
-    cfg["resolved_model"] = model_cfg
-    run_dir = make_run_dir(cfg["name"], cfg, root=cfg.get("runs_root", "runs"))
-    print(f"run directory: {run_dir}", flush=True)
 
     data_dir = Path(cfg["data"])
     train, val = load_split(data_dir / "train.npz"), load_split(data_dir / "val.npz")
@@ -107,21 +123,28 @@ def main() -> None:
     opt = torch.optim.AdamW(
         model.parameters(), lr=float(opt_cfg["lr"]), weight_decay=float(opt_cfg["weight_decay"])
     )
+    if ckpt is not None:
+        model.load_state_dict(ckpt["model"])
+        ema.load_state_dict(ckpt["ema"])
+        opt.load_state_dict(ckpt["opt"])
+        del ckpt
     requests = (
         RequestSampler(RequestSamplerConfig(**cfg["requests"])) if cfg.get("conditional") else None
     )
     noise = cfg["noise"]
     augment = bool(model_cfg.get("rotation_augmentation", False))
-    noise_gen = torch.Generator().manual_seed(int(cfg["seed"]) + 1)
+    noise_gen = torch.Generator().manual_seed(int(cfg["seed"]) + 1 + start_step)
     n_updates, ema_decay = int(opt_cfg["n_updates"]), float(opt_cfg["ema"])
     max_seconds = float(cfg.get("max_minutes", 0)) * 60 or float("inf")
 
     log_path = run_dir / "log.csv"
-    log_path.write_text(
-        "step,seconds,train_loss," + ",".join(f"val_{v}" for v in VAL_SIGMAS) + "\n"
-    )
+    if start_step == 0:
+        log_path.write_text(
+            "step,seconds,train_loss," + ",".join(f"val_{v}" for v in VAL_SIGMAS) + "\n"
+        )
 
-    def save(step: int) -> None:
+    def save(step: int, seconds: float) -> None:
+        tmp = run_dir / "ckpt.pt.tmp"
         torch.save(
             {
                 "model_cfg": model_cfg,
@@ -129,13 +152,17 @@ def main() -> None:
                 "ema": ema.state_dict(),
                 "opt": opt.state_dict(),
                 "step": step,
+                "seconds": seconds,
                 "cfg": cfg,
             },
-            run_dir / "ckpt.pt",
+            tmp,
         )
+        os.replace(tmp, run_dir / "ckpt.pt")
 
-    step, running, n_running, t0 = 0, 0.0, 0, time.time()
-    done = False
+    step, running, n_running, t0 = start_step, 0.0, 0, time.time()
+    done = step >= n_updates
+    if done:
+        print(f"run already finished ({step} >= {n_updates} updates)")
     while not done:
         for batch in loader:
             s = batch_to_structures(batch).to(device)
@@ -163,8 +190,9 @@ def main() -> None:
                     p_ema.lerp_(p, 1 - ema_decay)
             step += 1
             running, n_running = running + loss.item(), n_running + 1
-            elapsed = time.time() - t0
-            done = step >= n_updates or elapsed > max_seconds
+            session_seconds = time.time() - t0
+            elapsed = seconds_before + session_seconds
+            done = step >= n_updates or session_seconds > max_seconds
 
             if step % int(cfg.get("val_every", 1000)) == 0 or done:
                 vals = validation_losses(ema, val_loader, device, requests)
@@ -181,7 +209,7 @@ def main() -> None:
             elif step % int(cfg.get("log_every", 100)) == 0:
                 print(f"step {step} {elapsed:.0f}s train {running / n_running:.5f}", flush=True)
             if step % int(cfg.get("ckpt_every", 5000)) == 0 or done:
-                save(step)
+                save(step, elapsed)
             if done:
                 break
     print(f"finished {step} updates in {time.time() - t0:.0f}s -> {run_dir / 'ckpt.pt'}")
