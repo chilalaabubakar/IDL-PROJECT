@@ -1,0 +1,19 @@
+schedule:
+  n_noisy: 300
+  n_final: 100
+  sigma_start: 1.0
+  sigma_end: 0.001
+  sigma_min: 0.001
+strategy:
+  name: pinned_label
+  guidance_w: 0
+request:
+  mode: host
+n_samples: 256
+batch_size: 64
+seed: 0
+ckpt: /content/drive/MyDrive/idl-project/runs/20261004-121118Z_egnn_cond/ckpt.pt
+data: data/ka2d_256
+defect: D1_MINUS
+name: cond_w0_s300_host_D1_MINUS
+runs_root: /content/drive/MyDrive/idl-project/eval
