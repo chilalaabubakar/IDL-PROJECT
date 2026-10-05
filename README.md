@@ -42,6 +42,10 @@ For the current experiment round only, use the shorter
 [`notebooks/colab_round3.ipynb`](notebooks/colab_round3.ipynb):
 <https://colab.research.google.com/github/chilalaabubakar/IDL-PROJECT/blob/main/notebooks/colab_round3.ipynb>
 (setup, round 3, summary and push; it reuses the models and results of rounds 1–2 in Drive).
+Out of Colab compute? [`notebooks/kaggle_round3.ipynb`](notebooks/kaggle_round3.ipynb) runs
+the same round on Kaggle without Drive: it loads earlier models and results from this
+repository and pushes its progress back every 45 minutes, so it can continue across Kaggle
+sessions.
 
 The full notebook checks the GPU, measures training speed, trains the unconditional and
 conditional EGNN (resuming automatically after a disconnect), runs every experiment and
