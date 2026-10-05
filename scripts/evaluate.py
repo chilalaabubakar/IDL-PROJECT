@@ -3,6 +3,7 @@
     python scripts/evaluate.py --config configs/eval/default.yaml run=runs/<run> data=data/ka2d_256
     python scripts/evaluate.py --config configs/eval/default.yaml floor=true defect=D2 \\
         data=data/ka2d_256 runs_root=results       # floor row: train vs test natural defects
+                                                   # (name=floor_n64_D2 to tell datasets apart)
 
 Needs <run>/samples.npz and <run>/relaxed.npz. Writes <run>/metrics.json: for each metric
 an estimate with a 95% bootstrap CI over samples ([estimate, lower, upper]).
@@ -81,7 +82,8 @@ def main() -> None:
     r_loc = float(cfg.get("local", {}).get("r_loc", 3.0))
     n_boot = int(cfg.get("bootstrap", {}).get("n_resamples_w1", 1000))
     if cfg.get("floor"):
-        out_dir = make_run_dir(f"floor_{cfg['defect']}", cfg, root=cfg.get("runs_root", "runs"))
+        name = cfg.get("name") or f"floor_{cfg['defect']}"
+        out_dir = make_run_dir(name, cfg, root=cfg.get("runs_root", "runs"))
         metrics = evaluate_floor(cfg, data_dir, r_loc, n_boot)
         (out_dir / "metrics.json").write_text(json.dumps(metrics, indent=2))
         print(json.dumps(metrics, indent=2))

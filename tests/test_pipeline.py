@@ -7,6 +7,7 @@ scripts.
 
 from __future__ import annotations
 
+import csv
 import importlib.util
 import json
 import sys
@@ -77,6 +78,7 @@ def test_pipeline_end_to_end(tmp_path, make_lattice, monkeypatch):
         "optim.batch_size=2",
         "optim.n_updates=3",
         "val_every=3",
+        "noise.sigma_max=0.8",
         monkeypatch=monkeypatch,
     )
     ckpt = next(runs.glob("*_egnn_cond/ckpt.pt"))
@@ -115,6 +117,8 @@ def test_pipeline_end_to_end(tmp_path, make_lattice, monkeypatch):
         runs.glob("*_sample_unconditional_centre_D2")
     )
     run = next(runs.glob("*_sample_pinned_label_host_D2"))
+    # the sampler clips sigma at the checkpoint's training sigma_max unless told otherwise
+    assert json.loads((run / "timing.json").read_text())["model_sigma_max"] == 0.8
     eval_cfg = str(ROOT / "configs/eval/default.yaml")
     _run("relax", "--config", eval_cfg, f"run={run}", "relax.fmax=1e-3", monkeypatch=monkeypatch)
     _run(
@@ -129,6 +133,20 @@ def test_pipeline_end_to_end(tmp_path, make_lattice, monkeypatch):
     )
     metrics = json.loads((run / "metrics.json").read_text())
     assert len(metrics["success_after_relax"]) == 3 and "w1_pe_atom" in metrics["local"]
+    for name in ("floor_D2", "floor_tiny_D2"):  # default name and a named floor
+        _run(
+            "evaluate",
+            "--config",
+            eval_cfg,
+            "floor=true",
+            "defect=D2",
+            f"data={data}",
+            f"runs_root={runs}",
+            f"name={name}",
+            "bootstrap.n_resamples_w1=10",
+            "local.r_loc=2.0",
+            monkeypatch=monkeypatch,
+        )
     out = tmp_path / "summary.csv"
     _run(
         "aggregate_results",
@@ -138,7 +156,9 @@ def test_pipeline_end_to_end(tmp_path, make_lattice, monkeypatch):
         f"out={out}",
         monkeypatch=monkeypatch,
     )
-    assert out.exists()
+    with out.open() as f:
+        methods = {row["method"] for row in csv.DictReader(f)}
+    assert {"floor", "floor_tiny_D2", run.name.split("_", 1)[1]} <= methods
 
 
 def test_training_resumes_after_interruption(tmp_path, make_lattice, monkeypatch):

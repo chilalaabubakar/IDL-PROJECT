@@ -63,7 +63,9 @@ when that file passes.
 | Colab workflow (`notebooks/colab_train.ipynb`): speed test, resumable training (`train.py resume=<run>`, atomic checkpoints), experiment matrix, summary | ✅ ready |
 | **GPU training runs** (unconditional EGNN at full size, then conditional) and the first experiment matrix | ✅ done on Colab: `results/colab_20261004-2352Z/` (33 evaluations; analysis and next steps in its `ANALYSIS.md`) |
 | Diagnostics: `scripts/defect_stability.py` (natural defects under noise + relaxation), B–B contacts per B atom in the global metrics | ✅ done |
-| **Round 2** on Colab: sampler steps (100 / 300 / 900), guidance w sweep, RePaint U sweep, stability control | ⏳ next: the round 2 cells in `notebooks/colab_train.ipynb` |
+| **Round 2** on Colab: sampler steps (100 / 300 / 900), guidance w sweep, RePaint U sweep, stability control | ✅ done: `results/colab_20261005-1006Z/` (analysis in its `ANALYSIS.md`); the sampler default becomes 100 steps |
+| `sample.py` clips σ at each checkpoint's own training σ_max; named floor runs (`evaluate.py name=...`) | ✅ done |
+| **Round 3** on Colab: retrain with σ_max = 1.0, main table at 100 steps (w = 2, 4, 6; all three defects), Stage 4 symmetry ladder at N = 64 | ⏳ next: the round 3 cells in `notebooks/colab_train.ipynb` |
 
 Install and check:
 

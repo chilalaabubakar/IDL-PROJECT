@@ -24,11 +24,14 @@ metrics with bootstrap CIs. See
 [`docs/IMPLEMENTATION_PLAN.md`](docs/IMPLEMENTATION_PLAN.md) §2 for the ticket-by-ticket
 status.
 
-**First GPU results** ([`results/colab_20261004-2352Z/ANALYSIS.md`](results/colab_20261004-2352Z/ANALYSIS.md)):
-with guidance, the conditional EGNN places D1− and D2 defects inside existing glasses more
-often than hand insertion or local melt-quench, with surroundings as realistic as natural
-defects. D1+ fails for every method. The DM2 sampler's 2,900 steps over-anneal the glass;
-the next Colab round tests 100–900 steps, the guidance strength and RePaint resampling.
+**GPU results so far** (round 1: [`results/colab_20261004-2352Z/ANALYSIS.md`](results/colab_20261004-2352Z/ANALYSIS.md),
+round 2: [`results/colab_20261005-1006Z/ANALYSIS.md`](results/colab_20261005-1006Z/ANALYSIS.md)):
+with guidance, the conditional EGNN places D1− and D2 defects inside existing glasses
+2–4× as often as hand insertion (D2: 0.56 vs 0.30 at w = 6), with surroundings at or near
+the natural floor; local melt-quench almost never succeeds. D1+ fails for every method.
+The DM2 sampler's step count acts like a cooling rate: 100 steps give the natural energy
+at a fraction of the cost of DM2's 2,900. Round 3 retrains with a wider noise range,
+builds the final table at 100 steps and runs the N = 64 symmetry ladder.
 
 ## Run on Colab (GPU)
 

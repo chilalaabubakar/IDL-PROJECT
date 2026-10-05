@@ -25,7 +25,7 @@ from glassdiff.data.requests import host_init, make_eval_request
 from glassdiff.diffusion.conditioning import build_strategy
 from glassdiff.diffusion.guidance import CFGDenoiser
 from glassdiff.diffusion.sampler import ScoreDynamicsSchedule, random_init, sample
-from glassdiff.models.registry import load_denoiser
+from glassdiff.models.registry import load_denoiser, training_sigma_max
 from glassdiff.types import DefectClass, Structures
 from glassdiff.utils.config import cli_config
 from glassdiff.utils.runs import make_run_dir, pick_device, seed_everything
@@ -48,7 +48,12 @@ def main() -> None:
     if w:
         model = CFGDenoiser(model, w)
     strategy = build_strategy(cfg["strategy"])
-    schedule = ScoreDynamicsSchedule(**cfg["schedule"])
+    schedule_cfg = dict(cfg["schedule"])
+    if "model_sigma_max" not in schedule_cfg:  # clip sigma at what the model was trained on
+        trained = training_sigma_max(cfg["ckpt"])
+        if trained is not None:
+            schedule_cfg["model_sigma_max"] = trained
+    schedule = ScoreDynamicsSchedule(**schedule_cfg)
 
     data_dir = Path(cfg["data"])
     test = load_split(data_dir / "test.npz").structures
@@ -100,6 +105,7 @@ def main() -> None:
         "device": str(device),
         "n_samples": n_samples,
         "steps": schedule.n_noisy + schedule.n_final,
+        "model_sigma_max": schedule.model_sigma_max,
     }
     (run_dir / "timing.json").write_text(json.dumps(timing, indent=2))
     print(f"wrote {run_dir / 'samples.npz'} ({timing['seconds_per_sample']:.2f} s/sample)")
