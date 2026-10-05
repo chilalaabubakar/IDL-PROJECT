@@ -57,6 +57,14 @@ def test_local_features_and_identical_sets_have_zero_w1(make_lattice):
     assert wasserstein1(torch.tensor([0.0, 1.0]), torch.tensor([1.0, 2.0])) == 1.0
     g = global_realism(s, s)
     assert g["gr_l1_AA"] == 0.0 and g["w1_pe_atom"] == 0.0
+    assert g["bb_per_b"] >= 0.0
+
+
+def test_bb_per_b_counts_b_contacts(make_triangular):
+    s = make_triangular(4, 4, a=1.1)  # every atom has six neighbours at 1.1 < 1.2
+    s.types[:] = 0
+    s.types[0, :2] = 1  # two neighbouring B atoms: one B-B contact each
+    assert global_realism(s, s)["bb_per_b"] == 1.0
 
 
 def test_natural_windows(make_triangular):
