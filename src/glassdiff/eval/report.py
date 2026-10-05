@@ -17,6 +17,9 @@ DEFAULT_METRICS = (
     "local.w1_pe_atom",
     "local.w1_bond_angle",
     "local.overlap_rate",
+    "global.pe_atom_mean",
+    "global.gr_l1_AB",
+    "global.bb_per_b",
     "seconds_per_success",
 )
 

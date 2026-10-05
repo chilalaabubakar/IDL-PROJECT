@@ -1,6 +1,6 @@
 """End-to-end pipeline test on a tiny synthetic dataset (no LAMMPS needed).
 
-freeze_thresholds -> build_patches -> train -> sample -> relax -> evaluate -> aggregate,
+freeze_thresholds -> build_patches -> defect_stability -> train -> sample -> relax -> evaluate -> aggregate,
 each through its command-line entry point, as a guard against interface drift between
 scripts.
 """
@@ -48,6 +48,22 @@ def test_pipeline_end_to_end(tmp_path, make_lattice, monkeypatch):
     _run("build_patches", "--config", defects, f"data={data}", monkeypatch=monkeypatch)
     meta = json.loads((data / "meta.json").read_text())
     assert "digest" in meta["defects"]
+    diag = tmp_path / "diagnostics"
+    _run(
+        "defect_stability",
+        "--config",
+        str(ROOT / "configs/eval/default.yaml"),
+        f"data={data}",
+        f"runs_root={diag}",
+        "sigmas=[0,0.05]",
+        "threads=1",
+        "bootstrap.n_resamples=20",
+        monkeypatch=monkeypatch,
+    )
+    stability = json.loads(next(diag.glob("*_defect_stability/metrics.json")).read_text())
+    unperturbed = [v for v in stability["sigmas"]["0"].values() if isinstance(v, dict)]
+    assert set(stability["sigmas"]) == {"0", "0.05"} and unperturbed
+    assert all(v["survival"][0] == 1.0 for v in unperturbed if v["survival"])  # relaxed already
 
     common = [f"data={data}", f"runs_root={runs}", "threads=1"]
     _run(
