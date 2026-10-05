@@ -35,3 +35,10 @@ def load_denoiser(path: str | Path, device: str | torch.device = "cpu") -> Denoi
     model = build_model(ckpt["model_cfg"])
     model.load_state_dict(ckpt["ema"])
     return model.to(device).eval()
+
+
+def training_sigma_max(path: str | Path) -> float | None:
+    """Largest noise level a checkpoint was trained on (None for checkpoints without it)."""
+    ckpt = torch.load(path, map_location="cpu", weights_only=False)
+    sigma_max = ckpt.get("cfg", {}).get("noise", {}).get("sigma_max")
+    return None if sigma_max is None else float(sigma_max)
