@@ -5,7 +5,8 @@
 
 One row per run: method (from the run directory name), defect, request mode, sample count,
 success before/after relaxation with CIs, cost, and the local and global realism metrics.
-Floor runs (natural vs natural) are included with method "floor". Also writes a
+Floor runs (natural vs natural) are included with method "floor" (or their own name when
+evaluate.py was given one, e.g. floor_n64_D2). Also writes a
 markdown table of the headline metrics next to the CSV (glassdiff.eval.report).
 """
 
@@ -39,7 +40,8 @@ def main() -> None:
     for path in sorted(Path(cfg.get("runs_dir", "runs")).glob("*/metrics.json")):
         metrics = json.loads(path.read_text())
         name = path.parent.name.split("_", 1)[-1]  # strip the timestamp
-        row = {"run": path.parent.name, "method": "floor" if "floor" in name else name}
+        floor = metrics.get("kind", "").startswith("floor") and name == f"floor_{metrics['defect']}"
+        row = {"run": path.parent.name, "method": "floor" if floor else name}
         row.update(flatten(metrics))
         rows.append(row)
     if not rows:
