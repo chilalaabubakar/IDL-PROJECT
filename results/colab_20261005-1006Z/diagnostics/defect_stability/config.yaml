@@ -1,0 +1,22 @@
+reference: data/ka2d_256/test.npz
+relax:
+  fmax: 1.0e-06
+  max_steps: 100000
+success:
+  r_tol: 0.5
+local:
+  r_loc: 3.0
+bootstrap:
+  n_resamples: 10000
+  alpha: 0.05
+  seed: 0
+data: data/ka2d_256
+sigmas:
+- 0
+- 0.05
+- 0.1
+- 0.15
+- 0.2
+- 0.3
+n_glasses: 100
+runs_root: /content/drive/MyDrive/idl-project/diagnostics
