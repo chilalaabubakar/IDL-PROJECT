@@ -16,13 +16,19 @@ whether its surroundings look like naturally formed ones. The work builds on DM2
 
 ## Status
 
-The MVP pipeline is implemented and tested (64 tests, including an end-to-end run of
+The MVP pipeline is implemented and tested (67 tests, including an end-to-end run of
 every script). It covers dataset generation, defect labelling, the periodic EGNN and
 the MPNN/MLP ablations, training, the DM2 sampler with clamping, RePaint and CFG
 conditioning, both baselines (hand insertion, local melt-quench), relaxation and
-metrics with bootstrap CIs. Full-size training runs need a GPU. See
+metrics with bootstrap CIs. See
 [`docs/IMPLEMENTATION_PLAN.md`](docs/IMPLEMENTATION_PLAN.md) §2 for the ticket-by-ticket
 status.
+
+**First GPU results** ([`results/colab_20261004-2352Z/ANALYSIS.md`](results/colab_20261004-2352Z/ANALYSIS.md)):
+with guidance, the conditional EGNN places D1− and D2 defects inside existing glasses more
+often than hand insertion or local melt-quench, with surroundings as realistic as natural
+defects. D1+ fails for every method. The DM2 sampler's 2,900 steps over-anneal the glass;
+the next Colab round tests 100–900 steps, the guidance strength and RePaint resampling.
 
 ## Run on Colab (GPU)
 

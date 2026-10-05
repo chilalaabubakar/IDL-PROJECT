@@ -61,7 +61,9 @@ when that file passes.
 | B-1 Stage 0 (needs a GPU + the DM2 environment) | ⏳ open |
 | S-5 classifier guidance, M-7 NequIP-2D | ⏳ stretch |
 | Colab workflow (`notebooks/colab_train.ipynb`): speed test, resumable training (`train.py resume=<run>`, atomic checkpoints), experiment matrix, summary | ✅ ready |
-| **GPU training runs** (unconditional EGNN at full size, then conditional) | ⏳ next: run the Colab notebook |
+| **GPU training runs** (unconditional EGNN at full size, then conditional) and the first experiment matrix | ✅ done on Colab: `results/colab_20261004-2352Z/` (33 evaluations; analysis and next steps in its `ANALYSIS.md`) |
+| Diagnostics: `scripts/defect_stability.py` (natural defects under noise + relaxation), B–B contacts per B atom in the global metrics | ✅ done |
+| **Round 2** on Colab: sampler steps (100 / 300 / 900), guidance w sweep, RePaint U sweep, stability control | ⏳ next: the round 2 cells in `notebooks/colab_train.ipynb` |
 
 Install and check:
 
