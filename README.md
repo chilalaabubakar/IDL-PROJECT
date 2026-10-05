@@ -38,9 +38,14 @@ builds the final table at 100 steps and runs the N = 64 symmetry ladder.
 Open [`notebooks/colab_train.ipynb`](notebooks/colab_train.ipynb) in Colab:
 <https://colab.research.google.com/github/chilalaabubakar/IDL-PROJECT/blob/main/notebooks/colab_train.ipynb>
 
-It checks the GPU, measures training speed, trains the unconditional and conditional EGNN
-(resuming automatically after a disconnect), runs every experiment and baseline, and builds
-the summary table. Runs and results are kept in Google Drive (`MyDrive/idl-project/`);
+For the current experiment round only, use the shorter
+[`notebooks/colab_round3.ipynb`](notebooks/colab_round3.ipynb):
+<https://colab.research.google.com/github/chilalaabubakar/IDL-PROJECT/blob/main/notebooks/colab_round3.ipynb>
+(setup, round 3, summary and push; it reuses the models and results of rounds 1–2 in Drive).
+
+The full notebook checks the GPU, measures training speed, trains the unconditional and
+conditional EGNN (resuming automatically after a disconnect), runs every experiment and
+baseline, and builds the summary table. Runs and results are kept in Google Drive (`MyDrive/idl-project/`);
 the last cell pushes a compact copy (summary, metrics, figures, trained weights) to
 `results/colab_<date>/` in this repository, using a GitHub token stored in Colab Secrets.
 
