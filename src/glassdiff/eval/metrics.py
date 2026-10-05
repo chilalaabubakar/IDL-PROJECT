@@ -15,7 +15,7 @@ from scipy.stats import wasserstein_distance
 from torch import Tensor
 
 from glassdiff.analysis.defects import DefectThresholds, detect_defects
-from glassdiff.analysis.descriptors import psi6_global
+from glassdiff.analysis.descriptors import psi6_global, same_species_neighbors
 from glassdiff.analysis.structure import bond_angles, pair_distances, radial_distribution
 from glassdiff.data.dataset import GlassSplit
 from glassdiff.data.requests import DEFECT_SPECIES
@@ -161,7 +161,7 @@ def local_realism(
 
 
 def global_realism(gen: Structures, ref: Structures) -> dict[str, float]:
-    """g_ab(r) L1 distances, per-atom PE W1, and crystallinity (global |psi6|)."""
+    """g_ab(r) L1 distances, per-atom PE W1, crystallinity (global |psi6|) and chemical order."""
     out = {}
     for name, pair in SPECIES_PAIRS.items():
         r, g_gen = radial_distribution(gen, pair, r_max=5.0)
@@ -174,6 +174,8 @@ def global_realism(gen: Structures, ref: Structures) -> dict[str, float]:
     psi = psi6_global(gen)
     out["psi6_global_mean"] = float(psi.mean())
     out["crystallized_fraction"] = float((psi > 0.3).double().mean())
+    # chemical order: B-B contacts per B atom (D2 cutoff); below natural = over-annealed glass
+    out["bb_per_b"] = float(same_species_neighbors(gen, 1, 1.2)[gen.types == 1].double().mean())
     return out
 
 
