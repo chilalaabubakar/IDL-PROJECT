@@ -1,0 +1,37 @@
+name: egnn_cond_smax1
+seed: 0
+data: data/ka2d_256
+model: configs/model/egnn.yaml
+conditional: true
+requests:
+  mode_probs:
+    centre: 0.5
+    patch: 0.3
+    host: 0.2
+  p_defect_centre: 0.5
+  patch_radius: 1.5
+  host_r_out: 4.0
+  p_uncond: 0.15
+noise:
+  sigma_min: 0.001
+  sigma_max: 1.0
+  distribution: uniform
+optim:
+  lr: 0.0002
+  weight_decay: 0.0
+  batch_size: 16
+  n_updates: 50000
+  grad_clip: 1.0
+  ema: 0.999
+log_every: 100
+val_every: 1000
+ckpt_every: 1000
+max_minutes: 660
+runs_root: /kaggle/working/idl-project/runs
+resolved_model:
+  name: egnn_pbc
+  hidden: 128
+  n_layers: 4
+  cutoff: 2.5
+  k_max: 64
+  sigma_aware: true
