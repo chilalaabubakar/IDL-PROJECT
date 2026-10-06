@@ -1,0 +1,18 @@
+schedule:
+  n_noisy: 100
+  n_final: 100
+  sigma_start: 1.0
+  sigma_end: 0.001
+  sigma_min: 0.001
+strategy:
+  name: clamp
+request:
+  mode: patch
+n_samples: 256
+batch_size: 64
+seed: 0
+ckpt: /kaggle/working/IDL-PROJECT/results/colab_20261004-2352Z/training/egnn_uncond/ema.pt
+data: data/ka2d_256
+defect: D1_MINUS
+name: B4_clamp_s100_patch_D1_MINUS
+runs_root: /kaggle/working/idl-project/eval
