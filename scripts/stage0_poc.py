@@ -9,6 +9,12 @@ steps, time as an input) on tiny 2D grids. Its four code cells:
                pins atom 4 at (1.5, 1.5) at every step (naive clamping)
   4. antisite  2x2 two-species grid, half with A0 and B0 swapped; generation pins the swap
 
+The antisite cell has a bug: the A sites are built from np.arange (integers), so the swap
+writes A0's new position (0.5, 0.5) as (0, 0). Its "antisite" training structures therefore
+hold A0 and B0 on top of each other at A0's site, with B0's site empty, and the model never
+sees the configuration that generation pins. ``antisite_fixed`` runs the same cell with
+float A sites (one added ``.astype(float)``); the notebook itself is left unchanged.
+
 This script runs each cell exactly as written (fresh namespace, fixed seed, figures saved
 instead of shown) and measures:
 
@@ -16,7 +22,7 @@ instead of shown) and measures:
     distribution of all atom-pair distances; W1 between the two (grid spacings), against a
     floor (training set vs a fresh set from the same generator); and the positional disorder
     (RMS displacement from the ideal site, per coordinate).
-  - frenkel / antisite, seed 0: the share of 500 generated structures whose unpinned atoms all
+  - frenkel / antisite(_fixed), seed 0: the share of 500 generated structures whose unpinned atoms all
     stay within 0.35 / 0.3 of their own sites (and, for Frenkel, the vacancy stays empty),
     next to the same share in the training structures that carry that defect.
 
@@ -43,6 +49,8 @@ from scipy.spatial.distance import pdist  # noqa: E402
 from scipy.stats import wasserstein_distance  # noqa: E402
 
 DEMOS = ("grid", "grid_gpu", "frenkel", "antisite")
+VARIANTS = (*DEMOS, "antisite_fixed")
+ANTISITE_A = "pos_A = np.stack([xv.flatten(), yv.flatten()], axis=1)"
 GEN_COLOR, REF_COLOR = "#2a6fdb", "0.25"
 
 
@@ -51,7 +59,10 @@ def code_cells(path):
     cells = ["".join(c["source"]) for c in nb["cells"] if c["cell_type"] == "code"]
     cells = [c for c in cells if c.strip()]
     assert len(cells) == len(DEMOS), f"expected {len(DEMOS)} code cells, found {len(cells)}"
-    return dict(zip(DEMOS, cells))
+    out = dict(zip(DEMOS, cells))
+    assert out["antisite"].count(ANTISITE_A) == 1
+    out["antisite_fixed"] = out["antisite"].replace(ANTISITE_A, f"{ANTISITE_A}.astype(float)")
+    return out
 
 
 def run_cell(code, seed, figure=None):
@@ -138,6 +149,7 @@ def antisite_metrics(ns, n, tol=0.3):
     free[[0, k]] = False  # A0 and B0 are pinned (swapped)
     gen = ns["sample_gen"](n_batch=n)
     train = ns["train_data"].cpu().numpy()[np.array(ns["train_labels"], bool)]
+    swap_gap = float(np.linalg.norm(train[:, 0] - train[:, k], axis=1).mean())
 
     def intact(x):
         return round(
@@ -150,6 +162,10 @@ def antisite_metrics(ns, n, tol=0.3):
         "intact_training_with_this_defect": intact(train),
         "n_generated": n,
         "n_training_with_this_defect": len(train),
+        "A0_B0_distance_training_swapped": round(swap_gap, 3),  # 0.71 for a real swap
+        "A0_B0_distance_generated": round(
+            float(np.linalg.norm(gen[:, 0] - gen[:, k], axis=1).mean()), 3
+        ),
     }
 
 
@@ -191,7 +207,7 @@ def main() -> None:
     ap.add_argument("--seeds", type=int, nargs="+", default=[0, 1, 2, 3, 4])
     ap.add_argument("--n", type=int, default=2000, help="structures per set for Fig. 1")
     ap.add_argument("--n-defect", type=int, default=500)
-    ap.add_argument("--demos", nargs="+", default=list(DEMOS), choices=DEMOS)
+    ap.add_argument("--demos", nargs="+", default=list(VARIANTS), choices=VARIANTS)
     ap.add_argument("--threads", type=int, default=4)
     a = ap.parse_args()
     torch.set_num_threads(a.threads)
@@ -214,7 +230,7 @@ def main() -> None:
                     plot_figure1(out / "figure1_reproduction.png", *arrays, m)
             elif demo == "frenkel":
                 run.update(frenkel_metrics(ns, a.n_defect))
-            elif demo == "antisite":
+            elif demo.startswith("antisite"):
                 run.update(antisite_metrics(ns, a.n_defect))
             runs.append(run)
             print(demo, json.dumps(run), flush=True)
