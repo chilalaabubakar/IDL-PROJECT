@@ -1,0 +1,216 @@
+{
+  "training_set": "1 K/ps samples 0-2 (DM2's unconditional training data)",
+  "r_max_compared_A": 8.0,
+  "generation_minutes": [
+    17.3,
+    17.1,
+    16.5,
+    18.7
+  ],
+  "structure": {
+    "DM2 generated": {
+      "n_structures": 4,
+      "n_atoms": 300,
+      "density_g_cm3": 2.1001,
+      "Si_4fold_fraction": 0.9925,
+      "Si_mean_CN": 4.0025,
+      "O_2fold_fraction": 0.9838,
+      "Si-O_bond_mean_A": 1.6503,
+      "O-Si-O_mean_deg": 109.39,
+      "O-Si-O_std_deg": 6.41,
+      "Si-O-Si_mean_deg": 151.45,
+      "Si-O-Si_std_deg": 15.23,
+      "Si-O-Si_below_110deg_fraction": 0.01361,
+      "edge_sharing_pairs": 5,
+      "edge_sharing_pairs_per_Si": 0.0125
+    },
+    "random start": {
+      "n_structures": 1,
+      "n_atoms": 300,
+      "density_g_cm3": 2.1002,
+      "Si_4fold_fraction": 0.05,
+      "Si_mean_CN": 1.67,
+      "O_2fold_fraction": 0.14,
+      "Si-O_bond_mean_A": 1.7017,
+      "O-Si-O_mean_deg": 90.77,
+      "O-Si-O_std_deg": 38.03,
+      "Si-O-Si_mean_deg": 88.02,
+      "Si-O-Si_std_deg": 35.67,
+      "Si-O-Si_below_110deg_fraction": 0.73438,
+      "edge_sharing_pairs": 107,
+      "edge_sharing_pairs_per_Si": 1.07
+    },
+    "MD 1 K/ps training": {
+      "n_structures": 3,
+      "n_atoms": 3000,
+      "density_g_cm3": 2.1309,
+      "Si_4fold_fraction": 0.9993,
+      "Si_mean_CN": 4.0,
+      "O_2fold_fraction": 0.9957,
+      "Si-O_bond_mean_A": 1.6456,
+      "O-Si-O_mean_deg": 109.38,
+      "O-Si-O_std_deg": 5.64,
+      "Si-O-Si_mean_deg": 150.68,
+      "Si-O-Si_std_deg": 13.1,
+      "Si-O-Si_below_110deg_fraction": 0.001,
+      "edge_sharing_pairs": 6,
+      "edge_sharing_pairs_per_Si": 0.002
+    },
+    "MD 0.1 K/ps": {
+      "n_structures": 6,
+      "n_atoms": 3000,
+      "density_g_cm3": 2.1145,
+      "Si_4fold_fraction": 0.9998,
+      "Si_mean_CN": 4.0002,
+      "O_2fold_fraction": 0.9969,
+      "Si-O_bond_mean_A": 1.6451,
+      "O-Si-O_mean_deg": 109.39,
+      "O-Si-O_std_deg": 5.38,
+      "Si-O-Si_mean_deg": 151.44,
+      "Si-O-Si_std_deg": 12.83,
+      "Si-O-Si_below_110deg_fraction": 0.00025,
+      "edge_sharing_pairs": 7,
+      "edge_sharing_pairs_per_Si": 0.00117
+    },
+    "MD 1 K/ps": {
+      "n_structures": 6,
+      "n_atoms": 3000,
+      "density_g_cm3": 2.129,
+      "Si_4fold_fraction": 0.9995,
+      "Si_mean_CN": 3.9998,
+      "O_2fold_fraction": 0.9952,
+      "Si-O_bond_mean_A": 1.6457,
+      "O-Si-O_mean_deg": 109.38,
+      "O-Si-O_std_deg": 5.62,
+      "Si-O-Si_mean_deg": 150.74,
+      "Si-O-Si_std_deg": 13.12,
+      "Si-O-Si_below_110deg_fraction": 0.00067,
+      "edge_sharing_pairs": 10,
+      "edge_sharing_pairs_per_Si": 0.00167
+    },
+    "MD 10 K/ps": {
+      "n_structures": 6,
+      "n_atoms": 3000,
+      "density_g_cm3": 2.1539,
+      "Si_4fold_fraction": 0.999,
+      "Si_mean_CN": 4.0,
+      "O_2fold_fraction": 0.9883,
+      "Si-O_bond_mean_A": 1.6464,
+      "O-Si-O_mean_deg": 109.38,
+      "O-Si-O_std_deg": 6.03,
+      "Si-O-Si_mean_deg": 149.8,
+      "Si-O-Si_std_deg": 13.78,
+      "Si-O-Si_below_110deg_fraction": 0.00249,
+      "edge_sharing_pairs": 28,
+      "edge_sharing_pairs_per_Si": 0.00467
+    },
+    "MD 100 K/ps": {
+      "n_structures": 6,
+      "n_atoms": 3000,
+      "density_g_cm3": 2.1689,
+      "Si_4fold_fraction": 0.9968,
+      "Si_mean_CN": 3.9978,
+      "O_2fold_fraction": 0.9812,
+      "Si-O_bond_mean_A": 1.6474,
+      "O-Si-O_mean_deg": 109.38,
+      "O-Si-O_std_deg": 6.55,
+      "Si-O-Si_mean_deg": 148.22,
+      "Si-O-Si_std_deg": 14.3,
+      "Si-O-Si_below_110deg_fraction": 0.00529,
+      "edge_sharing_pairs": 50,
+      "edge_sharing_pairs_per_Si": 0.00833
+    }
+  },
+  "gr_L1_to_training": {
+    "DM2 generated": {
+      "Si-O": 0.579,
+      "O-O": 0.4489,
+      "Si-Si": 0.6184
+    },
+    "random start": {
+      "Si-O": 6.1999,
+      "O-O": 5.4066,
+      "Si-Si": 5.905
+    },
+    "MD 0.1 K/ps": {
+      "Si-O": 0.1625,
+      "O-O": 0.1657,
+      "Si-Si": 0.2483
+    },
+    "MD 10 K/ps": {
+      "Si-O": 0.225,
+      "O-O": 0.1908,
+      "Si-Si": 0.2696
+    },
+    "MD 100 K/ps": {
+      "Si-O": 0.3831,
+      "O-O": 0.3428,
+      "Si-Si": 0.4977
+    },
+    "MD 1 K/ps held-out (floor)": {
+      "Si-O": 0.1677,
+      "O-O": 0.1339,
+      "Si-Si": 0.2454
+    }
+  },
+  "gr_L1_to_training_same_size": {
+    "n_Si": 400,
+    "n_O": 800,
+    "MD 1 K/ps held-out (floor)": {
+      "Si-O": {
+        "mean": 0.3136,
+        "p95": 0.3897
+      },
+      "O-O": {
+        "mean": 0.2309,
+        "p95": 0.259
+      },
+      "Si-Si": {
+        "mean": 0.3929,
+        "p95": 0.4403
+      }
+    },
+    "MD 0.1 K/ps": {
+      "Si-O": {
+        "mean": 0.3435,
+        "p95": 0.4148
+      },
+      "O-O": {
+        "mean": 0.2613,
+        "p95": 0.3045
+      },
+      "Si-Si": {
+        "mean": 0.4128,
+        "p95": 0.4586
+      }
+    },
+    "MD 10 K/ps": {
+      "Si-O": {
+        "mean": 0.3745,
+        "p95": 0.4657
+      },
+      "O-O": {
+        "mean": 0.2777,
+        "p95": 0.3055
+      },
+      "Si-Si": {
+        "mean": 0.4184,
+        "p95": 0.4818
+      }
+    },
+    "MD 100 K/ps": {
+      "Si-O": {
+        "mean": 0.4953,
+        "p95": 0.5754
+      },
+      "O-O": {
+        "mean": 0.4026,
+        "p95": 0.4524
+      },
+      "Si-Si": {
+        "mean": 0.6081,
+        "p95": 0.677
+      }
+    }
+  }
+}
