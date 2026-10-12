@@ -51,6 +51,8 @@ Out of Colab compute? [`notebooks/kaggle_round3.ipynb`](notebooks/kaggle_round3.
 the same round on Kaggle without Drive: it loads earlier models and results from this
 repository and pushes its progress back every 45 minutes, so it can continue across Kaggle
 sessions.
+The sensitivity checks run in [`notebooks/kaggle_sensitivity.ipynb`](notebooks/kaggle_sensitivity.ipynb)
+(one Kaggle session, ~4 h; analysis in `results/sensitivity/`).
 
 The full notebook checks the GPU, measures training speed, trains the unconditional and
 conditional EGNN (resuming automatically after a disconnect), runs every experiment and
