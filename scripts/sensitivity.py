@@ -30,6 +30,7 @@ from __future__ import annotations
 
 import dataclasses
 import json
+import re
 from pathlib import Path
 from typing import NamedTuple
 
@@ -182,6 +183,7 @@ def summarize(roots: list[str], out: Path) -> None:
         if "variants" not in d:
             continue
         name = p.parent.name if p.name == "sensitivity.json" else p.stem
+        name = re.sub(r"^\d{8}-\d{6}Z_", "", name)  # local run dirs carry a timestamp
         base = d["variants"].get("default", {})
         for vname, v in d["variants"].items():
             row = {"run": name, "defect": d["defect"], "variant": vname}
