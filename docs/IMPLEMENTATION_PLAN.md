@@ -59,7 +59,7 @@ when that file passes.
 | **E-5** report tables (`eval/report.py`; `aggregate_results.py` also writes `summary.md`), training curves (`scripts/plot_training.py`) | ✅ done |
 | End-to-end smoke run on real data (CPU) | ✅ `results/cpu_smoke/`: B1, B2, B5, B6 and the floor for D2; a pipeline check, not results |
 | B-1 Stage 0b: DM2's pretrained a-SiO₂ model against its training glasses (`scripts/stage0_dm2_sanity.py`, runs on CPU) | ✅ done: `results/stage0/` (g(r) and local structure match; finer measures look like a 100 K/ps quench) |
-| B-1 Stage 0a: the course proof-of-concept notebook | ⏳ waiting for the notebook file |
+| B-1 Stage 0a: the course proof-of-concept notebook (`notebooks/stage0_poc.ipynb`, rerun by `scripts/stage0_poc.py`) | ✅ done: `results/stage0/poc/` (the proposal's Fig. 1 reproduces over 5 seeds; a bug in the notebook's antisite demo is documented with a fixed variant) |
 | S-5 classifier guidance, M-7 NequIP-2D | ⏳ stretch |
 | Colab workflow (`notebooks/colab_train.ipynb`): speed test, resumable training (`train.py resume=<run>`, atomic checkpoints), experiment matrix, summary | ✅ ready |
 | **GPU training runs** (unconditional EGNN at full size, then conditional) and the first experiment matrix | ✅ done on Colab: `results/colab_20261004-2352Z/` (33 evaluations; analysis and next steps in its `ANALYSIS.md`) |
@@ -67,7 +67,7 @@ when that file passes.
 | **Round 2** on Colab: sampler steps (100 / 300 / 900), guidance w sweep, RePaint U sweep, stability control | ✅ done: `results/colab_20261005-1006Z/` (analysis in its `ANALYSIS.md`); the sampler default becomes 100 steps |
 | `sample.py` clips σ at each checkpoint's own training σ_max; named floor runs (`evaluate.py name=...`) | ✅ done |
 | **Round 3** (run on Kaggle): retrain with σ_max = 1.0, main table at 100 steps (w = 2, 4, 6; all three defects), Stage 4 symmetry ladder at N = 64 | ✅ done: `results/kaggle_2026100*` / `kaggle_20261012-*`; analysis in `results/round3_ANALYSIS.md` |
-| B-1 Stage 0a (course notebook), sensitivity checks, seeds for publication | ⏳ open |
+| Sensitivity checks, seeds for publication | ⏳ open |
 
 Install and check:
 
@@ -225,4 +225,4 @@ These don't block week 1; settle them at the first team meeting.
 2. Training on inherent structures (default in the configs) or on thermal snapshots?
 3. A σ-aware main model (default `sigma_aware: true`) or σ-blind as in DM2?
 4. GPU access: this decides how many seeds we run.
-5. The Stage 0 course notebook: commit it to `notebooks/`.
+5. ~~The Stage 0 course notebook: commit it to `notebooks/`.~~ Done: `notebooks/stage0_poc.ipynb`.

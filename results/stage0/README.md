@@ -1,4 +1,11 @@
-# Stage 0b: DM2's pretrained a-SiO₂ model against its training glasses
+# Stage 0: reproduction
+
+| Part | Result | Details |
+|---|---|---|
+| **0a.** The course proof-of-concept notebook (MLP denoiser, 3×3 jittered grid) | The proposal's Fig. 1 reproduces: pair-distance W1 0.063 over 5 seeds (Fig. 1: 0.068), generated disorder 0.153 (Fig. 1: 0.163). The notebook's antisite demo has a bug (integer sites), documented with a fixed variant. | [`poc/README.md`](poc/README.md) |
+| **0b.** DM2's pretrained a-SiO₂ model | g(r) and local structure match the training glasses; on finer measures more disordered, like a 100× faster quench | below |
+
+## Stage 0b: DM2's pretrained a-SiO₂ model against its training glasses
 
 **Question:** does DM2's published unconditional model (`gen-a-sio2-uncond-v1.pt`) make
 amorphous silica that looks like the glasses it was trained on? This checks that we can
@@ -27,7 +34,7 @@ generated structures).
 
 ![g(r) and bond angles](stage0_dm2_sio2.png)
 
-## 1. Local structure: correct silica
+### 1. Local structure: correct silica
 
 | | DM2 generated | MD 1 K/ps (training) | MD 100 K/ps | Random start |
 |---|---|---|---|---|
@@ -42,7 +49,7 @@ From random positions the model builds a network of corner-sharing SiO₄ tetrah
 right bond length and tetrahedral angle. All peaks of the three partial g(r) sit at the
 training positions with the training heights (figure).
 
-## 2. Distance to the training glasses: like a faster quench
+### 2. Distance to the training glasses: like a faster quench
 
 L1 distance of each partial g(r) to the training glasses, up to 8 Å. The generated set has
 only 1,200 atoms, so each MD set is cut down to the same number of centre atoms (400 Si,
@@ -67,7 +74,7 @@ only 1,200 atoms, so each MD set is cut down to the same number of centre atoms 
   - Edge-sharing also shows as the small Si–O–Si tail at 80–110° and the faint Si–Si
     shoulder near 2.5 Å in the figure.
 
-## 3. Verdict for the exit criterion
+### 3. Verdict for the exit criterion
 
 **Passed, with a caveat.** DM2's pretrained model, run with its own demo settings, makes
 a-SiO₂ whose g(r) and local structure match the training glasses. On a finer scale it is
