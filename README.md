@@ -24,14 +24,16 @@ metrics with bootstrap CIs. See
 [`docs/IMPLEMENTATION_PLAN.md`](docs/IMPLEMENTATION_PLAN.md) §2 for the ticket-by-ticket
 status.
 
-**GPU results so far** (round 1: [`results/colab_20261004-2352Z/ANALYSIS.md`](results/colab_20261004-2352Z/ANALYSIS.md),
-round 2: [`results/colab_20261005-1006Z/ANALYSIS.md`](results/colab_20261005-1006Z/ANALYSIS.md)):
-with guidance, the conditional EGNN places D1− and D2 defects inside existing glasses
-2–4× as often as hand insertion (D2: 0.56 vs 0.30 at w = 6), with surroundings at or near
-the natural floor; local melt-quench almost never succeeds. D1+ fails for every method.
-The DM2 sampler's step count acts like a cooling rate: 100 steps give the natural energy
-at a fraction of the cost of DM2's 2,900. Round 3 retrains with a wider noise range,
-builds the final table at 100 steps and runs the N = 64 symmetry ladder.
+**Results** (round 1: [`results/colab_20261004-2352Z/ANALYSIS.md`](results/colab_20261004-2352Z/ANALYSIS.md),
+round 2: [`results/colab_20261005-1006Z/ANALYSIS.md`](results/colab_20261005-1006Z/ANALYSIS.md),
+round 3: [`results/round3_ANALYSIS.md`](results/round3_ANALYSIS.md)):
+with guidance, the conditional EGNN places D2 defects inside existing glasses 1.9–2.6× as
+often as hand insertion (0.56–0.79 vs 0.30) and D1− defects 3.5–4× as often (0.21–0.25 vs
+0.06); local melt-quench almost never succeeds. In the whole-box task it reaches D2
+success 0.61 with surroundings at the natural floor. D1+ fails for every method. The DM2
+sampler's step count acts like a cooling rate (100 steps give the natural energy), and in
+the N = 64 symmetry ladder the EGNN makes the most natural glasses while a flat MLP does
+not learn.
 
 ## Run on Colab (GPU)
 
