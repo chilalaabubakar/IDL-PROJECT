@@ -1,0 +1,136 @@
+{
+  "device": "cpu",
+  "demos": {
+    "grid": [
+      {
+        "seed": 0,
+        "seconds": 21.8,
+        "final_loss": 0.22134,
+        "W1_pair_distance_generated": 0.0597,
+        "W1_pair_distance_floor": 0.0018,
+        "disorder_training": 0.1494,
+        "disorder_fresh": 0.1496,
+        "disorder_generated": 0.1658,
+        "min_pair_distance_generated": 0.075
+      },
+      {
+        "seed": 1,
+        "seconds": 19.2,
+        "final_loss": 0.01933,
+        "W1_pair_distance_generated": 0.1223,
+        "W1_pair_distance_floor": 0.0024,
+        "disorder_training": 0.1499,
+        "disorder_fresh": 0.1496,
+        "disorder_generated": 0.1629,
+        "min_pair_distance_generated": 0.13
+      },
+      {
+        "seed": 2,
+        "seconds": 19.1,
+        "final_loss": 0.59067,
+        "W1_pair_distance_generated": 0.055,
+        "W1_pair_distance_floor": 0.0043,
+        "disorder_training": 0.1504,
+        "disorder_fresh": 0.1503,
+        "disorder_generated": 0.1456,
+        "min_pair_distance_generated": 0.162
+      },
+      {
+        "seed": 3,
+        "seconds": 20.4,
+        "final_loss": 0.10965,
+        "W1_pair_distance_generated": 0.0463,
+        "W1_pair_distance_floor": 0.0014,
+        "disorder_training": 0.1495,
+        "disorder_fresh": 0.1497,
+        "disorder_generated": 0.1311,
+        "min_pair_distance_generated": 0.279
+      },
+      {
+        "seed": 4,
+        "seconds": 17.0,
+        "final_loss": 0.04579,
+        "W1_pair_distance_generated": 0.0326,
+        "W1_pair_distance_floor": 0.0039,
+        "disorder_training": 0.1493,
+        "disorder_fresh": 0.1496,
+        "disorder_generated": 0.1571,
+        "min_pair_distance_generated": 0.238
+      }
+    ],
+    "grid_gpu": [
+      {
+        "seed": 0,
+        "seconds": 140.0,
+        "final_loss": 0.42198
+      }
+    ],
+    "frenkel": [
+      {
+        "seed": 0,
+        "seconds": 213.4,
+        "final_loss": 0.72137,
+        "tolerance": 0.35,
+        "intact_generated": 0.886,
+        "intact_training_with_this_defect": 0.968,
+        "n_generated": 500,
+        "n_training_with_this_defect": 348
+      }
+    ],
+    "antisite": [
+      {
+        "seed": 0,
+        "seconds": 23.2,
+        "final_loss": 0.0223,
+        "tolerance": 0.3,
+        "intact_generated": 0.878,
+        "intact_training_with_this_defect": 0.996,
+        "n_generated": 500,
+        "n_training_with_this_defect": 2566,
+        "A0_B0_distance_training_swapped": 0.14,
+        "A0_B0_distance_generated": 0.707
+      }
+    ],
+    "antisite_fixed": [
+      {
+        "seed": 0,
+        "seconds": 21.2,
+        "final_loss": 0.02368,
+        "tolerance": 0.3,
+        "intact_generated": 0.942,
+        "intact_training_with_this_defect": 0.996,
+        "n_generated": 500,
+        "n_training_with_this_defect": 2566,
+        "A0_B0_distance_training_swapped": 0.717,
+        "A0_B0_distance_generated": 0.707
+      }
+    ]
+  },
+  "grid_over_seeds": {
+    "W1_pair_distance_generated": {
+      "mean": 0.0632,
+      "min": 0.0326,
+      "max": 0.1223
+    },
+    "W1_pair_distance_floor": {
+      "mean": 0.0028,
+      "min": 0.0014,
+      "max": 0.0043
+    },
+    "disorder_training": {
+      "mean": 0.1497,
+      "min": 0.1493,
+      "max": 0.1504
+    },
+    "disorder_fresh": {
+      "mean": 0.1498,
+      "min": 0.1496,
+      "max": 0.1503
+    },
+    "disorder_generated": {
+      "mean": 0.1525,
+      "min": 0.1311,
+      "max": 0.1658
+    }
+  }
+}

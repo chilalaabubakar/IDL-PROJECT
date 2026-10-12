@@ -35,7 +35,8 @@ sampler's step count acts like a cooling rate (100 steps give the natural energy
 the N = 64 symmetry ladder the EGNN makes the most natural glasses while a flat MLP does
 not learn. Stage 0 ([`results/stage0/`](results/stage0/README.md)): DM2's own pretrained
 a-SiO₂ model, rerun on CPU, reproduces its training glasses' g(r) and tetrahedral structure,
-with somewhat more disorder (like a 100× faster quench).
+with somewhat more disorder (like a 100× faster quench); the course proof-of-concept
+notebook reproduces the proposal's Fig. 1.
 
 ## Run on Colab (GPU)
 

@@ -261,7 +261,7 @@ A single modern GPU (cluster, Colab or PSC) is enough. This cloud container has 
 1. **Adopt Task B (host-conditioned inpainting) as the headline evaluation?** (Recommended.)
 2. Training targets: inherent structures (T = 0, recommended) or low-T thermal snapshots?
 3. Main denoiser σ-aware (recommended) or σ-blind as in DM2?
-4. Where is the Stage 0 proof-of-concept notebook? Please commit it to `notebooks/`.
+4. ~~Where is the Stage 0 proof-of-concept notebook?~~ Committed as `notebooks/stage0_poc.ipynb`; reproduced in `results/stage0/poc/`.
 5. What GPU access do we have (cluster, Colab, PSC)? This sets how many seeds we run.
 6. One cooling rate (1e-2/τ) only, or also add cooling rate as a global condition, as in DM2?
 
