@@ -4,6 +4,11 @@
   runs persist in Google Drive and resume after disconnects). Open it from
   <https://colab.research.google.com/github/chilalaabubakar/IDL-PROJECT/blob/main/notebooks/colab_train.ipynb>.
 
+- `kaggle_round3.ipynb`, `kaggle_sensitivity.ipynb`: round 3 and the sensitivity checks on
+  Kaggle (no Drive; models and results come from this repository, progress is pushed back).
+  The sensitivity notebook re-runs the headline Task B rows and baselines, re-scores them
+  with `scripts/sensitivity.py`, and varies R_out.
+
 - `stage0_poc.ipynb`: the course proof-of-concept notebook, as provided (unchanged, with its
   Colab outputs): MLP denoisers on a 3×3 jittered grid, plus Frenkel-pair and antisite demos
   by naive clamping. `scripts/stage0_poc.py` reruns its cells and reproduces the proposal's

@@ -1,6 +1,7 @@
 """End-to-end pipeline test on a tiny synthetic dataset (no LAMMPS needed).
 
-freeze_thresholds -> build_patches -> defect_stability -> train -> sample -> relax -> evaluate -> aggregate,
+freeze_thresholds -> build_patches -> defect_stability -> train -> sample -> relax -> evaluate
+-> sensitivity -> aggregate,
 each through its command-line entry point, as a guard against interface drift between
 scripts.
 """
@@ -133,6 +134,41 @@ def test_pipeline_end_to_end(tmp_path, make_lattice, monkeypatch):
     )
     metrics = json.loads((run / "metrics.json").read_text())
     assert len(metrics["success_after_relax"]) == 3 and "w1_pe_atom" in metrics["local"]
+    sens_args = (f"data={data}", "bootstrap.n_resamples_w1=10", "local.r_loc=2.0")
+    _run("sensitivity", "--config", eval_cfg, f"run={run}", *sens_args, monkeypatch=monkeypatch)
+    sens = json.loads((run / "sensitivity.json").read_text())["variants"]
+    assert set(sens) == {
+        "default",
+        "d2_rc=1.15",
+        "d2_rc=1.25",
+        "r_tol=0.4",
+        "r_tol=0.6",
+        "r_loc=1.5",
+        "r_loc=2.5",
+    }
+    assert sens["default"]["success_after_relax"] == metrics["success_after_relax"]
+    assert sens["default"]["local_w1_pe_atom"] == metrics["local"]["w1_pe_atom"]
+    floor_json = tmp_path / "sensitivity" / "floor_D2.json"
+    _run(
+        "sensitivity",
+        "--config",
+        eval_cfg,
+        "floor=true",
+        "defect=D2",
+        f"out={floor_json}",
+        *sens_args,
+        monkeypatch=monkeypatch,
+    )
+    _run(
+        "sensitivity",
+        "--config",
+        eval_cfg,
+        "summary=true",
+        f"runs=[{runs},{floor_json.parent}]",
+        f"out={tmp_path / 'sensitivity' / 'summary'}",
+        monkeypatch=monkeypatch,
+    )
+    assert (tmp_path / "sensitivity" / "summary.md").read_text().count("default") == 2
     for name in ("floor_D2", "floor_tiny_D2"):  # default name and a named floor
         _run(
             "evaluate",

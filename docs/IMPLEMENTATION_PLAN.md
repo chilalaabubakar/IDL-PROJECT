@@ -67,7 +67,8 @@ when that file passes.
 | **Round 2** on Colab: sampler steps (100 / 300 / 900), guidance w sweep, RePaint U sweep, stability control | ✅ done: `results/colab_20261005-1006Z/` (analysis in its `ANALYSIS.md`); the sampler default becomes 100 steps |
 | `sample.py` clips σ at each checkpoint's own training σ_max; named floor runs (`evaluate.py name=...`) | ✅ done |
 | **Round 3** (run on Kaggle): retrain with σ_max = 1.0, main table at 100 steps (w = 2, 4, 6; all three defects), Stage 4 symmetry ladder at N = 64 | ✅ done: `results/kaggle_2026100*` / `kaggle_20261012-*`; analysis in `results/round3_ANALYSIS.md` |
-| Sensitivity checks, seeds for publication | ⏳ open |
+| Sensitivity checks: `scripts/sensitivity.py` re-scores a run with the defect cutoffs ±0.05, success radius ±0.1 and realism window ±0.5 (natural references relabelled to match); floors per setting in `results/sensitivity/`; `notebooks/kaggle_sensitivity.ipynb` makes the samples and varies R_out (3 / 4 / 5) | 🔄 code and floors done; Kaggle run pending |
+| Seeds for publication | ⏳ open |
 
 Install and check:
 
