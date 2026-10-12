@@ -65,7 +65,8 @@ when that file passes.
 | Diagnostics: `scripts/defect_stability.py` (natural defects under noise + relaxation), B–B contacts per B atom in the global metrics | ✅ done |
 | **Round 2** on Colab: sampler steps (100 / 300 / 900), guidance w sweep, RePaint U sweep, stability control | ✅ done: `results/colab_20261005-1006Z/` (analysis in its `ANALYSIS.md`); the sampler default becomes 100 steps |
 | `sample.py` clips σ at each checkpoint's own training σ_max; named floor runs (`evaluate.py name=...`) | ✅ done |
-| **Round 3** on Colab: retrain with σ_max = 1.0, main table at 100 steps (w = 2, 4, 6; all three defects), Stage 4 symmetry ladder at N = 64 | ⏳ next: the round 3 cells in `notebooks/colab_train.ipynb` |
+| **Round 3** (run on Kaggle): retrain with σ_max = 1.0, main table at 100 steps (w = 2, 4, 6; all three defects), Stage 4 symmetry ladder at N = 64 | ✅ done: `results/kaggle_2026100*` / `kaggle_20261012-*`; analysis in `results/round3_ANALYSIS.md` |
+| B-1 Stage 0, sensitivity checks, seeds for publication | ⏳ open |
 
 Install and check:
 
