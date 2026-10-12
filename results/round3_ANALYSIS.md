@@ -132,7 +132,7 @@ likely the training process blocking on the notebook's output stream.
 |---|---|
 | Stages 1–3 (MVP, training-free placement, trained conditioning) | Done |
 | Stage 4 (symmetry ladder; step count; noise-aware model) | Done (σ-blind ablation not run) |
-| Stage 0 (reproduce DM2's SiO₂ sample) | Open |
+| Stage 0 (reproduce DM2's SiO₂ sample) | Done for the DM2 check (`results/stage0/`); the course notebook is still missing |
 | Sensitivity (defect thresholds ±0.05σ, R_out / R_loc) | Open |
 | Reports | The tables in §1, §2 and §4 are final |
 

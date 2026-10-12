@@ -58,7 +58,8 @@ when that file passes.
 | End-to-end pipeline test (`tests/test_pipeline.py`) | ✅ runs every script on a tiny synthetic dataset in CI |
 | **E-5** report tables (`eval/report.py`; `aggregate_results.py` also writes `summary.md`), training curves (`scripts/plot_training.py`) | ✅ done |
 | End-to-end smoke run on real data (CPU) | ✅ `results/cpu_smoke/`: B1, B2, B5, B6 and the floor for D2; a pipeline check, not results |
-| B-1 Stage 0 (needs a GPU + the DM2 environment) | ⏳ open |
+| B-1 Stage 0b: DM2's pretrained a-SiO₂ model against its training glasses (`scripts/stage0_dm2_sanity.py`, runs on CPU) | ✅ done: `results/stage0/` (g(r) and local structure match; finer measures look like a 100 K/ps quench) |
+| B-1 Stage 0a: the course proof-of-concept notebook | ⏳ waiting for the notebook file |
 | S-5 classifier guidance, M-7 NequIP-2D | ⏳ stretch |
 | Colab workflow (`notebooks/colab_train.ipynb`): speed test, resumable training (`train.py resume=<run>`, atomic checkpoints), experiment matrix, summary | ✅ ready |
 | **GPU training runs** (unconditional EGNN at full size, then conditional) and the first experiment matrix | ✅ done on Colab: `results/colab_20261004-2352Z/` (33 evaluations; analysis and next steps in its `ANALYSIS.md`) |
@@ -66,7 +67,7 @@ when that file passes.
 | **Round 2** on Colab: sampler steps (100 / 300 / 900), guidance w sweep, RePaint U sweep, stability control | ✅ done: `results/colab_20261005-1006Z/` (analysis in its `ANALYSIS.md`); the sampler default becomes 100 steps |
 | `sample.py` clips σ at each checkpoint's own training σ_max; named floor runs (`evaluate.py name=...`) | ✅ done |
 | **Round 3** (run on Kaggle): retrain with σ_max = 1.0, main table at 100 steps (w = 2, 4, 6; all three defects), Stage 4 symmetry ladder at N = 64 | ✅ done: `results/kaggle_2026100*` / `kaggle_20261012-*`; analysis in `results/round3_ANALYSIS.md` |
-| B-1 Stage 0, sensitivity checks, seeds for publication | ⏳ open |
+| B-1 Stage 0a (course notebook), sensitivity checks, seeds for publication | ⏳ open |
 
 Install and check:
 
@@ -123,7 +124,7 @@ training · **WS4** sampling & conditioning · **WS5** baselines, tracking & wri
 ### WS5: baselines, tracking & writing
 | Ticket | Deliverable | Depends on | Done when | Week |
 |---|---|---|---|---|
-| **B-1** | Stage 0: the course notebook in `notebooks/stage0_poc.ipynb`, plus `scripts/stage0_dm2_sanity.py` on a GPU | — | Notebook figure reproduced; DM2's pretrained sample g(r) matches its training data (figure in `results/stage0/`) | 1 |
+| **B-1** | Stage 0: the course notebook in `notebooks/stage0_poc.ipynb`, plus `scripts/stage0_dm2_sanity.py` (a CPU is enough) | — | Notebook figure reproduced; DM2's pretrained sample g(r) matches its training data (figure in `results/stage0/`) | 1 |
 | **B-2** | `data/requests.py` `make_eval_request`; pipelines for B1 (unconditional + filter) and B2 (hand insertion + relax) | S-1, P-3, E-3, E-4 | 256 samples per defect class evaluated end to end, with CIs | 3–4 |
 | **B-3** | `scripts/aggregate_results.py` → `results/summary.csv` | E-4 | One row per (task, method, defect, model, seed) with every metric and CI | 3 |
 | **B-4** | Midterm report (week 6) and final report (week 9) | all | — | 6, 9 |

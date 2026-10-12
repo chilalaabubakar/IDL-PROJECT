@@ -49,6 +49,7 @@ SHELL = 4.0 / 3.0 * np.pi * (EDGES[1:] ** 3 - EDGES[:-1] ** 3)
 PAIRS = {"Si-O": ("Si", "O"), "O-O": ("O", "O"), "Si-Si": ("Si", "Si")}
 ANGLES = ("O-Si-O", "Si-O-Si")
 RC_SIO = 2.2  # first minimum of g_SiO(r)
+RC_EDGE = 2.8  # Si-Si closer than this: tetrahedra sharing an edge (corner sharing: ~3.1 A)
 RATES = {"0_1k": "0.1 K/ps", "1k": "1 K/ps", "10k": "10 K/ps", "100k": "100 K/ps"}
 
 
@@ -196,11 +197,14 @@ def mean_gr(counts):
 
 
 def local_structure(atoms):
-    """Si and O coordination numbers, Si-O bond lengths, O-Si-O and Si-O-Si angles."""
+    """Si and O coordination numbers, Si-O bond lengths, O-Si-O and Si-O-Si angles, and the
+    number of edge-sharing Si-Si pairs."""
     from ase.neighborlist import neighbor_list
 
-    i, j, d, vec = neighbor_list("ijdD", atoms, RC_SIO)
     sym = np.array(atoms.get_chemical_symbols())
+    i, j = neighbor_list("ij", atoms, RC_EDGE)
+    n_edge = int(((sym[i] == "Si") & (sym[j] == "Si")).sum()) // 2
+    i, j, d, vec = neighbor_list("ijdD", atoms, RC_SIO)
     sio = (sym[i] == "Si") & (sym[j] == "O")
     osi = (sym[i] == "O") & (sym[j] == "Si")
     n_si = np.bincount(i[sio], minlength=len(atoms))[sym == "Si"]
@@ -217,7 +221,7 @@ def local_structure(atoms):
             for q in range(p + 1, e)
         ]
         angles[name] = np.degrees(np.arccos(np.clip(cos, -1, 1)))
-    return n_si, n_o, d[sio], angles
+    return n_si, n_o, d[sio], angles, n_edge
 
 
 def summarize(structures):
@@ -238,6 +242,9 @@ def summarize(structures):
     for k in ANGLES:
         stats[f"{k}_mean_deg"] = round(float(ang[k].mean()), 2)
         stats[f"{k}_std_deg"] = round(float(ang[k].std()), 2)
+    stats["Si-O-Si_below_110deg_fraction"] = round(float((ang["Si-O-Si"] < 110).mean()), 5)
+    stats["edge_sharing_pairs"] = sum(p[4] for p in parts)
+    stats["edge_sharing_pairs_per_Si"] = round(stats["edge_sharing_pairs"] / len(n_si), 5)
     return gr, ang, stats
 
 
@@ -246,15 +253,16 @@ def l1(g1, g2, r_max):
     return round(float(np.abs(g1[m] - g2[m]).sum() * DR), 4)
 
 
-def same_size_floor(heldout, g_train, n_si, n_o, r_max, draws, rng):
-    """L1 to the training g(r) of held-out glasses restricted to n_si Si and n_o O centres."""
+def same_size_l1(structs, g_train, n_si, n_o, r_max, draws, rng):
+    """L1 to the training g(r) of other glasses restricted to n_si Si and n_o O centres (the
+    number in the generated set), drawn at random; mean and 95th percentile over draws."""
     out = {k: [] for k in PAIRS}
     for _ in range(draws):
         counts = []
         split = zip(
-            heldout,
-            np.array_split(np.arange(n_si), len(heldout)),
-            np.array_split(np.arange(n_o), len(heldout)),
+            structs,
+            np.array_split(np.arange(n_si), len(structs)),
+            np.array_split(np.arange(n_o), len(structs)),
         )
         for x, k_si, k_o in split:
             sym = np.array(x.get_chemical_symbols())
@@ -333,12 +341,16 @@ def analyze(a: argparse.Namespace) -> None:
         if r != "1k":
             dist[f"MD {RATES[r]}"] = {k: l1(curves[r][k], g_train[k], r_cmp) for k in PAIRS}
     g_held = mean_gr([gr_counts(x) for x in heldout])
-    dist["floor: held-out 1 K/ps, all atoms"] = {k: l1(g_held[k], g_train[k], r_cmp) for k in PAIRS}
+    dist["MD 1 K/ps held-out (floor)"] = {k: l1(g_held[k], g_train[k], r_cmp) for k in PAIRS}
+    # The generated set is small, so its g(r) is noisier: compare it with MD glasses cut down to
+    # the same number of centre atoms. The held-out 1 K/ps glasses give the floor.
     n_si = sum(int((np.array(x.get_chemical_symbols()) == "Si").sum()) for x in gen)
     n_o = sum(int((np.array(x.get_chemical_symbols()) == "O").sum()) for x in gen)
-    dist["floor: held-out 1 K/ps, same size"] = same_size_floor(
-        heldout, g_train, n_si, n_o, r_cmp, a.floor_draws, rng
-    )
+    same = {"MD 1 K/ps held-out (floor)": heldout}
+    same.update({f"MD {RATES[r]}": refs[r] for r in RATES if r != "1k"})
+    same_dist = {
+        k: same_size_l1(v, g_train, n_si, n_o, r_cmp, a.floor_draws, rng) for k, v in same.items()
+    }
     res = {
         "training_set": "1 K/ps samples 0-2 (DM2's unconditional training data)",
         "r_max_compared_A": r_cmp,
@@ -350,6 +362,7 @@ def analyze(a: argparse.Namespace) -> None:
             **{f"MD {k}": v for k, v in simulated.items()},
         },
         "gr_L1_to_training": dist,
+        "gr_L1_to_training_same_size": {"n_Si": n_si, "n_O": n_o, **same_dist},
     }
     (out / "metrics.json").write_text(json.dumps(res, indent=2) + "\n")
     plot(

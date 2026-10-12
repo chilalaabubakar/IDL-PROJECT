@@ -33,7 +33,9 @@ often as hand insertion (0.56–0.79 vs 0.30) and D1− defects 3.5–4× as oft
 success 0.61 with surroundings at the natural floor. D1+ fails for every method. The DM2
 sampler's step count acts like a cooling rate (100 steps give the natural energy), and in
 the N = 64 symmetry ladder the EGNN makes the most natural glasses while a flat MLP does
-not learn.
+not learn. Stage 0 ([`results/stage0/`](results/stage0/README.md)): DM2's own pretrained
+a-SiO₂ model, rerun on CPU, reproduces its training glasses' g(r) and tetrahedral structure,
+with somewhat more disorder (like a 100× faster quench).
 
 ## Run on Colab (GPU)
 
