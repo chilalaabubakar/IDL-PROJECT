@@ -21,6 +21,7 @@ data/**/.cache/
 log.lammps
 *.lammpstrj
 *.extxyz
+!results/stage0/samples/*.extxyz
 
 # Editors / OS
 .vscode/
