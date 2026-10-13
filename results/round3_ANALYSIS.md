@@ -8,6 +8,12 @@ sample relaxed before scoring, 95% bootstrap CIs over samples.
 "Old model" = the round 1 EGNNs (trained with noise σ ≤ 0.5). "Retrained" = the same
 EGNNs retrained with σ ≤ 1.0, since the sampler starts at σ = 1.0.
 
+> **Sensitivity checks** ([`sensitivity/README.md`](sensitivity/README.md)) confirm the
+> method ranking below under every evaluation setting tried, and qualify two statements:
+> the retrained model's w = 6 surroundings match hand insertion only at the 3σ window
+> (better within 2.5σ, worse within 3.5σ), and the D1− w = 2 surroundings are within 1–2×
+> of the floor depending on the defect cutoff, not always at it.
+
 ## 1. Task B (inside an existing glass): the headline table
 
 **D2** (natural floor of the local W1: 0.013)
@@ -133,7 +139,7 @@ likely the training process blocking on the notebook's output stream.
 | Stages 1–3 (MVP, training-free placement, trained conditioning) | Done |
 | Stage 4 (symmetry ladder; step count; noise-aware model) | Done (σ-blind ablation not run) |
 | Stage 0 (course notebook; DM2's SiO₂ sample) | Done (`results/stage0/`) |
-| Sensitivity (defect thresholds ±0.05σ, R_out / R_loc) | Open |
+| Sensitivity (defect thresholds ±0.05σ, R_out / R_loc) | Done: `results/sensitivity/README.md` |
 | Reports | The tables in §1, §2 and §4 are final |
 
 For publication, the main additions would be 2–3 training seeds for the two conditional
