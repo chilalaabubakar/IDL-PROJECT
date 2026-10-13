@@ -26,7 +26,7 @@
 \newcommand{\Dp}{D1$^{+}$}
 \newcommand{\pmsd}[2]{#1\,{\scriptsize$\pm$\,#2}}
 
-\title{Placing Defects Where You Ask:\\ Location-Specific Defect Generation in a Model Glass\\ with Conditional Diffusion}
+\title{Placing Defects Where You Ask:\\ Generating Defects at Chosen Sites in a Model Glass\\ with a Diffusion Model}
 
 \ifnum\anonymous=1
 \author{Anonymous authors}
@@ -43,123 +43,121 @@
 \maketitle
 
 \begin{abstract}
-Defects control many properties of amorphous materials, but obtaining a specific defect at a chosen location still means waiting for it to form in a slow melt-quench simulation or inserting it by hand. Diffusion models now generate realistic amorphous structures, yet they cannot be asked for a particular defect at a particular place. In a two-dimensional Kob--Andersen glass, a periodic E($n$)-equivariant denoiser receives pinned atoms and a per-atom defect label, uses classifier-free guidance, and regenerates a disk around a requested site inside an existing glass. Every sample is relaxed before it is scored, and its surroundings are compared with those of naturally formed defects. Averaged over three training runs, the model places under-coordinated defects 3.5$\times$ as often as hand insertion (0.22 vs.\ 0.06) with near-natural surroundings, and B-rich defects 1.5--2.4$\times$ as often (0.45--0.71 vs.\ 0.30) with surroundings as natural or more natural. Local melt-quench of the same disk almost never succeeds. Over-coordinated defects fail for every method, and we show that nothing local can hold them. The ranking survives every evaluation setting we varied. Along the way we find that the sampler's step count acts as a cooling rate, that training on the full noise range the sampler visits decides whether generated defects survive relaxation, and that training runs with the same validation loss differ in their effective guidance strength.
+Defects control many properties of glasses. To study a particular defect, researchers today either wait for it to appear by chance in a slow melt-and-cool simulation, or insert it by hand, which can leave unnatural surroundings. Diffusion models can generate realistic glass structures, but cannot be told to put a given defect at a given place. We build such a model for a two-dimensional model glass. A graph neural network that respects the symmetries of the glass learns to remove noise from atom positions; told which atoms to keep fixed and which defect to create, it rebuilds a small region around a chosen site inside an existing glass. We relax every result before checking it and compare each new defect's surroundings with those of natural defects. Over three training runs, the model creates atoms with too few neighbours 3.5 times as often as hand insertion (0.22 vs.\ 0.06), with near-natural surroundings. It creates B-rich defects 1.5--2.4 times as often (0.45--0.71 vs.\ 0.30), with surroundings that are as natural or more natural. Melting and cooling the same region again almost never works. No method can create atoms with too many neighbours, and we show why. These results hold under every change to the evaluation that we tried. We also find that the number of sampling steps acts like a cooling rate, that the model must be trained on all noise levels used in sampling, and that training runs with the same validation loss follow the defect label with different strength.
 \end{abstract}
 
 \section{Introduction}
 
-A defect's behaviour in a glass depends on its surroundings, so studies of plasticity, relaxation or optical properties need many realistic examples of a given defect. Today these come from two sources: melt-quench molecular dynamics (MD), where one waits for the defect to form by chance at an uncontrolled place, and hand insertion, where atoms are moved or replaced and the structure relaxed, which can leave artificial surroundings. Generative models offer a third route. DM2~\citep{yang2026dm2} denoises random atomic positions into amorphous silica and metallic glasses whose structure and properties match MD, at a fraction of the cost for slow cooling rates. Like most generative models for materials~\citep{xie2022cdvae,jiao2023diffcsp,zeni2025mattergen,finkler2026inverse,kwon2024spectroscopy}, it conditions on global quantities. It cannot be asked for a particular local feature at a particular place.
+Glasses have no regular crystal lattice, but they still contain defects: small groups of atoms arranged differently from the rest. How a defect behaves depends on the atoms around it, so studies of how glasses deform, age or absorb light need many realistic examples of the same kind of defect. There are two common ways to get them. In a melt-and-cool (melt-quench) molecular dynamics (MD) simulation, one waits for the defect to form by chance, at a place one cannot choose. In hand insertion, atoms are moved or replaced by hand and the structure is relaxed, which can leave unnatural surroundings.
 
-We frame location-specific defect generation like image inpainting~\citep{lugmayr2022repaint}: the defect is fixed, and the model generates realistic surroundings. Two points shape the study.
-\begin{itemize}
-\item \emph{Location must mean something.} ``At a chosen location'' is trivial in an empty periodic box, since any naturally formed defect can be translated to any point. Our headline task therefore regenerates a disk around a requested site \emph{inside an existing glass}, with everything outside the disk held fixed (Task~B). This is the setting of host-guided inpainting for crystals~\citep{zhong2025inpainting} and of linker design between fixed fragments~\citep{igashov2024difflinker}.
-\item \emph{Success must survive physics.} A generated defect counts only if it is still there after the whole structure has been relaxed to a local energy minimum. Realism is measured against naturally formed defects of the same class, with a natural-vs.-natural floor as the reference.
-\end{itemize}
+Generative models offer a third way. DM2~\citep{yang2026dm2} learns to turn random atom positions into amorphous silica and metallic glasses that match MD structures, at a fraction of the cost of slow cooling. Like most generative models for materials~\citep{xie2022cdvae,jiao2023diffcsp,zeni2025mattergen,finkler2026inverse,kwon2024spectroscopy}, it is controlled by properties of the whole sample, such as the cooling rate. It cannot be asked for a particular defect at a particular place.
+
+We treat this problem like image inpainting~\citep{lugmayr2022repaint}, where a model fills in a missing part of a picture. Here the model fills in a small region of a glass and is told which defect to put at its centre. Two choices guide the study. First, the region is cut out of an existing glass and everything outside it stays fixed (Task~B). Asking for a defect at a location in an empty box would be trivial, because any natural defect could simply be moved there. Second, a generated defect only counts if it is still there after the whole structure has been relaxed to the nearest energy minimum, and its surroundings are compared with those of defects that formed naturally.
 
 \paragraph{Contributions.}
 \begin{enumerate}
-\item A task and evaluation protocol for location-specific defect generation in glasses: host-conditioned inpainting, success after relaxation, local realism against natural defects, and an MD baseline that re-melts the same disk.
-\item A conditional periodic EGNN with pinned atoms, per-atom defect labels and classifier-free guidance~\citep{ho2022cfg}. It beats hand insertion and local melt-quench for two of three defect classes, and the result holds across evaluation settings, re-sampling and three training seeds.
-\item Lessons for diffusion models of glasses: the number of sampler steps acts as a cooling rate; the training noise range must cover the sampler's starting noise; training runs differ in effective guidance strength, which the denoising loss does not show; equivariance matters more than validation loss for sample quality; and over-coordinated defects are held by their host beyond 3.5$\sigma$, so no local method can place them.
+\item A test for placing defects in glasses: fill a region inside an existing glass, check the defect after relaxation, compare its surroundings with natural defects, and compare with an MD baseline that melts and cools the same region again.
+\item A diffusion model built on a periodic equivariant graph neural network (EGNN). It takes atoms held fixed, a defect label for each atom and classifier-free guidance~\citep{ho2022cfg}. It beats hand insertion and local melt-quench for two of three defect types, across evaluation settings, repeated sampling and three training runs.
+\item Practical lessons: sampling steps act as a cooling rate; training must cover all noise levels used in sampling; runs with the same loss follow the label with different strength; built-in symmetry matters more than a low loss; and atoms with too many neighbours depend on atoms more than 3.5$\sigma$ away.
 \end{enumerate}
-Figure~\ref{fig:overview} summarises the study.
+Figure~\ref{fig:overview} gives an overview.
 
 \begin{figure}[t]
 \centering
 \includegraphics[width=\linewidth]{figures/fig1_overview.pdf}
-\caption{Study overview. \textbf{(a)}~Workflow: labelled melt-quench glasses (1--2) train a periodic EGNN denoiser conditioned on pins and per-atom labels (3); a request (4) is answered by guided score dynamics or a baseline (5), relaxed with all atoms free (6) and scored against natural defects (7). \textbf{(b)}~Natural defects (rings) in a test glass; A atoms blue, B atoms pink and smaller. \textbf{(c)}~A real Task~B request: pinned atoms (pale, including the site atom under the cross), the regenerated disk ($R_\text{out}$) and the realism window ($r_\text{loc}$). \textbf{(d)}~The model ($w=6$) answering it: free atoms start uniform in the disk and are denoised as $\sigma_k$ falls; after relaxation the requested D2 (ring) is at the site.}
+\caption{Overview of the study. \textbf{(a)}~Workflow. We make glasses by melting and cooling (1), label their defects (2) and train the network (3). A request (4) names a glass, a site and a defect type. The model or a baseline fills in the region around the site (5). Every result is relaxed with all atoms free to move (6) and then scored (7). \textbf{(b)}~Natural defects (rings) in a test glass. Large blue atoms are type A; small pink atoms are type B. \textbf{(c)}~A real request. Pale atoms are held fixed, including the atom at the site (under the cross). Atoms inside the solid circle ($R_\text{out}$) are rebuilt; the dashed circle ($r_\text{loc}$) is the area used to judge realism. \textbf{(d)}~The model filling this region ($w=6$). Atoms start at random positions and are cleaned up as the noise level $\sigma_k$ falls. After relaxation, the requested D2 defect (ring) sits at the site.}
 \label{fig:overview}
 \end{figure}
 
 \section{Related work}
 
-\paragraph{Diffusion models for materials.} Denoising diffusion and score-based models~\citep{ho2020ddpm,song2021sde} now generate crystals~\citep{xie2022cdvae,jiao2023diffcsp,zeni2025mattergen} and disordered solids. For amorphous materials, DM2~\citep{yang2026dm2} learns to remove Gaussian displacements from glass configurations and samples by a noisy relaxation it calls score dynamics. It conditions on the cooling rate and reproduces structure and mechanical properties of silica and metallic glasses. Other work conditions on spectra~\citep{kwon2024spectroscopy} or target properties~\citep{finkler2026inverse}. All of these control global quantities; none places a chosen local motif at a chosen site.
+\paragraph{Diffusion models for materials.} Diffusion models~\citep{ho2020ddpm,song2021sde} learn to turn noise into data step by step. They now generate crystals~\citep{xie2022cdvae,jiao2023diffcsp,zeni2025mattergen} and disordered solids. For glasses, DM2~\citep{yang2026dm2} learns to remove random shifts from atom positions and builds new glasses by repeating this clean-up with small random kicks (score dynamics). It can be told the cooling rate and reproduces the structure and mechanical properties of silica and metallic glasses. Other work steers generation with measured spectra~\citep{kwon2024spectroscopy} or target properties~\citep{finkler2026inverse}. All of these control properties of the whole sample. None of them places a chosen local structure at a chosen site.
 
-\paragraph{Local control.} In images, RePaint~\citep{lugmayr2022repaint} inpaints a masked region with an unconditional model, and guidance~\citep{dhariwal2021,ho2022cfg} strengthens a condition at sampling time. In materials and molecules, the closest settings are host-guided inpainting for crystal structure prediction~\citep{zhong2025inpainting}, constrained diffusion that relaxes crystals containing given point defects~\citep{cui2026constrained}, and linker generation between fixed molecular fragments~\citep{igashov2024difflinker}. A glass differs from these in two ways. There is no lattice to define a defect against, so a defect is a local motif that also occurs naturally. And realism can only be judged statistically, against the ensemble of naturally formed motifs. Our evaluation is built around both points.
+\paragraph{Local control.} In images, RePaint~\citep{lugmayr2022repaint} fills a masked region using a model trained without labels, and guidance~\citep{dhariwal2021,ho2022cfg} makes a model follow a label more strongly while sampling. In materials and molecules, the closest work fills in parts of crystals around a fixed host~\citep{zhong2025inpainting}, relaxes crystals that contain given point defects~\citep{cui2026constrained}, and links fixed molecule fragments~\citep{igashov2024difflinker}. Glasses differ in two ways. There is no lattice to compare a defect with, so a defect is a local arrangement that also appears naturally. And realism can only be judged by comparing with many natural examples. Our evaluation is built on both points.
 
 \section{Setup}
 \label{sec:setup}
 
-\paragraph{Glass and defects.} We use the two-dimensional Kob--Andersen binary Lennard-Jones mixture~\citep{kob1995,bruning2009}: 65:35 A:B at density 1.2, with $N=256$ atoms in a periodic square box of side 14.6$\sigma$. Glasses are made in LAMMPS~\citep{thompson2022lammps} by melting at $T=2.0$ for 100$\tau$, quenching at $10^{-2}$ per $\tau$ to $T=0.01$ and minimising the energy: 800 training, 100 validation and 100 test glasses, each screened for crystallinity. Defects are defined by cutoff coordination, with the first shell within $1.4\,\sigma_{\alpha\beta}$:
+\paragraph{Glass and defects.} We use the two-dimensional Kob--Andersen glass~\citep{kob1995,bruning2009}, a standard model with two kinds of atoms, A (large, 65\%) and B (small, 35\%), that interact through Lennard-Jones forces. Each glass has $N=256$ atoms in a square box of side 14.6$\sigma$ that repeats in both directions (periodic boundaries); $\sigma$, the size of an A atom, is our unit of length. We make glasses in LAMMPS~\citep{thompson2022lammps}: melt at temperature $T=2.0$ for 100 time units, cool by $10^{-2}$ per time unit to $T=0.01$, and minimise the energy. We keep 800 training, 100 validation and 100 test glasses, and discard any that crystallise. An atom's neighbours are the atoms within 1.4 times the contact distance of the two atom types. We define three defect types:
 \begin{itemize}
-\item \textbf{\Dm}: an A atom with at most 5 neighbours (1.7 per glass);
+\item \textbf{\Dm}: an A atom with at most 5 neighbours (1.7 per glass on average);
 \item \textbf{\Dp}: an A atom with at least 8 neighbours (1.4 per glass);
 \item \textbf{D2}: a B atom with at least two B neighbours within $1.2\sigma$ (10 per glass).
 \end{itemize}
-Thresholds are frozen on the training split.
+These rules were set using the training glasses and never changed afterwards.
 
-\paragraph{Tasks.} In \textbf{Task~B} (headline), a test glass supplies the host. The requested site $p$ is the host atom of the defect's species nearest a random point. That atom, which carries the label, and every atom farther than $R_\text{out}=4\sigma$ from it are pinned; the $\approx$58 atoms in between are regenerated, starting from uniform random positions. \textbf{Task~A} generates a whole box with the defect at its centre. It is reported for completeness, since location is trivial there.
+\paragraph{Tasks.} In \textbf{Task~B}, our main task, we take a test glass and choose a site: the atom of the right type nearest a random point. That atom, which carries the defect label, and every atom more than $R_\text{out}=4\sigma$ from it are held fixed. The $\approx$58 atoms in between are removed and rebuilt from random starting positions. In \textbf{Task~A}, the model builds a whole new box with the defect at its centre. We report it for completeness, since choosing a location means little in an empty box.
 
-\paragraph{Denoiser architecture.} The denoiser $d_\theta(x_\sigma,\sigma,m,c)$ (Figure~\ref{fig:arch}a) takes a noisy configuration and returns one 2D vector per atom: its estimate of the displacement that the noise added. Rotating, translating or relabelling the atoms of a glass must rotate, leave unchanged or relabel these vectors in the same way. We build these symmetries into the network rather than learning them, using an E($n$)-equivariant graph neural network (EGNN)~\citep{satorras2021egnn} adapted to periodic boundaries. It has four parts.
+\paragraph{Model architecture.} The network $d_\theta(x_\sigma,\sigma,m,c)$ (Figure~\ref{fig:arch}a) takes noisy atom positions $x_\sigma$ and returns one 2D arrow per atom: its guess of how far the noise has pushed that atom. If the glass is shifted or rotated, or its atoms are renumbered, these arrows should shift, rotate or be renumbered in the same way. Instead of hoping the network learns this, we build it in, using an E($n$)-equivariant graph neural network (EGNN)~\citep{satorras2021egnn} that we adapted to periodic boxes. It has four parts.
 \begin{itemize}
-\item \textbf{Periodic graph.} Every atom is a node joined to all atoms within $r_c=2.5\sigma$ (about 24 neighbours). Edge vectors $r_{ij}$ follow the minimum-image convention, so atoms near opposite faces of the box are neighbours. Distances enter through 16 Gaussian radial basis functions (RBFs) and a cosine cutoff $f_c$, so a message switches on smoothly as two atoms approach.
-\item \textbf{Node embedding.} Learned embeddings of the species $t_i$, the pin flag $m_i$ and the label token $c_i$ (``none'' everywhere except the requested site, where it names the defect class) are added to an MLP of random Fourier features of $\log\sigma$ and passed through an MLP, giving $h_i^0\in\mathbb{R}^{128}$. The noise level tells the network how far atoms may sit from clean positions; the label tells it what to build at the site.
-\item \textbf{EGNN layers.} Four layers (Figure~\ref{fig:arch}b) each compute messages, a residual feature update and an output vector:
+\item \textbf{Graph.} Each atom is a node, linked to every atom within $r_c=2.5\sigma$ (about 24 neighbours). Distances are measured across the box edge when that is shorter, so atoms near opposite edges can be neighbours. Each distance is described by 16 smooth bump functions (radial basis functions) and multiplied by a cut-off $f_c$ that fades to zero at $r_c$, so links switch on smoothly as atoms come close.
+\item \textbf{Atom features.} Each atom starts with a vector of 128 numbers, $h_i^0$, built from its type $t_i$, whether it is held fixed ($m_i$), its label $c_i$ and the noise level $\sigma$. The label is ``none'' everywhere except at the site, where it names the requested defect. The noise level tells the network how far atoms may be from their clean positions.
+\item \textbf{EGNN layers.} Four layers (Figure~\ref{fig:arch}b) each pass messages between neighbours, update the features and produce an arrow for each atom:
 \begin{align}
 m_{ij} &= \phi_e\big(h_i, h_j, \mathrm{rbf}(|r_{ij}|)\big)\, f_c(|r_{ij}|), \nonumber\\
 h_i &\leftarrow h_i + \phi_h\Big(\mathrm{LN}(h_i),\ \tfrac{1}{K_0}\textstyle\sum_j g(m_{ij})\, m_{ij}\Big), \label{eq:egnn}\\
-v_i^\ell &= \tfrac{1}{K_0}\textstyle\sum_j r_{ij}\, \phi_x(m_{ij})\, f_c(|r_{ij}|), \nonumber
+v_i^\ell &= \tfrac{1}{K_0}\textstyle\sum_j r_{ij}\, \phi_x(m_{ij})\, f_c(|r_{ij}|). \nonumber
 \end{align}
-where $\phi_e,\phi_h,\phi_x$ are two-layer SiLU MLPs, $g$ a sigmoid gate, LN layer normalisation and $K_0=24$. Features and messages depend only on distances and are invariant; the only vectors are the edge vectors, so $v_i^\ell$, a weighted sum of them, rotates exactly with the glass. Unlike the original EGNN, positions are not moved inside the network: each layer adds its own vector to the output.
-\item \textbf{Output.} $d_i=(1-m_i)\sum_\ell v_i^\ell$, zero on pinned atoms. It is translation-invariant and equivariant to rotations, reflections and permutations by construction; \texttt{tests/test\_equivariance.py} checks translations, rotations and permutations numerically.
+Here $r_{ij}$ is the vector from atom $i$ to its neighbour $j$; $\phi_e$, $\phi_h$ and $\phi_x$ are small two-layer neural networks; $g$ is a gate between 0 and 1; LN is layer normalisation; and $K_0=24$ is the typical number of neighbours. Messages and features depend only on distances, so they do not change when the glass is rotated. The only directions come from the vectors $r_{ij}$, so each output arrow is a weighted sum of them and turns exactly with the glass. Unlike the original EGNN, we do not move atoms inside the network; each layer simply adds its arrow to the output.
+\item \textbf{Output.} The prediction for atom $i$ is $d_i=(1-m_i)\sum_\ell v_i^\ell$, which is zero for held atoms. Our tests (\texttt{tests/test\_equivariance.py}) check numerically that shifts, rotations and renumbering act on the output as they should.
 \end{itemize}
-The network has 0.53\,M parameters, 59\,k of them in the embedding. Because the condition enters only through node features, one network serves whole-box, patch and host requests. Classifier-free guidance (Figure~\ref{fig:arch}c) needs no second network: the same weights are evaluated with and without the site label.
+The network has 0.53 million parameters, 59 thousand of them in the atom features. Because the request enters only through atom features, the same network handles every kind of request. Guidance (Figure~\ref{fig:arch}c) needs no second network: we run the same network with and without the site label.
 
-\paragraph{Ablation backbones.} To test what the symmetries are worth (Section~\ref{sec:lessons}), we trained two less symmetric denoisers with the same inputs and recipe (Figure~\ref{fig:arch}d). The \emph{MPNN}~\citep{gilmer2017mpnn} keeps the graph and message function but adds the raw components $(dx,dy)$ of $r_{ij}$ to the edge features and reads the output from $h_i$ with an MLP, so it is permutation-equivariant but not rotation-equivariant (0.48\,M parameters). The \emph{flat MLP} concatenates, for all 64 atoms sorted by species, the sine and cosine of the fractional coordinates and one-hot species, pin and label, appends the $\sigma$ embedding, and maps this through four 512-wide SiLU layers to 128 outputs (1.32\,M parameters). It is periodic but has no other symmetry.
+\paragraph{Networks for the symmetry test.} To see how much the built-in symmetry helps (Section~\ref{sec:lessons}), we also trained two simpler networks with the same inputs and settings (Figure~\ref{fig:arch}d). The message-passing network (MPNN)~\citep{gilmer2017mpnn} uses the same graph and messages as the EGNN, but also receives the raw $x$ and $y$ parts of each neighbour vector and predicts the arrows directly from the atom features with a small network. It therefore handles renumbering correctly but not rotation (0.48 million parameters). The flat MLP has no graph. For all 64 atoms, sorted by type, it lists the sine and cosine of each coordinate across the box, the atom type, the fixed flag and the label, adds the noise level, and passes everything through four layers of 512 units to 128 outputs (1.32 million parameters). It respects the repeating box and nothing else.
 
 \begin{figure}[t]
 \centering
 \includegraphics[width=\linewidth]{figures/fig2_architecture.pdf}
-\caption{The deep learning models. \textbf{(a)}~The conditional denoiser: noisy positions define a periodic graph, the other inputs define node features, and four EGNN layers turn both into one displacement vector per atom. \textbf{(b)}~One EGNN layer (Eq.~\ref{eq:egnn}): blue tensors are invariant scalars, red tensors rotate with the glass; every output vector is a sum of edge vectors with invariant weights, so the prediction rotates exactly with the input. \textbf{(c)}~Classifier-free guidance runs the same network with and without the site label. \textbf{(d)}~The backbones of the symmetry ablation (Table~\ref{tab:ladder}).}
+\caption{The neural networks. \textbf{(a)}~The denoising network. Noisy positions define a graph of neighbouring atoms, the other inputs define each atom's starting features, and four EGNN layers turn both into one arrow per atom. \textbf{(b)}~One EGNN layer (Eq.~\ref{eq:egnn}). Blue items do not change when the glass is rotated; red items are vectors that rotate with it. Each output arrow is a sum of neighbour vectors with rotation-free weights, so the prediction rotates exactly with the glass. \textbf{(c)}~Classifier-free guidance runs the same network with and without the site label and combines the two answers. \textbf{(d)}~The three networks compared in the symmetry test (Table~\ref{tab:ladder}).}
 \label{fig:arch}
 \end{figure}
 
-\paragraph{Training.} We follow DM2's formulation~\citep{yang2026dm2}. Positions are perturbed as $x_\sigma = x_0 + \sigma\epsilon$ with $\epsilon\sim\mathcal{N}(0,I)$ (pinned atoms untouched), and the denoiser $d_\theta$ regresses the added displacement on the unpinned atoms $U$:
+\paragraph{Training.} We follow DM2~\citep{yang2026dm2}. We add random noise to the free atoms, $x_\sigma = x_0 + \sigma\epsilon$ with $\epsilon$ drawn from a standard normal distribution, and train the network to predict the added shift $\sigma\epsilon$. The loss is the mean squared error over the free atoms $U$:
 \begin{equation}
 \mathcal{L}(\theta) = \mathbb{E}_{x_0,\sigma,\epsilon,m,c}\Big[\tfrac{1}{|U|}\textstyle\sum_{i\in U}\big\|d_\theta(x_\sigma,\sigma,m,c)_i-\sigma\epsilon_i\big\|^2\Big],
 \label{eq:loss}
 \end{equation}
-where $m$ is the pin mask and $c$ the per-atom labels. Further details:
+where $m$ marks the held atoms and $c$ holds the labels. Other details:
 \begin{itemize}
-\item $\sigma \sim \mathcal{U}(10^{-3}, \sigma_\text{max})$;
-\item training requests mix whole-box, patch and host-inpainting modes (probabilities 0.5 / 0.3 / 0.2), centred on a natural defect half of the time;
-\item labels are dropped with probability 0.15 for classifier-free guidance;
-\item AdamW, learning rate $2\times10^{-4}$, batch 16, gradient clipping at 1, 50{,}000 updates, weights averaged with EMA 0.999; about 4\,h on one T4 GPU.
+\item the noise level $\sigma$ is drawn uniformly between $10^{-3}$ and $\sigma_\text{max}$;
+\item training examples are whole boxes (50\%), small patches (30\%) or filled-in regions (20\%), centred on a natural defect half of the time;
+\item the label is hidden 15\% of the time, which classifier-free guidance needs;
+\item AdamW optimiser, learning rate $2\times10^{-4}$, batch size 16, gradient clipping at 1, 50{,}000 steps, and a moving average of the weights (0.999); training takes about 4 hours on one T4 GPU.
 \end{itemize}
-Two recipes differ only in $\sigma_\text{max}$: 0.5 (DM2's choice of half a bond length; used for \Dm{} and Task~A) and 1.0 (Section~\ref{sec:why}; used for D2).
+We use two settings that differ only in $\sigma_\text{max}$: 0.5 (DM2's choice, half a bond length; used for \Dm{} and Task~A) and 1.0 (Section~\ref{sec:why}; used for D2).
 
-\paragraph{Sampler.} DM2's score dynamics alternates denoising with fresh noise,
+\paragraph{Sampling.} DM2's score dynamics starts from random positions and repeats two moves: subtract the predicted shift, then add a smaller random kick,
 \begin{equation}
-x_{k+1} = x_k - \tilde d(x_k,\sigma_k) - \eta_k,\qquad \eta_k\sim\mathcal{N}(0,s_k^2 I),\quad s_k\sim\mathcal{U}(10^{-3},\sigma_k),
+x_{k+1} = x_k - \tilde d(x_k,\sigma_k) - \eta_k,\qquad \eta_k\sim\mathcal{N}(0,s_k^2 I),\quad s_k\sim\mathcal{U}(10^{-3},\sigma_k).
 \label{eq:sampler}
 \end{equation}
-with pinned atoms reset after every step. Classifier-free guidance~\citep{ho2022cfg} combines the conditional and label-free predictions,
+Held atoms are put back after every step. Classifier-free guidance~\citep{ho2022cfg} combines the predictions with and without the label,
 \begin{equation}
-\tilde d = (1+w)\,d_\theta(x,\sigma,m,c) - w\,d_\theta(x,\sigma,m,\varnothing),
+\tilde d = (1+w)\,d_\theta(x,\sigma,m,c) - w\,d_\theta(x,\sigma,m,\varnothing).
 \label{eq:cfg}
 \end{equation}
-so $w=0$ is the unguided conditional model. We use 100 steps with $\sigma_k$ falling linearly from 1.0 to $10^{-3}$, then 100 noise-free steps; the $\sigma$ passed to the model is clipped at its training $\sigma_\text{max}$.
+The guidance weight $w$ sets how strongly the model follows the label; $w=0$ adds no extra push. We run 100 steps with $\sigma_k$ falling evenly from 1.0 to $10^{-3}$, then 100 steps without noise. The noise level given to the network is capped at the $\sigma_\text{max}$ it was trained on.
 
 \paragraph{Baselines.}
 \begin{itemize}
-\item \emph{Chance}: inpainting the same disk without a label.
-\item \emph{Hand insertion} (current practice): a natural defect patch of radius 1.5$\sigma$, drawn from the training split, is pasted at the site; each patch atom replaces the nearest host atom of its species.
-\item \emph{Local melt-quench}: in LAMMPS, atoms beyond $R_\text{out}$ are frozen, the disk is melted at $T=2.0$ and quenched at the dataset rate, i.e.\ waiting for the defect, confined to the disk.
-\item For Task~A: \emph{Clamp} and \emph{RePaint}~\citep{lugmayr2022repaint} with an unconditional model.
+\item \emph{Chance}: fill the same region with no label.
+\item \emph{Hand insertion} (common practice): take a natural defect and its neighbours within 1.5$\sigma$ from a training glass and paste it at the site; each pasted atom replaces the nearest host atom of the same type.
+\item \emph{Local melt-quench}: in LAMMPS, freeze the atoms beyond $R_\text{out}$, then melt and cool the region at the rate used to make the dataset. This is waiting for the defect, but only inside the region.
+\item For Task~A: \emph{Clamp} and \emph{RePaint}~\citep{lugmayr2022repaint}, which use a model trained without labels.
 \end{itemize}
 
 \paragraph{Evaluation.}
 \begin{itemize}
-\item \textbf{Relaxation.} Every sample is relaxed with FIRE~\citep{bitzek2006fire} ($f_\text{max}=10^{-6}$), with all atoms free, host included.
-\item \textbf{Success.} The atom of the requested species nearest the site lies within $r_\text{tol}=0.5\sigma$ of it and carries the requested label.
-\item \textbf{Local realism.} The Wasserstein-1 distance (W1) between the per-atom energies in a window of radius $r_\text{loc}=3\sigma$ around the site and those around natural defects of the same class in the test glasses. The floor is natural training defects against natural test defects: \Dm{} 0.016, \Dp{} 0.018, D2 0.013.
-\item \textbf{Statistics.} 256 samples per row, with 95\% bootstrap confidence intervals (CIs) over samples.
+\item \textbf{Relaxation.} Every result is relaxed with the FIRE algorithm~\citep{bitzek2006fire} until the largest force is below $10^{-6}$. All atoms can move, including the host.
+\item \textbf{Success.} The atom of the requested type nearest the site must lie within $r_\text{tol}=0.5\sigma$ of it and must be a defect of the requested type.
+\item \textbf{Local realism (local W1).} We compare the energies of the atoms within $r_\text{loc}=3\sigma$ of the site with the same energies around natural defects of that type in the test glasses, using the Wasserstein-1 distance (W1). Lower is more natural. Natural defects from the training glasses, compared with those from the test glasses, score \Dm{} 0.016, \Dp{} 0.018 and D2 0.013. We call this the natural floor: the best a method can expect.
+\item \textbf{Statistics.} 256 samples per result, with 95\% confidence intervals (CIs) from bootstrap resampling.
 \end{itemize}
 
 \begin{figure}[t]
 \centering
 \includegraphics[width=\linewidth]{figures/fig3_taskB.pdf}
-\caption{The request of Figure~\ref{fig:overview}c answered by each method, after relaxation ($\pm5\sigma$ around the site; pale: held fixed while generating; rings: defects). \textbf{(a)}~The model places a D2 at the site. \textbf{(b)}~Hand insertion also succeeds here, but its surroundings are far from natural on average. \textbf{(c)}~Local melt-quench re-forms the disk without one. Of the six requests drawn for these figures, the model answered two, hand insertion four and local melt-quench one; Table~\ref{tab:main} gives rates over 256 requests per seed.}
+\caption{The request of Figure~\ref{fig:overview}c answered by each method, after relaxation. The view is $\pm5\sigma$ around the site; pale atoms were held fixed during generation; rings mark defects. \textbf{(a)}~The model places a D2 defect at the site. \textbf{(b)}~Hand insertion also works here, but on average it leaves less natural surroundings. \textbf{(c)}~Local melt-quench rebuilds the region without a D2 at the site. Across the six requests made for these figures, the model succeeded twice, hand insertion four times and local melt-quench once; Table~\ref{tab:main} gives the rates over 256 requests per training run.}
 \label{fig:taskB}
 \end{figure}
 
@@ -167,17 +165,17 @@ so $w=0$ is the unguided conditional model. We use 100 steps with $\sigma_k$ fal
 
 \subsection{Main result: defects inside existing glasses}
 
-Table~\ref{tab:main} and Figure~\ref{fig:seeds} give the Task~B results. Model rows are means $\pm$ standard deviations over three training runs (seeds 0--2), each with 256 samples.
+Table~\ref{tab:main} and Figure~\ref{fig:seeds} give the Task~B results. Model results are averages $\pm$ standard deviations over three training runs (seeds 0--2), each with 256 samples.
 
-\begin{table}[t]
+\begin{table}[!tb]
 \centering
-\caption{Task~B, success after relaxation and local realism (W1 of per-atom energy in a $3\sigma$ window; lower is more natural). Model rows: mean $\pm$ s.d.\ over three training runs; baselines: estimate with 95\% CI. D2 uses the $\sigma_\text{max}=1.0$ recipe, \Dm{} and \Dp{} the $\sigma_\text{max}=0.5$ recipe. $^\dagger$2{,}900-step sampler. $^\ddagger$Seed 0 only.}
+\caption{Task~B: success after relaxation and local realism (W1 of atom energies within $3\sigma$ of the site; lower is more natural). Model rows: mean $\pm$ standard deviation over three training runs. Baselines: estimate with 95\% CI. D2 uses $\sigma_\text{max}=1.0$; \Dm{} and \Dp{} use $\sigma_\text{max}=0.5$. $^\dagger$2{,}900-step sampler. $^\ddagger$Seed 0 only.}
 \label{tab:main}
 \small
 \setlength{\tabcolsep}{4pt}
 \begin{tabular}{lccccc}
 \toprule
-& \multicolumn{2}{c}{D2 (B-rich)} & \multicolumn{2}{c}{\Dm{} (under-coordinated)} & \Dp{} \\
+& \multicolumn{2}{c}{D2 (B-rich)} & \multicolumn{2}{c}{\Dm{} (too few neighbours)} & \Dp{} \\
 \cmidrule(lr){2-3}\cmidrule(lr){4-5}\cmidrule(lr){6-6}
 Method & success & local W1 & success & local W1 & success \\
 \midrule
@@ -193,62 +191,60 @@ Natural floor & --- & 0.013 & --- & 0.016 & --- \\
 \end{tabular}
 \end{table}
 
-\paragraph{The model beats both baselines on the two classes that can be placed.}
+\paragraph{The model beats both baselines for the two defect types that can be placed.}
 \begin{itemize}
-\item \textbf{D2.} At $w=6$ the model succeeds 2.4$\times$ as often as hand insertion on average (2.1--2.7$\times$ per seed), with surroundings as natural or more natural. At $w=2$ it succeeds 1.5$\times$ as often (1.2--1.9$\times$) with clearly more natural surroundings for every seed (W1 0.045--0.056 vs.\ 0.087).
-\item \textbf{\Dm.} The model succeeds 3.5$\times$ as often as hand insertion at $w=2$, with surroundings 1.2--1.5$\times$ the natural floor.
-\item \textbf{Local melt-quench} almost never produces the defect at the site. Re-forming a 60-atom disk at the dataset's cooling rate is the ``wait for it'' approach in miniature, and rare defects remain rare.
-\item \textbf{Cost.} Per success the model needs 1--4 GPU-seconds, comparable with hand insertion (0.8--3.6\,s, almost all relaxation) and far below local melt-quench (65\,s per D2 success; no \Dm{} success at all).
+\item \textbf{D2.} At $w=6$ the model succeeds 2.4 times as often as hand insertion on average (2.1--2.7 times for each training run), with surroundings as natural or more natural. At $w=2$ it succeeds 1.5 times as often (1.2--1.9 times), with clearly more natural surroundings for every run (W1 0.045--0.056 vs.\ 0.087).
+\item \textbf{\Dm.} The model succeeds 3.5 times as often as hand insertion at $w=2$, and its surroundings score 1.2--1.5 times the natural floor.
+\item \textbf{Local melt-quench} almost never creates the defect at the site. Melting and cooling a 60-atom region at the dataset's cooling rate is simply waiting for the defect on a small scale, and rare defects stay rare.
+\item \textbf{Cost.} Each success takes the model 1--4 GPU-seconds. This is similar to hand insertion (0.8--3.6\,s, nearly all of it relaxation) and much less than local melt-quench (65\,s per D2 success, and no \Dm{} success at all).
 \end{itemize}
 
-\paragraph{Guidance trades realism for success.} Stronger guidance places the defect more often before relaxation: D2 0.86 at $w=2$ against 1.00 at $w=6$ (seed 0). More of those placements also survive relaxation, but the surroundings move away from natural. For \Dm{}, success saturates at $w=2$: extra guidance puts more defects in place before relaxation (0.85 at $w=6$), but they sit in shallow basins and relax away. Without guidance ($w=0$) success drops (\Dm{} 0.09 vs.\ 0.23, D2 0.24 vs.\ 0.30 at 300 steps; Appendix~\ref{app:extra}).
+\paragraph{Stronger guidance gives more successes but less natural surroundings.} With stronger guidance, the defect is in place before relaxation more often: for D2, in 0.86 of samples at $w=2$ and 1.00 at $w=6$ (seed 0). More of these defects also survive relaxation, but their surroundings become less natural. For \Dm{}, success stops improving after $w=2$: extra guidance places more defects (0.85 at $w=6$), but they sit in shallow energy minima and disappear during relaxation. Without guidance ($w=0$), success drops (\Dm{} 0.09 vs.\ 0.23, D2 0.24 vs.\ 0.30, at 300 steps; Appendix~\ref{app:extra}).
 
-\paragraph{\Dp{} fails for every method, and the reason is not local.} Natural \Dp{} sites survive noise and relaxation in their own glass, yet a natural \Dp{} transplanted into a new host with its 47 nearest atoms (radius 3.5$\sigma$) relaxes away 97\% of the time (Appendix~\ref{app:stability}). Its host holds it beyond 3.5$\sigma$, so neither a patch nor a pinned label can carry it.
+\paragraph{No method can place \Dp{}, because it depends on atoms further away.} Natural \Dp{} defects survive noise and relaxation in their own glass. But when we move a natural \Dp{} into another glass together with its 47 nearest atoms (radius 3.5$\sigma$), it disappears during relaxation 97\% of the time (Appendix~\ref{app:stability}). The atoms that hold it in place lie more than 3.5$\sigma$ away, so neither a pasted patch nor a label on one atom can create it.
 
 \begin{figure}[t]
 \centering
 \includegraphics[width=\linewidth]{figures/fig4_seeds.pdf}
-\caption{Success against local W1 for three training runs. Open circles: $w=2$; filled: $w=6$; arrows join the two weights of one run (seed number). Diamonds: baselines; grey band: natural floor; lines: 95\% CIs; panel~(b) has its own success scale. For D2, every run moves along the same success--realism line as guidance grows.}
+\caption{Success against local realism (W1) for three training runs. Open circles: $w=2$; filled circles: $w=6$. Each arrow joins the two results of one training run, marked with its seed number. Diamonds: baselines. Grey band: natural floor. Thin lines: 95\% CIs. Panel~(b) has its own success scale. For D2, every training run moves the same way as guidance gets stronger: more successes, less natural surroundings. Seed~0, used for all single-run D2 results in this paper, is the most successful run.}
 \label{fig:seeds}
 \end{figure}
 
-\subsection{Why generated defects survive relaxation, or do not}
+\subsection{Why some generated defects survive relaxation and others do not}
 \label{sec:why}
 
-A natural defect survives Gaussian noise of mean displacement up to $\approx$0.19$\sigma$ followed by relaxation 99--100\% of the time (Appendix~\ref{app:stability}). Generated samples move 0.16--0.24$\sigma$ during relaxation, yet only 25--80\% of their placed defects survive. The gap is the generator's: its defects sit in shallower basins than natural ones.
+Natural defects are stable: after random shifts of up to about 0.19$\sigma$ on average and relaxation, 99--100\% of them survive (Appendix~\ref{app:stability}). Generated samples move by a similar amount during relaxation (0.16--0.24$\sigma$), yet only 25--80\% of their defects survive. So the problem lies with the generator: its defects sit in shallower energy minima than natural ones.
 
-The training noise range is the main lever (Table~\ref{tab:noise}, Appendix~\ref{app:extra}). Following DM2, our original recipe trains with noise up to half a bond length ($\sigma_\text{max}=0.5$), while the sampler starts at $\sigma=1$, a range the model never saw. Retraining with $\sigma_\text{max}=1.0$ makes the model place the D2 defect more reliably before relaxation, and keep it more often afterwards: 79\% instead of 57\% at $w=6$. D2 success rises from 0.54 to 0.79 (seed 0). For \Dm{} the original recipe remains slightly better (0.22 vs.\ 0.21 at $w=2$, 0.25 vs.\ 0.22 at $w=6$), so we report each class with its better recipe.
+The range of training noise matters most (Table~\ref{tab:noise}, Appendix~\ref{app:extra}). Following DM2, we first trained with noise up to half a bond length ($\sigma_\text{max}=0.5$), but sampling starts at $\sigma=1$, a noise level the network had never seen. Retraining with $\sigma_\text{max}=1.0$ places the D2 defect more reliably and keeps it more often after relaxation: 79\% instead of 57\% at $w=6$. D2 success rises from 0.54 to 0.79 (seed 0). For \Dm{}, the first setting stays slightly better (0.22 vs.\ 0.21 at $w=2$, 0.25 vs.\ 0.22 at $w=6$), so we report each defect type with its better setting.
 
-\subsection{Robustness}
+\subsection{How reliable are the results?}
 
-\paragraph{Reproducibility and training seeds.} Re-running the nine headline rows with the same seed reproduced eight of them to the last digit; the ninth moved within its CI. A fresh evaluation draw (new hosts, sites and noise) moved success by 0.02 on average, within the bootstrap CIs. Across three training runs, \Dm{} and Task~A vary no more than the evaluation noise (s.d.\ 0.02--0.04), while Task~B D2 varies twice as much (s.d.\ 0.08--0.11; Figure~\ref{fig:seeds}). The D2 seeds rank identically in success and in local W1, and their placement rate before relaxation differs (0.41--0.86 at $w=2$), although their validation losses agree to within a few percent. Each training run thus ends with a different \emph{effective guidance strength}, invisible to the denoising loss. The model beats both baselines for every seed, with one exception: seed~1 at $w=2$, whose success CI overlaps hand insertion's while its surroundings remain clearly more natural.
+\paragraph{Repeat runs and training seeds.} Re-running the nine main results with the same seed gave identical numbers for eight of them, and the ninth changed within its CI. A new evaluation draw (new glasses, sites and noise) changed success by 0.02 on average. Across three training runs, \Dm{} and Task~A vary no more than this (standard deviation 0.02--0.04). Task~B D2 varies about twice as much (0.08--0.11; Figure~\ref{fig:seeds}). The D2 runs place the defect before relaxation at different rates (0.41--0.86 at $w=2$) and rank in the same order for success and realism, although their validation losses agree within a few percent. So each run follows the label with a different strength, and the loss does not show this. The model beats both baselines for every training run with one exception: seed~1 at $w=2$, whose success CI overlaps that of hand insertion, although its surroundings are still clearly more natural.
 
-\paragraph{Evaluation settings.} We moved each setting on its own (Figure~\ref{fig:sens}, Appendix~\ref{app:extra}): the defect cutoffs by $\pm0.05$ (relabelling the natural references to match), the success radius by $\pm0.1\sigma$, the realism window by $\pm0.5\sigma$, and the regenerated disk $R_\text{out}$ to 3 and 5$\sigma$. The ranking never changes, but absolute success moves by up to $\approx$0.1 with the definitions, so rates must be quoted with the definition used. Hand insertion's damage is local: its W1 falls from 0.113 to 0.068 as the window grows, while the model's is spread over the regenerated disk (W1 0.089 at $w=6$ throughout), so realism should be compared at more than one window size. Success changes little with $R_\text{out}$ (within the CIs), although the model was trained at 4$\sigma$ only, and a larger disk makes D2 surroundings much more natural (W1 0.026 at $R_\text{out}=5$, $w=2$), which may partly reflect the boundary between regenerated and pinned atoms moving out of the window.
+\paragraph{Evaluation settings.} We changed one setting at a time (Figure~\ref{fig:sens}, Appendix~\ref{app:extra}): the defect rules by $\pm0.05$ (with the natural references relabelled to match), the success radius by $\pm0.1\sigma$, the realism window by $\pm0.5\sigma$, and the rebuilt region $R_\text{out}$ to 3$\sigma$ and 5$\sigma$. The ranking of the methods never changed. Success moved by up to about 0.1 with the defect rules, so a rate should be reported with the rules used. Hand insertion damages only the area close to the site: its W1 falls from 0.113 to 0.068 as the window grows. The model's differences are spread over the rebuilt region (W1 0.089 at $w=6$ for every window), so realism should be compared at more than one window size. Success changed little with $R_\text{out}$ (within the CIs), although the model was trained at 4$\sigma$ only, and a larger region gave much more natural D2 surroundings (W1 0.026 at $R_\text{out}=5$, $w=2$), perhaps partly because the region's edge moves out of the window.
 
 \subsection{Lessons for diffusion models of glasses}
 \label{sec:lessons}
 
-\paragraph{The step count is a cooling rate.} The score-dynamics sampler adds fresh noise at every step, so a longer schedule is a slower anneal (Table~\ref{tab:steps}, Appendix~\ref{app:extra}). DM2's default of 3{,}000 steps over-anneals our glass: lower energy than the training glasses, fewer B--B contacts, worse $g(r)$. 100 steps reproduce the natural energy at a fifteenth of the cost, without changing Task~B success.
+\paragraph{The number of sampling steps acts as a cooling rate.} The sampler adds new noise at every step, so a longer run is like cooling more slowly (Table~\ref{tab:steps}, Appendix~\ref{app:extra}). DM2's default of 3{,}000 steps cools our glass too far: the energy ends below that of the training glasses, with fewer B--B contacts and a worse $g(r)$. With 100 steps the energy matches natural glass at one fifteenth of the cost, and Task~B success does not change. DM2's own silica model shows the opposite problem: its samples have the right SiO$_4$ tetrahedra but are as disordered as glass cooled 100 times faster than its training data (Appendix~\ref{app:stage0}). The effective cooling rate of generated glass should be checked.
 
-DM2's own pretrained silica model shows the same issue in the other direction: its samples have the right tetrahedra, but their disorder matches a glass cooled 100$\times$ faster than its training data (Appendix~\ref{app:stage0}). The cooling rate of generated glass should be measured, not assumed.
+\paragraph{Whole generated glasses have the wrong chemistry.} Even at 100 steps, generated boxes have only about two-thirds of the natural number of B--B contacts, whatever the noise range, so Task~B, which keeps most of a natural glass, is the more reliable setting. In Task~A the model still reaches D2 success \pmsd{0.58}{0.03} with surroundings at the natural floor (W1 \pmsd{0.012}{0.002}), against 0.34--0.35 for the Clamp and RePaint patches.
 
-\paragraph{Whole generated glasses are chemically biased.} Even at 100 steps, generated boxes have about two-thirds of the natural B--B contacts, whatever the noise range, which is why Task~B, keeping most of a natural host, is the more trustworthy setting. In Task~A the model still reaches D2 success \pmsd{0.58}{0.03} with surroundings at the natural floor (W1 \pmsd{0.012}{0.002}), against 0.34--0.35 for Clamp and RePaint patches.
-
-\paragraph{Symmetry matters more than loss.} Trained with the same recipe at $N=64$ (Figure~\ref{fig:arch}d; Table~\ref{tab:ladder}, Appendix~\ref{app:extra}), the EGNN makes the most natural glasses, the MPNN reaches a \emph{lower} validation loss but worse samples, and the flat MLP does not learn at all (validation loss at the predict-zero level; 16\% of its samples partly crystalline).
+\paragraph{Built-in symmetry matters more than a low loss.} Trained the same way at $N=64$ (Figure~\ref{fig:arch}d; Table~\ref{tab:ladder}, Appendix~\ref{app:extra}), the EGNN makes the most natural glasses. The MPNN reaches a \emph{lower} validation loss but makes worse glasses. The flat MLP does not learn at all: its validation loss stays at the level of always predicting zero, and 16\% of its samples partly crystallise.
 
 \section{Discussion and limitations}
 
-For two of three defect classes in a model glass, a diffusion model can be asked for a specific defect at a specific place, with natural-looking surroundings, more reliably than the methods used today. The failure is informative: an over-coordinated atom is stabilised by its host beyond any local patch, a limit for every local placement method, not just ours.
+For two of the three defect types in our model glass, a diffusion model can place a requested defect at a chosen site, with natural surroundings, more often than the methods used today. The third type, \Dp{}, cannot be placed by any method that only changes a small region, because the atoms that hold it in place lie further away.
 
-\paragraph{What this means in practice.} When many instances of a local motif are needed in realistic surroundings, the conditional model gives 1.5--3.5$\times$ more correct placements per attempt than hand insertion, with surroundings closer to natural; hand insertion remains the cheapest per attempt and is adequate when the surroundings do not matter, and re-melting a region is not a practical way to obtain a specific defect. The guidance weight is a dial between success and realism (Figure~\ref{fig:seeds}); since each trained model sits at its own point on that curve, it should be chosen per model rather than fixed in advance. A defect stabilised by its host beyond 3.5$\sigma$, like \Dp{}, cannot be carried by a patch or a label on one atom: regenerating a larger region, which already improves realism, or conditioning on a descriptor of the wider host are the obvious next tests. Finally, scoring after relaxation, natural floors, and several seeds and settings apply to any generative model for disordered matter; each changed a conclusion here.
+\paragraph{What this means in practice.} When many copies of a defect are needed in realistic surroundings, the model gives 1.5--3.5 times more correct placements per try than hand insertion, with more natural surroundings. Hand insertion stays the cheapest per try and is fine when the surroundings do not matter; re-melting a region is not a practical way to get a specific defect. Each trained model sits at its own point on the trade-off between success and realism (Figure~\ref{fig:seeds}), so $w$ should be chosen for each model. Defects like \Dp{} will need a larger rebuilt region or a label that describes the wider surroundings. Finally, checking results after relaxation, against natural floors and over several training runs and settings applies to any generative model for disordered materials; each of these checks changed a conclusion here.
 
-\paragraph{Limitations and outlook.} The system is a 256-atom two-dimensional model glass, defects are defined geometrically, whole generated glasses are chemically biased, and D2 success varies between training runs (choosing $w$ per model on validation data may help; untested). Because MD is cheap in 2D, cost is not a decisive argument here. We are extending the approach to three-dimensional amorphous silica with a NequIP-type denoiser~\citep{batzner2022nequip} and DM2's data and potential~\citep{bouhadja2013}, targeting coordination defects, non-bridging oxygens and small rings, which are rare in slowly cooled glass.
+\paragraph{Limitations and future work.} Our glass is two-dimensional with only 256 atoms, and defects are defined by simple geometric rules. Whole generated glasses have the wrong chemistry, and D2 success varies between training runs (choosing $w$ per model may help; untested). Cost matters little in 2D, where MD is cheap. We are extending the method to three-dimensional silica with a NequIP-type network~\citep{batzner2022nequip} and DM2's data and potential~\citep{bouhadja2013}, aiming at defects that are rare in slowly cooled glass, such as atoms with the wrong number of bonds, non-bridging oxygens and small rings.
 
 \section{Conclusion}
 
-A periodic equivariant denoiser with pinned atoms, per-atom labels and guidance places requested defects inside existing glasses more reliably than hand insertion or local melt-quench, with near-natural surroundings. Sampler length, noise range and training seed all shape its output and must be measured, not assumed.
+We built a diffusion model that can be told which atoms to keep fixed and which defect to create at a chosen site. Its network has the symmetries of the glass built in. Inside existing glasses, it places the requested defect more often than hand insertion or local melt-quench, and the new defect's surroundings are close to natural. The study also shows that the number of sampling steps, the training noise range and the training seed all change what such a model produces, so each of them should be checked rather than taken on trust.
 
-\paragraph{Code and data.} Code, generated datasets, trained weights and every result in this paper: \repo.
+\paragraph{Code and data.} Our code, datasets, trained models and all results are available at \repo.
 
 \ifnum\anonymous=0
 \paragraph{Acknowledgements.} This work was carried out as a course project in Introduction to Deep Learning at Carnegie Mellon University Africa. Experiments ran on Google Colab and Kaggle GPUs.
@@ -262,7 +258,7 @@ A periodic equivariant denoiser with pinned atoms, per-atom labels and guidance 
 \section{Additional results}
 \label{app:extra}
 
-\paragraph{Guidance sweep (Task~B, seed 0, 300 steps, $\sigma_\text{max}=0.5$).} The table gives success after relaxation, with placement before relaxation in brackets.
+\paragraph{Guidance weight (Task~B, seed 0, 300 steps, $\sigma_\text{max}=0.5$).} Success after relaxation, with the fraction placed before relaxation in brackets.
 
 \begin{center}\small
 \begin{tabular}{lccccc}
@@ -282,7 +278,7 @@ D2 success (placed) & 0.24 (0.32) & 0.31 (0.58) & 0.30 (0.73) & 0.47 (0.80) & 0.
 \toprule
 Method & D2 & \Dm{} & \Dp{} \\
 \midrule
-Unconditional (chance) & 0.01 (0.055) & 0.00 (0.069) & 0.00 \\
+No label (chance) & 0.01 (0.055) & 0.00 (0.069) & 0.00 \\
 Clamp patch & 0.34 (0.022) & 0.01 (0.053) & 0.04 \\
 RePaint patch ($U=1$) & 0.35 (0.045) & 0.02 (0.042) & 0.04 \\
 Model $w=6$, $\sigma_\text{max}=0.5$ & 0.61 (0.010) & 0.23 (0.034) & 0.05 \\
@@ -291,11 +287,11 @@ Model $w=6$, $\sigma_\text{max}=1.0$ & 0.84 (0.046) & 0.16 (0.092) & 0.01 \\
 \end{tabular}
 \end{center}
 
-RePaint resampling ($U=5, 10$) does not help on this sampler: every resampling pass re-runs part of the noisy schedule, so it acts as extra annealing (energy $-3.704$ and $-3.712$).
+Repeating parts of the RePaint schedule ($U=5, 10$) does not help with this sampler. Each repeat re-runs part of the noisy schedule, so it acts as extra cooling (energy $-3.704$ and $-3.712$).
 
 \begin{table}[h]
 \centering
-\caption{Unconditional whole-box samples (seed 0) against sampler steps. Natural test glasses: energy $-3.681$, $g_{AB}$ floor 0.067, 0.56 B--B contacts per B atom.}
+\caption{Whole boxes generated without a label (seed 0) for different numbers of sampling steps. Natural test glasses: energy $-3.681$, $g_{AB}$ floor 0.067, 0.56 B--B contacts per B atom.}
 \label{tab:steps}
 \small
 \begin{tabular}{lcccc}
@@ -311,12 +307,12 @@ B--B contacts per B & 0.36 & 0.31 & 0.25 & --- \\
 
 \begin{table}[h]
 \centering
-\caption{Symmetry ladder at $N=64$ (unconditional, 100 steps, relaxed). Natural: energy $-3.636$, $g_{AB}$ floor 0.094, 0.475 B--B per B, local W1 floor 0.007.}
+\caption{Symmetry test at $N=64$ (no label, 100 steps, relaxed). Natural glasses: energy $-3.636$, $g_{AB}$ floor 0.094, 0.475 B--B contacts per B atom, local W1 floor 0.007.}
 \label{tab:ladder}
 \small
 \begin{tabular}{lcccccc}
 \toprule
-Model & energy & $g_{AB}$ L1 & B--B per B & local W1 & crystallised & val.\ loss / $\sigma^2$ \\
+Network & energy & $g_{AB}$ L1 & B--B per B & local W1 & crystallised & val.\ loss / $\sigma^2$ \\
 \midrule
 EGNN & $-3.626$ & \textbf{0.21} & \textbf{0.32} & \textbf{0.044} & 0\% & 0.23 \\
 MPNN & $-3.645$ & 0.25 & 0.26 & 0.064 & 0\% & 0.14 \\
@@ -328,18 +324,18 @@ Flat MLP & $-3.341$ & 0.67 & 1.31 & 0.304 & 16\% & 1.02 \\
 \begin{figure}[t]
 \centering
 \includegraphics[width=\linewidth]{figures/fig5_sensitivity.pdf}
-\caption{Sensitivity (seed 0, Task~B). \textbf{(a, b)}~Success against the defect cutoff for D2 and \Dm{} (grey line: frozen value). \textbf{(c, d)}~D2 local W1 against the realism window and the regenerated-disk radius; grey band: natural floor. The method ranking holds everywhere; hand insertion's damage is local (c), and a larger disk gives more natural surroundings (d).}
+\caption{Changing the evaluation settings (seed 0, Task~B). \textbf{(a, b)}~Success for different defect rules, for D2 and \Dm{}; the natural references are relabelled with the same rules (grey line: the rule used in the paper). \textbf{(c, d)}~D2 local W1 for different realism windows and rebuilt-region sizes; grey band: natural floor. The ranking of the methods never changes. Hand insertion damages only the area near the site (c), and a larger rebuilt region gives more natural surroundings (d).}
 \label{fig:sens}
 \end{figure}
 
 \begin{table}[h]
 \centering
-\caption{Training noise range (Task~B, D2, seed 0). ``Kept'' = success after / before relaxation.}
+\caption{Training noise range (Task~B, D2, seed 0). ``Kept'' is success after relaxation divided by the fraction placed before it.}
 \label{tab:noise}
 \small
 \begin{tabular}{lccccc}
 \toprule
-Recipe & $w$ & placed (before relax) & success (after) & kept & local W1 \\
+Setting & $w$ & placed (before relaxing) & success (after) & kept & local W1 \\
 \midrule
 $\sigma_\text{max}=0.5$ & 2 & 0.67 & 0.35 & 52\% & 0.040 \\
 $\sigma_\text{max}=0.5$ & 6 & 0.94 & 0.54 & 57\% & 0.064 \\
@@ -349,15 +345,15 @@ $\sigma_\text{max}=1.0$ & 6 & 1.00 & 0.79 & 79\% & 0.089 \\
 \end{tabular}
 \end{table}
 
-\section{Stability of natural defects}
+\section{How stable are natural defects?}
 \label{app:stability}
 
-\paragraph{Noise followed by relaxation.} All atoms of 100 test glasses were displaced by Gaussian noise, the glasses relaxed, and each natural defect checked with the success test. The table gives the fraction of defects kept.
+\paragraph{Noise, then relaxation.} We shifted all atoms of 100 test glasses by random Gaussian noise, relaxed the glasses, and checked each natural defect with the success test. The table gives the fraction of defects that survived.
 
 \begin{center}\small
 \begin{tabular}{lccccc}
 \toprule
-noise $\sigma$ (mean displacement) & 0.05 (0.06) & 0.10 (0.12) & 0.15 (0.19) & 0.20 (0.26) & 0.30 (0.48) \\
+noise $\sigma$ (mean shift) & 0.05 (0.06) & 0.10 (0.12) & 0.15 (0.19) & 0.20 (0.26) & 0.30 (0.48) \\
 \midrule
 \Dm{} (155 sites) & 1.00 & 1.00 & 0.99 & 0.68 & 0.08 \\
 \Dp{} (135 sites) & 1.00 & 0.99 & 0.99 & 0.69 & 0.06 \\
@@ -366,27 +362,27 @@ D2 (1{,}010 sites) & 1.00 & 0.99 & 1.00 & 0.85 & 0.29 \\
 \end{tabular}
 \end{center}
 
-\paragraph{Transplanting \Dp{}.} Natural \Dp{} patches were pasted into test hosts and relaxed, 64 insertions each. All are in place before relaxation; afterwards:
+\paragraph{Moving \Dp{} into another glass.} We pasted natural \Dp{} defects, with their neighbours out to a given radius, into test glasses and relaxed them, 64 times for each radius. All are in place before relaxation. The fraction that survives relaxation is:
 \begin{itemize}
 \item radius 1.5$\sigma$ (9 atoms): 0.00;
 \item radius 2.5$\sigma$ (23 atoms): 0.05;
 \item radius 3.5$\sigma$ (47 atoms): 0.03.
 \end{itemize}
 
-\section{Reproductions}
+\section{Checks of earlier work}
 \label{app:stage0}
 
-\paragraph{DM2 on amorphous silica.} We reran DM2's pretrained unconditional model with its demo settings: a 300-atom box, 2{,}900 noisy and 100 final steps, four seeds, on CPU. We compared the samples with its 1\,K/ps training glasses.
+\paragraph{DM2 on amorphous silica.} We ran DM2's trained model (no label) with its demo settings: a 300-atom box, 2{,}900 noisy and 100 final steps, four seeds, on CPU. We compared the samples with its training glasses, which were cooled at 1\,K/ps.
 \begin{itemize}
-\item \textbf{Local structure is right.} Si is 99.3\% 4-fold coordinated, the Si--O bond is 1.650\,\AA{} (training 1.646\,\AA), O--Si--O is $109.4^\circ$, and every $g(r)$ peak is in place.
-\item \textbf{Disorder is too high.} At matched sample size, the $g(r)$ distance to the training glasses (Si--O 0.58) exceeds the held-out floor (0.31) and matches a 100\,K/ps quench (0.50). The O--Si--O width (6.4$^\circ$ vs.\ 5.6$^\circ$) and edge-sharing tetrahedra (0.0125 vs.\ 0.0020 per Si) agree.
+\item \textbf{The local structure is right.} 99.3\% of Si atoms have four O neighbours, the Si--O bond is 1.650\,\AA{} (training glasses: 1.646\,\AA), the O--Si--O angle is $109.4^\circ$, and every peak of $g(r)$ is in place.
+\item \textbf{The disorder is too high.} With the same number of samples, the $g(r)$ distance to the training glasses (Si--O 0.58) is larger than between two sets of training glasses (0.31) and matches glass cooled at 100\,K/ps (0.50). The spread of the O--Si--O angle (6.4$^\circ$ vs.\ 5.6$^\circ$) and the number of edge-sharing tetrahedra (0.0125 vs.\ 0.0020 per Si) agree.
 \end{itemize}
 
-\paragraph{Course proof-of-concept.} The provided notebook (an MLP denoiser on a jittered $3\times3$ grid) reproduces the figure in our proposal over five seeds:
+\paragraph{Course example.} The course notebook (an MLP denoiser on a jittered $3\times3$ grid) reproduces the figure in our proposal over five seeds:
 \begin{itemize}
 \item pair-distance W1 0.063 (range 0.033--0.122; proposal 0.068);
 \item generated disorder 0.153 (proposal 0.163).
 \end{itemize}
-Its antisite demo trains on overlapping atoms because of integer site coordinates; a one-line fix is documented in the repository.
+Its antisite demo trains on overlapping atoms because the site coordinates are integers. A one-line fix is described in the repository.
 
 \end{document}

@@ -1,8 +1,8 @@
 # Workshop paper
 
-*Placing Defects Where You Ask: Location-Specific Defect Generation in a Model Glass with
-Conditional Diffusion*: 8 pages of main text, then references and a 3-page appendix.
-`main.pdf` is the compiled version.
+*Placing Defects Where You Ask: Generating Defects at Chosen Sites in a Model Glass with a
+Diffusion Model*: about 8.5 pages of main text in plain language, then references and a
+3-page appendix. `main.pdf` is the compiled version.
 
 ## Build
 
