@@ -27,3 +27,6 @@ log.lammps
 .vscode/
 .idea/
 .DS_Store
+
+# LaTeX build output (paper/main.pdf is committed)
+paper/build/
