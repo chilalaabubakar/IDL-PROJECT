@@ -55,7 +55,8 @@ the same round on Kaggle without Drive: it loads earlier models and results from
 repository and pushes its progress back every 45 minutes, so it can continue across Kaggle
 sessions.
 The sensitivity checks run in [`notebooks/kaggle_sensitivity.ipynb`](notebooks/kaggle_sensitivity.ipynb)
-(one Kaggle session, ~4 h; analysis in `results/sensitivity/`).
+(one Kaggle session, ~4 h; analysis in `results/sensitivity/`), and the training seeds in
+[`notebooks/kaggle_seeds.ipynb`](notebooks/kaggle_seeds.ipynb) (one session on T4 x2, ~10–11 h).
 
 The full notebook checks the GPU, measures training speed, trains the unconditional and
 conditional EGNN (resuming automatically after a disconnect), runs every experiment and
