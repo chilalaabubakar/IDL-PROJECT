@@ -998,99 +998,155 @@ def figure3() -> None:
 # --------------------------------------------------------------------------- Figure 4
 
 
-SEED_MARKER = {0: "o", 1: "s", 2: "^"}
-
-
-def _point(ax, m, style, marker, ms=4.2):
+def _ci_point(ax, m, color, mfc, marker="o", ms=4.6, z=4):
+    """Estimate with light, capless 95% CI bars in both directions; returns (W1, success)."""
     s, w = m["success_after_relax"], m["local"]["w1_pe_atom"]
-    ax.errorbar(
+    ax.plot(
+        [w[1], w[2]],
+        [s[0], s[0]],
+        color=color,
+        lw=0.6,
+        alpha=0.45,
+        zorder=z - 1,
+        solid_capstyle="butt",
+    )
+    ax.plot(
+        [w[0], w[0]],
+        [s[1], s[2]],
+        color=color,
+        lw=0.6,
+        alpha=0.45,
+        zorder=z - 1,
+        solid_capstyle="butt",
+    )
+    ax.plot(
         w[0],
         s[0],
-        xerr=[[w[0] - w[1]], [w[2] - w[0]]],
-        yerr=[[s[0] - s[1]], [s[2] - s[0]]],
         marker=marker,
         ms=ms,
+        mfc=mfc,
+        mec=color,
+        mew=0.9,
         ls="none",
-        capsize=1.5,
-        elinewidth=0.7,
-        mew=0.8,
-        color=style["color"],
-        mfc=style["mfc"],
-        mec=style["color"] if style["mfc"] == "white" else P["ink"],
-        zorder=3,
+        zorder=z,
+        clip_on=False,
     )
+    return w[0], s[0]
 
 
 def figure4() -> None:
     seeds = _script("plot_seeds")
-    fig = plt.figure(figsize=(5.5, 2.05))
-    axes = [_inches(fig, 0.42 + k * 1.75, 0.62, 1.4, 1.22) for k in range(3)]
+    blue2, blue6 = fs.METHOD["model, w = 2"]["color"], fs.METHOD["model, w = 6"]["color"]
+    W, H = 5.5, 2.1
+    fig = plt.figure(figsize=(W, H))
+    x0, pw, gap, y0, ph = 0.42, 1.5, 0.29, 0.64, 1.22
+    axes = [_inches(fig, x0 + k * (pw + gap), y0, pw, ph) for k in range(3)]
     titles = ["Task B, D2", r"Task B, D1$^{-}$", "Task A, D2"]
+    xmax = [0.104, 0.052, 0.022]
+    xticks = [(0, 0.05, 0.1), (0, 0.02, 0.04), (0, 0.01, 0.02)]
+    # where to put each seed's number relative to its w = 6 point (points of offset)
+    seed_off = [
+        {0: (5, 4), 1: (-6, 4), 2: (-6, 4)},
+        {0: (0, 6), 1: (6, 0), 2: (0, -7)},
+        {0: (-6, 3), 1: (0, 6), 2: (5, -5)},
+    ]
+    ymax = [1.0, 0.4, 1.0]  # D1- success is below 0.3 for every method: own scale
     for k, (a, (_, defect, model_rows, baselines)) in enumerate(zip(axes, seeds.PANELS)):
         floor = json.loads(Path(f"results/sensitivity/floor_{defect}.json").read_text())
         lo, hi = floor["variants"]["default"]["local_w1_pe_atom"][1:]
-        a.axvspan(lo, hi, color=P["neutral"], alpha=0.6, lw=0, zorder=0)
+        a.axvspan(lo, hi, color=P["neutral"], alpha=0.55, lw=0, zorder=0)
+        pts = {}
         for label, row in model_rows.items():
             for seed in (0, 1, 2):
-                name = row if seed == 0 else f"seed{seed}_{row}"
-                _point(a, seeds.metrics(name), fs.METHOD[f"model, {label}"], SEED_MARKER[seed])
-        for label, row in baselines.items():
-            _point(a, seeds.metrics(row), fs.METHOD[label], "D")
-        a.set_title(titles[k], fontsize=7, pad=3)
-        a.set_xlabel("local W1 (lower = more natural)", fontsize=6.5, labelpad=1.5)
-        a.set_xlim(left=0)
-        a.set_ylim(0, 1)
-        a.set_yticks([0, 0.5, 1])
-        fig.text(
-            (0.42 + k * 1.75 - 0.3) / 5.5,
-            (0.62 + 1.22 + 0.04) / 2.05,
-            "abc"[k],
-            fontsize=9,
-            fontweight="bold",
-            va="bottom",
-        )
+                m = seeds.metrics(row if seed == 0 else f"seed{seed}_{row}")
+                w2 = label == "w = 2"
+                pts[label, seed] = _ci_point(a, m, blue2 if w2 else blue6, "white" if w2 else blue6)
+        for seed in (0, 1, 2):
+            if ("w = 2", seed) in pts:  # guidance arrow, same training run
+                a.annotate(
+                    "",
+                    xy=pts["w = 6", seed],
+                    xytext=pts["w = 2", seed],
+                    arrowprops=dict(
+                        arrowstyle="-|>,head_width=0.18,head_length=0.35",
+                        color=P["grey"],
+                        lw=0.7,
+                        shrinkA=3.2,
+                        shrinkB=3.2,
+                    ),
+                    zorder=2,
+                )
+            dx, dy = seed_off[k][seed]
+            a.annotate(
+                str(seed),
+                xy=pts["w = 6", seed],
+                xytext=(dx, dy),
+                textcoords="offset points",
+                fontsize=5.5,
+                color=P["grey_dark"],
+                ha="center",
+                va="center",
+                bbox=dict(boxstyle="round,pad=0.06", fc="white", ec="none", alpha=0.9),
+                zorder=6,
+            )
+        for j, (label, row) in enumerate(baselines.items()):
+            st = fs.METHOD[label]
+            _ci_point(a, seeds.metrics(row), st["color"], st["mfc"], marker="D", ms=4.0)
+        a.set_xlim(0, xmax[k])
+        a.set_xticks(xticks[k], labels=[f"{t:g}" for t in xticks[k]])
+        a.set_ylim(0, ymax[k])
+        yt = np.linspace(0, ymax[k], 5)
+        a.set_yticks(yt, labels=[f"{t:g}" if i % 2 == 0 else "" for i, t in enumerate(yt)])
+        a.set_title(titles[k], fontsize=7, pad=4)
+        a.grid(axis="y", color=P["neutral_1"], lw=0.6, zorder=-1)
+        a.set_axisbelow(True)
+        _letter(fig, x0 + k * (pw + gap) - 0.36, y0 + ph + 0.2, "abc"[k])
     axes[0].set_ylabel("success after relaxation", fontsize=6.5, labelpad=2)
-    handles = (
-        [
-            Line2D(
-                [],
-                [],
-                ls="",
-                marker="o",
-                ms=4.2,
-                mew=0.8,
-                label=label,
-                color=st["color"],
-                mfc=st["mfc"],
-                mec=st["color"] if st["mfc"] == "white" else P["ink"],
-            )
-            for label, st in fs.METHOD.items()
-        ]
-        + [Patch(fc=P["neutral"], alpha=0.6, label="natural floor (95% CI)")]
-        + [
-            Line2D(
-                [],
-                [],
-                ls="",
-                marker=SEED_MARKER[s],
-                ms=4.2,
-                mfc=P["grey"],
-                mec=P["ink"],
-                mew=0.5,
-                label=f"seed {s}",
-            )
-            for s in (0, 1, 2)
-        ]
+    fig.text(
+        (x0 + 1.5 * pw + gap + x0 + 1.5 * pw + gap) / 2 / W,
+        (y0 - 0.25) / H,
+        "local W1 of per-atom energy around the site (lower = more natural)",
+        fontsize=6.5,
+        ha="center",
+        va="center",
     )
-    for h in handles[2:4]:
-        h.set_marker("D")
+
+    def diamond(label):
+        st = fs.METHOD[label]
+        return Line2D(
+            [], [], ls="", marker="D", ms=4.0, mfc=st["mfc"], mec=st["color"], mew=0.9, label=label
+        )
+
+    # filled column by column: (w = 2, hand insertion), (w = 6, melt-quench), (arrow, floor)
+    handles = [
+        Line2D(
+            [], [], ls="", marker="o", ms=4.6, mfc="white", mec=blue2, mew=0.9, label="model, w = 2"
+        ),
+        diamond("hand insertion"),
+        Line2D(
+            [], [], ls="", marker="o", ms=4.6, mfc=blue6, mec=blue6, mew=0.9, label="model, w = 6"
+        ),
+        diamond("local melt-quench"),
+        Line2D(
+            [],
+            [],
+            color=P["grey"],
+            lw=0.7,
+            marker=">",
+            ms=3,
+            markevery=[1],
+            label="w = 2 → 6, same training run (seed number)",
+        ),
+        Patch(fc=P["neutral"], alpha=0.55, label="natural floor (95% CI)"),
+    ]
     fig.legend(
         handles=handles,
         loc="lower center",
-        ncol=8,
+        ncol=3,
         fontsize=6,
-        handletextpad=0.2,
-        columnspacing=0.8,
+        handletextpad=0.4,
+        columnspacing=1.6,
+        labelspacing=0.25,
         bbox_to_anchor=(0.5, -0.02),
     )
     fs.finalize_figure(fig, OUT / "fig4_seeds")
