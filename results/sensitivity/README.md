@@ -158,6 +158,7 @@ The model was trained with R_out = 4 only.
    floor) at a similar success rate. It needs the seam check in §4 before it becomes a
    claim.
 
-Not covered: the D1+ class (every method fails there), and seeds. All rows use one training
-run per model and one sampling seed; training seeds are the remaining open item for
-publication.
+Not covered: the D1+ class (every method fails there). These checks use the seed-0 models;
+the training-seed study ([`../seeds/README.md`](../seeds/README.md)) shows that every seed
+keeps the method ranking, so the conclusions above stand, but D2 success rates should be
+quoted as means over seeds.

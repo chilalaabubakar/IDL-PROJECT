@@ -68,7 +68,7 @@ when that file passes.
 | `sample.py` clips σ at each checkpoint's own training σ_max; named floor runs (`evaluate.py name=...`) | ✅ done |
 | **Round 3** (run on Kaggle): retrain with σ_max = 1.0, main table at 100 steps (w = 2, 4, 6; all three defects), Stage 4 symmetry ladder at N = 64 | ✅ done: `results/kaggle_2026100*` / `kaggle_20261012-*`; analysis in `results/round3_ANALYSIS.md` |
 | Sensitivity checks: `scripts/sensitivity.py` re-scores a run with the defect cutoffs ±0.05, success radius ±0.1 and realism window ±0.5 (natural references relabelled to match); floors per setting in `results/sensitivity/`; `notebooks/kaggle_sensitivity.ipynb` makes the samples and varies R_out (3 / 4 / 5) | ✅ done: `results/sensitivity/README.md` (ranking holds under every setting; absolute success moves by up to ~0.1; two realism statements qualified; R_out = 5 improves D2 realism) |
-| Seeds for publication: both conditional models retrained with seeds 1 and 2 and the five headline rows repeated (`notebooks/kaggle_seeds.ipynb`), plus a new sampler seed for the seed-0 models | 🔄 notebook ready; Kaggle run pending |
+| Seeds for publication: both conditional models retrained with seeds 1 and 2 and the five headline rows repeated (`notebooks/kaggle_seeds.ipynb`), plus a new sampler seed for the seed-0 models | ✅ done: `results/seeds/README.md` (D1− and Task A stable across seeds; D2 varies, sd 0.08–0.11; the method beats both baselines for every seed) |
 
 Install and check:
 
