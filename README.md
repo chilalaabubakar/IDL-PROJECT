@@ -13,6 +13,7 @@ whether its surroundings look like naturally formed ones. The work builds on DM2
 - [Implementation plan](docs/IMPLEMENTATION_PLAN.md): conventions, tickets per workstream, dependencies, MVP definition
 - [Dataset plan](docs/DATASET.md): the 2D KA dataset we generate, defect definitions, external datasets
 - [Feasibility pilot](docs/pilot/): LAMMPS script and measured outputs
+- [3D silica extension plan](docs/SILICA_3D_PLAN.md): the next step toward a materials-journal paper (defects in amorphous SiO₂, physical validation, compute budget)
 
 ## Status
 
