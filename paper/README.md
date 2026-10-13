@@ -23,12 +23,13 @@ panel letters, vector PDF plus 300-dpi PNG.
 | Figure | Content | Data |
 |---|---|---|
 | 1 `fig1_overview` | (a) numbered workflow; (b) natural defects in a test glass; (c) a Task B request on a real host; (d) a real sampling trajectory and its relaxed result | `data/ka2d_256/test.npz`, `paper/data/examples_D2_model.npz` |
-| 2 `fig2_taskB` | one D2 request answered by the model, hand insertion and local melt-quench | `paper/data/examples_D2_*.npz` |
-| 3 `fig3_seeds` | success vs. local W1 per training seed | `results/*/experiments/` (via `scripts/plot_seeds.py`) |
-| 4 `fig4_sensitivity` | sensitivity to evaluation settings | `results/*/experiments/`, `results/sensitivity/` |
+| 2 `fig2_architecture` | the deep learning models: (a) conditional periodic EGNN denoiser, (b) one EGNN layer, (c) classifier-free guidance, (d) the symmetry-ablation backbones (EGNN, MPNN, flat MLP) | `src/glassdiff/models/`, Table 3 numbers |
+| 3 `fig3_taskB` | one D2 request answered by the model, hand insertion and local melt-quench | `paper/data/examples_D2_*.npz` |
+| 4 `fig4_seeds` | success vs. local W1 per training seed | `results/*/experiments/` (via `scripts/plot_seeds.py`) |
+| 5 `fig5_sensitivity` (appendix) | sensitivity to evaluation settings | `results/*/experiments/`, `results/sensitivity/` |
 
 `make_examples.py` answers the same six D2 requests (first six test glasses, sites drawn with
-seed 7) with each method on CPU, relaxes them and records success, so Figures 1d and 2 show
+seed 7) with each method on CPU, relaxes them and records success, so Figures 1d and 3 show
 real samples, not illustrations.
 
 ## Before submitting

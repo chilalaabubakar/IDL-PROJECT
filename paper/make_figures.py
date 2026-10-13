@@ -7,9 +7,11 @@
 Style: paper/figstyle.py (figures4papers conventions), drawn at printed size.
   Figure 1  overview: (a) workflow, (b) natural defects in a test glass, (c) the Task B
             request on a real host, (d) a real sampling trajectory (examples_D2_model.npz).
-  Figure 2  one Task B request answered by the model, hand insertion and local melt-quench.
-  Figure 3  training seeds (data of scripts/plot_seeds.py).
-  Figure 4  sensitivity checks (data of scripts/plot_sensitivity.py).
+  Figure 2  the deep learning models: (a) the conditional periodic EGNN denoiser, (b) one
+            EGNN layer, (c) classifier-free guidance, (d) the symmetry ablation backbones.
+  Figure 3  one Task B request answered by the model, hand insertion and local melt-quench.
+  Figure 4  training seeds (data of scripts/plot_seeds.py).
+  Figure 5  sensitivity checks (data of scripts/plot_sensitivity.py; in the appendix).
 """
 
 from __future__ import annotations
@@ -36,7 +38,7 @@ from matplotlib.patches import (  # noqa: E402
 
 OUT = Path("paper/figures")
 DATA = Path("paper/data")
-EXAMPLE = 2  # request index (of make_examples.py) shown in Figures 1d and 2
+EXAMPLE = 2  # request index (of make_examples.py) shown in Figures 1d and 3
 SNAP_STEPS = (0, 25, 100)  # sampler steps shown in Figure 1d, then the relaxed sample
 NATURAL = (1, 154, 144)  # Figure 1b: test glass, a D1- atom, a nearby D1+ atom
 
@@ -483,8 +485,410 @@ def figure1() -> None:
 
 # --------------------------------------------------------------------------- Figure 2
 
+SCALAR, VECTOR = (P["blue_1"], P["blue_main"]), (P["red_1"], P["red_strong"])
+
+
+def _rbox(ax, x, y, w, h, fc, ec, lw=0.7, ls="-", r=0.05, z=1):
+    ax.add_patch(
+        FancyBboxPatch(
+            (x, y),
+            w,
+            h,
+            boxstyle=f"round,pad=0,rounding_size={r}",
+            fc=fc,
+            ec=ec,
+            lw=lw,
+            ls=ls,
+            zorder=z,
+        )
+    )
+
+
+def _chip(ax, x, y, w, text, kind, h=0.17, fs_=6.0):
+    """Small rounded tensor chip; blue = invariant scalars, red = equivariant vectors."""
+    fc, ec = kind
+    _rbox(ax, x, y - h / 2, w, h, fc, ec, lw=0.6, r=0.04, z=3)
+    ax.text(x + w / 2, y, text, fontsize=fs_, ha="center", va="center", zorder=4)
+
+
+def _op(ax, x, y, w, h, text, fc="white", ec=None, fs_=6.0, bold=False):
+    _rbox(ax, x, y, w, h, fc, ec or P["ink"], lw=0.7, r=0.04, z=3)
+    ax.text(
+        x + w / 2,
+        y + h / 2,
+        text,
+        fontsize=fs_,
+        ha="center",
+        va="center",
+        zorder=4,
+        fontweight="bold" if bold else "normal",
+    )
+
+
+def _line(ax, pts, color=None, lw=0.7):
+    """Polyline through ``pts`` with an arrowhead on the last segment."""
+    c = color or P["ink"]
+    if len(pts) > 2:
+        xs, ys = zip(*pts[:-1])
+        ax.plot(xs, ys, color=c, lw=lw, zorder=2, solid_capstyle="butt")
+    ax.annotate(
+        "",
+        xy=pts[-1],
+        xytext=pts[-2],
+        arrowprops=dict(
+            arrowstyle="-|>,head_width=0.15,head_length=0.3", color=c, lw=lw, shrinkA=0, shrinkB=0
+        ),
+        zorder=2,
+    )
+
+
+def _neighbourhood_icon(ax, glass=0, sigma=0.15, half=2.9):
+    """A real atom of a test glass with its periodic neighbours within r_c (graph edges)."""
+    test = np.load("data/ka2d_256/test.npz")
+    pos, types, box = test["pos"][glass], test["types"][glass], test["box"][glass]
+    rng = np.random.default_rng(0)
+    pos = pos + sigma * rng.standard_normal(pos.shape)  # a noisy x_sigma
+    centre = np.argmin(np.linalg.norm(np.mod(pos, box) - box / 2, axis=1))
+    c = np.mod(pos[centre], box)
+    d = _min_image(pos - c, box)
+    near = (np.linalg.norm(d, axis=1) <= 2.5) & (np.arange(len(pos)) != centre)
+    for v in d[near]:
+        ax.plot(
+            [c[0], c[0] + v[0]],
+            [c[1], c[1] + v[1]],
+            color=P["red_strong"],
+            lw=0.45,
+            zorder=4,
+            alpha=0.85,
+        )
+    fs.draw_atoms(ax, pos, types, box, c, half, edge_lw=0.2)
+    ax.add_patch(Circle(c, 2.5, fill=False, ec=P["ink"], lw=0.5, ls=(0, (2, 1.5)), zorder=5))
+    ax.plot(*c, "o", ms=2.2, color=P["ink"], zorder=6)
+    for s in ax.spines.values():
+        s.set_visible(False)
+
 
 def figure2() -> None:
+    W, H, OY = 5.5, 4.15, 0.16  # drawing coordinates in inches; the bottom OY is cropped
+    fig = plt.figure(figsize=(W, H - OY))
+    ax = _inches(fig, 0, 0, W, H - OY)
+    ax.set_xlim(0, W)
+    ax.set_ylim(OY, H)
+    ax.axis("off")
+    green = (P["green_1"], P["green_dark"])
+    grey = (P["neutral_1"], P["ink"])
+
+    # (a) the conditional denoiser --------------------------------------------------------
+    _letter(fig, -0.06, H - OY, "a")
+    title = r"Conditional periodic EGNN denoiser $d_\theta(x_\sigma, \sigma, m, c)$  (0.53 M parameters)"
+    ax.text(0.17, H - 0.04, title, fontsize=7, fontweight="bold", va="top", color=P["blue_main"])
+    y1, y2, bh = 3.63, 2.97, 0.58  # centre y of the geometry and feature streams, box height
+    _box(
+        ax,
+        0.02,
+        y1 - bh / 2,
+        0.98,
+        bh,
+        "",
+        "Noisy positions",
+        [r"$x_\sigma = x_0 + \sigma\epsilon$", "periodic box"],
+        *green,
+    )
+    _box(
+        ax,
+        0.02,
+        y2 - bh / 2,
+        0.98,
+        bh,
+        "",
+        "Per-atom inputs",
+        [r"species $t_i$, pin $m_i$", r"label $c_i$; noise $\sigma$"],
+        *green,
+    )
+    _box(
+        ax,
+        1.2,
+        y1 - bh / 2,
+        1.75,
+        bh,
+        "",
+        "Periodic graph",
+        [
+            r"neighbours within $r_c$ = 2.5σ",
+            r"min.-image vectors $r_{ij}$",
+            "16 RBFs × cosine cutoff",
+        ],
+        *grey,
+    )
+    _neighbourhood_icon(_inches(fig, 2.4, y1 - 0.23 - OY, 0.5, 0.5))
+    _box(
+        ax,
+        1.2,
+        y2 - bh / 2,
+        1.75,
+        bh,
+        "",
+        "Node embedding",
+        [
+            r"$E_t(t_i) + E_m(m_i) + E_c(c_i)$",
+            r"+ MLP(Fourier(log $\sigma$))",
+            r"→ MLP → $h_i^0 \in \mathbb{R}^{128}$",
+        ],
+        *grey,
+    )
+    for yy in (y1, y2):
+        _block_arrow(ax, 1.02, yy, 1.18, yy)
+    sx, sw = 3.2, 1.05  # stack of four layers
+    for k in range(3, -1, -1):
+        _rbox(
+            ax,
+            sx + 0.05 * k,
+            y2 - bh / 2 - 0.03 * k + 0.06,
+            sw,
+            y1 - y2 + bh - 0.12,
+            P["blue_1"],
+            P["blue_main"],
+            z=1 + (3 - k) * 0.1,
+        )
+    ax.text(
+        sx + sw / 2,
+        y1 + 0.1,
+        "EGNN layer",
+        fontsize=7,
+        fontweight="bold",
+        color=P["blue_main"],
+        ha="center",
+        va="center",
+        zorder=5,
+    )
+    ax.text(
+        sx + sw / 2,
+        (y1 + y2) / 2,
+        "messages $m_{ij}$\nupdate $h_i$\nvector $v_i^\\ell$",
+        fontsize=6,
+        ha="center",
+        va="center",
+        zorder=5,
+        linespacing=1.3,
+    )
+    ax.text(
+        sx + sw + 0.2,
+        y2 - bh / 2 + 0.01,
+        "× 4",
+        fontsize=7,
+        fontweight="bold",
+        color=P["blue_main"],
+        va="bottom",
+    )
+    _block_arrow(ax, 2.97, y1, sx - 0.02, y1)
+    _block_arrow(ax, 2.97, y2, sx - 0.02, y2)
+    ax.text(3.07, y1 + 0.1, r"$r_{ij}$", fontsize=6, ha="center", color=P["red_strong"])
+    ax.text(3.07, y2 + 0.1, r"$h^0$", fontsize=6, ha="center", color=P["blue_main"])
+    _block_arrow(ax, sx + sw + 0.17, (y1 + y2) / 2, 4.55, (y1 + y2) / 2)
+    _box(
+        ax,
+        4.57,
+        (y1 + y2) / 2 - 0.36,
+        0.91,
+        0.72,
+        "",
+        "Output",
+        [
+            r"$d_i = (1-m_i)\,\Sigma_\ell\, v_i^\ell$",
+            "a 2D vector per atom",
+            r"loss: MSE to $\sigma\epsilon$",
+        ],
+        P["red_1"],
+        P["red_strong"],
+        ec=P["red_strong"],
+    )
+
+    # (b) one EGNN layer -------------------------------------------------------------------
+    top = 2.5
+    _letter(fig, -0.06, top + 0.08 - OY, "b")
+    ax.text(0.17, top, r"One EGNN layer $\ell$", fontsize=7, fontweight="bold", va="top")
+    ys = {"hi": 2.2, "hj": 1.97, "rbf": 1.74, "r": 1.43}
+    _chip(ax, 0.05, ys["hi"], 0.48, r"$h_i^\ell$", SCALAR)
+    _chip(ax, 0.05, ys["hj"], 0.48, r"$h_j^\ell$", SCALAR)
+    _chip(ax, 0.05, ys["rbf"], 0.48, r"rbf$(|r_{ij}|)$", SCALAR)
+    _chip(ax, 0.05, ys["r"], 0.48, r"$r_{ij}$", VECTOR)
+    _op(ax, 0.75, 1.65, 0.42, 0.64, "$\\phi_e$\nMLP", fc=P["blue_1"], ec=P["blue_main"])
+    for k in ("hi", "hj", "rbf"):
+        _line(ax, [(0.53, ys[k]), (0.75, ys[k])])
+    _chip(ax, 1.33, 1.97, 0.38, r"$m_{ij}$", SCALAR)
+    _line(ax, [(1.17, 1.97), (1.33, 1.97)])
+    ax.text(
+        1.25,
+        1.57,
+        r"× cutoff $f_c(|r_{ij}|)$",
+        fontsize=5.5,
+        ha="center",
+        va="center",
+        color=P["grey_dark"],
+    )
+    # upper branch: gated sum over neighbours, then the residual node update
+    _op(ax, 1.86, 2.09, 0.52, 0.26, r"$K_0^{-1}\Sigma_j\, g\, m_{ij}$")
+    _op(ax, 2.52, 2.09, 0.34, 0.26, r"$\phi_h$", fc=P["blue_1"], ec=P["blue_main"])
+    _line(ax, [(1.71, 2.02), (1.78, 2.22), (1.86, 2.22)])
+    _line(ax, [(2.38, 2.22), (2.52, 2.22)])
+    _chip(ax, 2.98, 2.22, 0.42, r"$h_i^{\ell+1}$", SCALAR)
+    _line(ax, [(2.86, 2.22), (2.98, 2.22)])
+    ax.text(
+        2.69,
+        2.41,
+        r"$h_i + \phi_h(\mathrm{LN}(h_i), \cdot)$",
+        fontsize=5.5,
+        ha="center",
+        color=P["grey_dark"],
+    )
+    # lower branch: a scalar weight per edge times the edge vector
+    _op(ax, 1.86, 1.6, 0.36, 0.26, r"$\phi_x$", fc=P["blue_1"], ec=P["blue_main"])
+    _line(ax, [(1.71, 1.92), (1.78, 1.73), (1.86, 1.73)])
+    _op(
+        ax,
+        2.34,
+        1.3,
+        0.52,
+        0.26,
+        r"$K_0^{-1}\Sigma_j\, r_{ij}\,w_{ij}$",
+        fc=P["red_1"],
+        ec=P["red_strong"],
+    )
+    _line(ax, [(2.22, 1.73), (2.6, 1.73), (2.6, 1.56)])
+    ax.text(2.65, 1.645, r"$w_{ij}$", fontsize=5.5, color=P["grey_dark"], va="center")
+    _line(ax, [(0.53, ys["r"]), (2.34, ys["r"])], color=P["red_strong"])
+    _chip(ax, 2.98, 1.43, 0.42, r"$v_i^\ell$", VECTOR)
+    _line(ax, [(2.86, 1.43), (2.98, 1.43)], color=P["red_strong"])
+    _chip(ax, 0.05, 1.18, 0.3, "", SCALAR, h=0.12)
+    ax.text(0.4, 1.18, "invariant scalars", fontsize=5.8, va="center")
+    _chip(ax, 1.35, 1.18, 0.3, "", VECTOR, h=0.12)
+    ax.text(1.7, 1.18, "vectors that rotate with the glass", fontsize=5.8, va="center")
+
+    # (c) classifier-free guidance --------------------------------------------------------
+    cx0 = 3.55
+    _letter(fig, cx0 - 0.2, top + 0.08 - OY, "c")
+    ax.text(cx0, top, "Classifier-free guidance", fontsize=7, fontweight="bold", va="top")
+    ax.text(
+        cx0,
+        2.31,
+        r"same $x_\sigma$, $\sigma$ and pins $m$",
+        fontsize=5.8,
+        color=P["grey_dark"],
+        va="center",
+    )
+    _chip(ax, cx0, 2.1, 0.6, r"label $c$", SCALAR)
+    _chip(ax, cx0, 1.7, 0.6, r"label $\varnothing$", (P["neutral_1"], P["grey"]))
+    for yy, out in ((2.1, r"$d_c$"), (1.7, r"$d_\varnothing$")):
+        _op(ax, cx0 + 0.76, yy - 0.15, 0.4, 0.3, r"$d_\theta$", fc=P["blue_1"], ec=P["blue_main"])
+        _line(ax, [(cx0 + 0.6, yy), (cx0 + 0.76, yy)])
+        _chip(ax, cx0 + 1.3, yy, 0.32, out, VECTOR)
+        _line(ax, [(cx0 + 1.16, yy), (cx0 + 1.3, yy)])
+    ax.text(
+        cx0 + 0.96,
+        1.9,
+        "shared weights",
+        fontsize=5.5,
+        ha="center",
+        va="center",
+        color=P["grey_dark"],
+        style="italic",
+    )
+    _op(
+        ax,
+        cx0 + 0.05,
+        1.24,
+        1.82,
+        0.27,
+        r"$\tilde d = (1+w)\,d_c - w\,d_\varnothing$",
+        fc=P["red_1"],
+        ec=P["red_strong"],
+        fs_=6.5,
+    )
+    _line(ax, [(cx0 + 1.62, 2.1), (cx0 + 1.8, 2.1), (cx0 + 1.8, 1.51)], color=P["red_strong"])
+    _line(ax, [(cx0 + 1.62, 1.7), (cx0 + 1.72, 1.7), (cx0 + 1.72, 1.51)], color=P["red_strong"])
+    ax.text(
+        cx0,
+        1.14,
+        "training: site label → ∅ with p = 0.15\n"
+        r"sampling: $w$ = 2 or 6, two passes per step",
+        fontsize=5.8,
+        va="top",
+        color=P["grey_dark"],
+        linespacing=1.25,
+    )
+
+    # (d) symmetry ablation ----------------------------------------------------------------
+    dt = 0.66 + OY
+    _letter(fig, -0.06, dt + 0.08 - OY, "d")
+    ax.text(
+        0.17,
+        dt,
+        "Backbones of the symmetry ablation (unconditional, N = 64)",
+        fontsize=7,
+        fontweight="bold",
+        va="top",
+    )
+    other = (P["neutral_1"], P["grey"])
+    cols = [
+        (
+            "EGNN (main)",
+            SCALAR,
+            r"$\Sigma_j\, r_{ij}\,\phi_x$: output rotates with the input",
+            "✓✓✓",
+            "0.53 M params · val. loss 0.23 · W1 0.044",
+        ),
+        (
+            "MPNN",
+            other,
+            r"raw $(dx, dy)$ edge features, MLP readout",
+            "✓✗✓",
+            "0.48 M params · val. loss 0.14 · W1 0.064",
+        ),
+        (
+            "Flat MLP",
+            other,
+            "flattened sin/cos of 64 × 2 coordinates",
+            "✗✗✗",
+            "1.32 M params · val. loss 1.02 · W1 0.304",
+        ),
+    ]
+    cw, cg = 1.76, 0.07
+    for k, (name, (fc, ec), how, marks, nums) in enumerate(cols):
+        x = 0.02 + k * (cw + cg)
+        _rbox(ax, x, OY, cw, 0.52, fc, ec)
+        ax.text(
+            x + 0.07,
+            0.43 + OY,
+            name,
+            fontsize=6.5,
+            fontweight="bold",
+            va="center",
+            color=P["blue_main"] if k == 0 else P["ink"],
+        )
+        ax.text(x + 0.07, 0.305 + OY, how, fontsize=5.6, va="center")
+        xx = x + 0.07
+        renderer = fig.canvas.get_renderer()
+        for lab, mk in zip(("translation", "rotation", "permutation"), marks):
+            t = ax.text(xx, 0.185 + OY, lab, fontsize=5.6, va="center")
+            xx += t.get_window_extent(renderer).width / fig.dpi + 0.03  # axes units = inches
+            t = ax.text(
+                xx,
+                0.185 + OY,
+                mk,
+                fontsize=6.5,
+                va="center",
+                fontweight="bold",
+                color=P["green_dark"] if mk == "✓" else P["red_strong"],
+            )
+            xx += t.get_window_extent(renderer).width / fig.dpi + 0.1
+        ax.text(x + 0.07, 0.065 + OY, nums, fontsize=5.6, va="center", color=P["grey_dark"])
+    fs.finalize_figure(fig, OUT / "fig2_architecture")
+
+
+# --------------------------------------------------------------------------- Figure 3
+
+
+def figure3() -> None:
     parts = [
         ("model", "Conditional model, w = 6"),
         ("hand", "Hand insertion"),
@@ -588,10 +992,10 @@ def figure2() -> None:
         columnspacing=0.9,
         bbox_to_anchor=(0.5, -0.03),
     )
-    fs.finalize_figure(fig, OUT / "fig2_taskB")
+    fs.finalize_figure(fig, OUT / "fig3_taskB")
 
 
-# --------------------------------------------------------------------------- Figure 3
+# --------------------------------------------------------------------------- Figure 4
 
 
 SEED_MARKER = {0: "o", 1: "s", 2: "^"}
@@ -617,7 +1021,7 @@ def _point(ax, m, style, marker, ms=4.2):
     )
 
 
-def figure3() -> None:
+def figure4() -> None:
     seeds = _script("plot_seeds")
     fig = plt.figure(figsize=(5.5, 2.05))
     axes = [_inches(fig, 0.42 + k * 1.75, 0.62, 1.4, 1.22) for k in range(3)]
@@ -689,10 +1093,10 @@ def figure3() -> None:
         columnspacing=0.8,
         bbox_to_anchor=(0.5, -0.02),
     )
-    fs.finalize_figure(fig, OUT / "fig3_seeds")
+    fs.finalize_figure(fig, OUT / "fig4_seeds")
 
 
-# --------------------------------------------------------------------------- Figure 4
+# --------------------------------------------------------------------------- Figure 5
 
 
 SENS_MARKER = {
@@ -731,7 +1135,7 @@ def _floor(ax, x, rows):
     ax.plot(x, [r[0] for r in rows], color=P["grey"], lw=0.8, ls="--", zorder=1)
 
 
-def figure4() -> None:
+def figure5() -> None:
     sens = _script("plot_sensitivity")
     fig = plt.figure(figsize=(5.5, 3.55))
     W, H, x_l, x_r, y_b, y_t = 2.2, 1.12, 0.45, 3.1, 0.52, 2.12
@@ -831,15 +1235,15 @@ def figure4() -> None:
         columnspacing=1.2,
         bbox_to_anchor=(0.5, -0.01),
     )
-    fs.finalize_figure(fig, OUT / "fig4_sensitivity")
+    fs.finalize_figure(fig, OUT / "fig5_sensitivity")
 
 
 def main() -> None:
     fs.apply_publication_style()
     OUT.mkdir(parents=True, exist_ok=True)
-    which = sys.argv[1:] or ["1", "2", "3", "4"]
+    which = sys.argv[1:] or ["1", "2", "3", "4", "5"]
     for k in which:
-        {"1": figure1, "2": figure2, "3": figure3, "4": figure4}[k]()
+        {"1": figure1, "2": figure2, "3": figure3, "4": figure4, "5": figure5}[k]()
     print("figures in", OUT)
 
 
