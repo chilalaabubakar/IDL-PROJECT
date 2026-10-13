@@ -7,12 +7,29 @@ Conditional Diffusion*: 8 pages of main text, then references and a 3-page appen
 ## Build
 
 ```bash
-python paper/make_figures.py          # from the repository root: figures from results/
+# from the repository root
+python paper/make_examples.py part=model   # once, ~10 min on 4 CPU cores
+python paper/make_examples.py part=hand
+python paper/make_examples.py part=lmq     # needs LAMMPS
+python paper/make_figures.py               # all figures, or e.g. `make_figures.py 1 3`
 cd paper && latexmk -pdf -outdir=build main.tex && cp build/main.pdf main.pdf
 ```
 
-`make_figures.py` crops Figure 1 from the Task B sample plots, and draws Figures 2 and 3
-with `scripts/plot_seeds.py` and `scripts/plot_sensitivity.py` at paper size.
+Figures are drawn at their printed size (5.5 in wide) in the style of
+[figures4papers](https://github.com/ChenLiu-1996/figures4papers) (`figstyle.py`): Helvetica-type
+font, blues for the model, reds for the baselines, grey for natural references, lowercase bold
+panel letters, vector PDF plus 300-dpi PNG.
+
+| Figure | Content | Data |
+|---|---|---|
+| 1 `fig1_overview` | (a) numbered workflow; (b) natural defects in a test glass; (c) a Task B request on a real host; (d) a real sampling trajectory and its relaxed result | `data/ka2d_256/test.npz`, `paper/data/examples_D2_model.npz` |
+| 2 `fig2_taskB` | one D2 request answered by the model, hand insertion and local melt-quench | `paper/data/examples_D2_*.npz` |
+| 3 `fig3_seeds` | success vs. local W1 per training seed | `results/*/experiments/` (via `scripts/plot_seeds.py`) |
+| 4 `fig4_sensitivity` | sensitivity to evaluation settings | `results/*/experiments/`, `results/sensitivity/` |
+
+`make_examples.py` answers the same six D2 requests (first six test glasses, sites drawn with
+seed 7) with each method on CPU, relaxes them and records success, so Figures 1d and 2 show
+real samples, not illustrations.
 
 ## Before submitting
 
