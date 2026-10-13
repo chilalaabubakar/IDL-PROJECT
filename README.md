@@ -36,7 +36,10 @@ the N = 64 symmetry ladder the EGNN makes the most natural glasses while a flat 
 not learn. Stage 0 ([`results/stage0/`](results/stage0/README.md)): DM2's own pretrained
 a-SiO₂ model, rerun on CPU, reproduces its training glasses' g(r) and tetrahedral structure,
 with somewhat more disorder (like a 100× faster quench); the course proof-of-concept
-notebook reproduces the proposal's Fig. 1.
+notebook reproduces the proposal's Fig. 1. Sensitivity checks
+([`results/sensitivity/`](results/sensitivity/README.md)): the method ranking holds when the
+defect cutoffs, success radius, realism window and regenerated-disk size are varied; the
+absolute success rates move by up to about 0.1.
 
 ## Run on Colab (GPU)
 
