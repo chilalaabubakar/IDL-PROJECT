@@ -13,6 +13,12 @@ EGNNs retrained with σ ≤ 1.0, since the sampler starts at σ = 1.0.
 > the retrained model's w = 6 surroundings match hand insertion only at the 3σ window
 > (better within 2.5σ, worse within 3.5σ), and the D1− w = 2 surroundings are within 1–2×
 > of the floor depending on the defect cutoff, not always at it.
+>
+> **Training seeds** ([`seeds/README.md`](seeds/README.md)): the tables below use one
+> training run (seed 0). Over three runs the headline values are D2 0.45 ± 0.11 (w = 2,
+> retrained) and 0.71 ± 0.08 (w = 6, retrained), D1− 0.22 ± 0.02 (w = 2, old model) and
+> Task A D2 0.58 ± 0.03 (w = 6, old model). Seed 0 was the most successful D2 model; quote
+> the means.
 
 ## 1. Task B (inside an existing glass): the headline table
 

@@ -27,11 +27,15 @@ status.
 
 **Results** (round 1: [`results/colab_20261004-2352Z/ANALYSIS.md`](results/colab_20261004-2352Z/ANALYSIS.md),
 round 2: [`results/colab_20261005-1006Z/ANALYSIS.md`](results/colab_20261005-1006Z/ANALYSIS.md),
-round 3: [`results/round3_ANALYSIS.md`](results/round3_ANALYSIS.md)):
-with guidance, the conditional EGNN places D2 defects inside existing glasses 1.9–2.6× as
-often as hand insertion (0.56–0.79 vs 0.30) and D1− defects 3.5–4× as often (0.21–0.25 vs
-0.06); local melt-quench almost never succeeds. In the whole-box task it reaches D2
-success 0.61 with surroundings at the natural floor. D1+ fails for every method. The DM2
+round 3: [`results/round3_ANALYSIS.md`](results/round3_ANALYSIS.md); training seeds:
+[`results/seeds/`](results/seeds/README.md)): averaged over three training runs, the
+conditional EGNN places D2 defects inside existing glasses 1.5–2.4× as often as hand
+insertion (0.45 ± 0.11 at guidance w = 2, 0.71 ± 0.08 at w = 6, vs 0.30), with surroundings
+as natural or more natural, and D1− defects 3.5× as often (0.22 ± 0.02 vs 0.06); local
+melt-quench almost never succeeds. In the whole-box task it reaches D2 success 0.58 ± 0.03
+with surroundings at the natural floor. D1+ fails for every method. D2 success varies
+between training runs more than the evaluation noise (each run ends with a different
+effective guidance strength). The DM2
 sampler's step count acts like a cooling rate (100 steps give the natural energy), and in
 the N = 64 symmetry ladder the EGNN makes the most natural glasses while a flat MLP does
 not learn. Stage 0 ([`results/stage0/`](results/stage0/README.md)): DM2's own pretrained
