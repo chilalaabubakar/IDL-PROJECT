@@ -1,0 +1,21 @@
+# Timing benchmark for 3D silica MD (run: lmp -var glass <path to DM2 glass> -in in.silica_md_bench).
+# Measured 2026-10-14 on 1 core: 200-211k atom-steps/s (about 5 us per atom-step), i.e. 2.9 ms per
+# step for a 576-atom cell. Atom types in the DM2 file: 1 = O, 2 = Si. The short-range
+# parameters are BKS-like placeholders; only the cost (8 A cutoffs, all pairs) matters here.
+units metal
+atom_style charge
+boundary p p p
+# DM2 glass: <DM2 repo>/demo/demo_training/simu_data/sio2_3000_glass_1k_sample0.dat
+read_data ${glass}
+# BKS-like short range in Born form (A exp(-r/rho) - C/r^6) with DSF Coulomb, 8 A cutoffs,
+# the same cost profile as the BMH + DSF potential DM2's silica data was made with
+pair_style born/coul/dsf 0.25 8.0
+pair_coeff * * 0.0 1.0 0.0 0.0 0.0
+pair_coeff 1 1 1388.773 0.3623 0.0 175.0 0.0      # O-O
+pair_coeff 1 2 18003.7572 0.2052 0.0 133.5381 0.0  # O-Si
+neighbor 1.0 bin
+timestep 0.001
+velocity all create 300 4928459
+fix 1 all nvt temp 300 300 0.1
+thermo 500
+run 2000
