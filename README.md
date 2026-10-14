@@ -15,7 +15,8 @@ whether its surroundings look like naturally formed ones. The work builds on DM2
 - [Feasibility pilot](docs/pilot/): LAMMPS script and measured outputs
 - [Team summary](docs/Project_Summary.docx) (Word): plain-language summary of what was done, the data, models, training runs, results, next steps and compute
 - [Workshop paper](paper/main.pdf) (about 8.5 pages, plain language; LaTeX source in `paper/`)
-- [3D silica extension plan](docs/SILICA_3D_PLAN.md): the next step toward a materials-journal paper (defects in amorphous SiO₂, physical validation, compute budget)
+- [3D silica extension plan](docs/SILICA_3D_PLAN.md): the next step toward a materials-journal paper (defects in amorphous SiO₂, physical validation)
+- [Compute estimate](docs/compute/README.md): GPU-hours, CPU core-hours and ACCESS credits for the rest of the project, from measured timings
 
 ## Status
 

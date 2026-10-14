@@ -16,9 +16,9 @@ This plan adds those three things for amorphous silica (a-SiO₂), reusing as mu
 **Target paper (working title):** *Placing rare defects in well-annealed amorphous silica with
 a conditional diffusion model.*
 
-**Estimated effort:** 14–16 weeks for the five of us. Compute, to be confirmed in week 1:
-~150–250 GPU-hours and ~500 CPU core-hours. This needs a cluster allocation; Kaggle alone
-is not enough (§8).
+**Estimated effort:** 14–16 weeks for the six of us. Compute (§8, `docs/compute/`):
+~350 GPU-hours (up to ~630) and ~1,550 CPU core-hours, about 30K–50K ACCESS credits with
+1 TB of storage. This needs a cluster allocation; Kaggle alone is not enough.
 
 ---
 
@@ -75,9 +75,10 @@ We also use, as is:
 - **Why the 100 K/ps glasses:** they make rare defects about 3× more common (§2.3). The model
   is conditioned on cooling rate (as DM2's conditional model is), so it can still be asked
   for 1 K/ps surroundings.
-- **Cost estimate, to be benchmarked in week 1:** 576 atoms with an 8 Å cutoff is about 40k
-  pairs per step. That's roughly 10 minutes per glass at 10 K/ps and 1 hour at 1 K/ps on one
-  core, so ~200–300 core-hours for the whole set.
+- **Cost, from a LAMMPS benchmark** (`docs/compute/in.silica_md_bench`: 200,000
+  atom-steps per second per core with 8 Å Born + DSF Coulomb): 2.9 ms per step for 576
+  atoms, so 0.24 h per glass at 100 K/ps, 0.58 h at 10 K/ps and 4.0 h at 1 K/ps on one core,
+  ~735 core-hours for the whole set including reruns.
 
 ### 2.3 Defect classes
 
@@ -229,22 +230,30 @@ Option B goes in the paper whatever we pick; option A or C is the showcase.
 - **WS4** sampler and experiments;
 - **WS5** physical validation, application, compute and writing.
 
-## 8. Compute budget (estimates; replaced by the week-1 benchmarks)
+## 8. Compute budget
 
-| Item | Estimate | Where |
+Full method, assumptions and tables: `docs/compute/README.md`, printed by
+`docs/compute/budget.py` (GPU-hours = variants × epochs × epoch time). Measured anchors:
+our 2D training and evaluation times, a CPU benchmark of DM2's NequIP against our EGNN
+(`bench_models.py`), DM2's reported A6000 training time, and a LAMMPS silica benchmark.
+
+| Item | Base plan | Where |
 |---|---|---|
-| MD dataset (§2.2) | 200–300 core-h | cluster CPUs |
-| Local melt-quench baseline (3 classes × ~2 radii × 256) | 100–200 core-h | cluster CPUs |
-| Main model: conditional NequIP × 3 seeds | 100–200 GPU-h (DM2 reports ~40 h on an A6000 for its conditional model) | cluster GPU (A100 / H100) |
-| EGNN-3D ablation × 3 seeds | 20–40 GPU-h | Kaggle / Colab |
-| Sampling and evaluation (~40 rows) | 20–30 GPU-h | Kaggle / Colab |
-| Machine-learned-potential re-relaxation, VDOS | 10–20 GPU-h + 50 core-h | either |
-| NEB application | ~200 core-h | cluster CPUs |
-| DFT spot check (stretch) | 2,000–5,000 core-h | cluster CPUs |
+| NequIP training: 32-variant screen → top 6 → top 2 → 3 seeds, plus a model without labels (11,723 epochs × 45 s) | 147 GPU-h | cluster GPUs |
+| EGNN-3D ablation: 4-variant screen, 3 seeds | 17 GPU-h | Kaggle / Colab or cluster |
+| Sampling: ~55 rows of 256 samples at 1,000 steps (28 / 91 / 271 GPU-h at 300 / 1,000 / 3,000 steps) | 91 GPU-h | cluster GPUs |
+| Physics checks (MACE re-relaxation, vibrations) and setup | 35 GPU-h | either |
+| **GPU total with 20% contingency** | **347 GPU-h (upper 627)** | ≈ 19K (34K) credits |
+| MD dataset | 735 core-h | cluster CPUs |
+| Local melt-quench baseline (1,536 attempts) | 641 core-h | cluster CPUs |
+| Relaxations, hand-built baseline, NEB application | 175 core-h | cluster CPUs |
+| **CPU total** | **1,551 core-h** (+2,000–5,000 for DFT) | ≈ 1.6K credits |
+| Storage | 1 TB | 10K credits |
 
-**Action for week 1:** apply for an NSF ACCESS *Explore* allocation (PSC Bridges-2 or NCSA
-Delta GPUs and CPUs). Also ask about the department cluster. Kaggle's 30 GPU-hours a week
-covers the ablation and evaluation, not the main model.
+**Action for week 1:** apply for an NSF ACCESS *Explore* allocation (200K credits ≈ 3,700
+GPU-hours on PSC Bridges-2), which covers the upper estimate about four times over. Also ask
+about CMU and CMU-Africa clusters. Kaggle's ~30 GPU-hours a week covers the 2D work left
+(22 GPU-h) and the EGNN-3D ablation, not the main model.
 
 ## 9. Risks
 
