@@ -16,9 +16,9 @@ This plan adds those three things for amorphous silica (a-SiO₂), reusing as mu
 **Target paper (working title):** *Placing rare defects in well-annealed amorphous silica with
 a conditional diffusion model.*
 
-**Estimated effort:** 14–16 weeks for the six of us. Compute (§8, `docs/compute/`):
-~350 GPU-hours (up to ~630) and ~1,550 CPU core-hours, about 30K–50K ACCESS credits with
-1 TB of storage. This needs a cluster allocation; Kaggle alone is not enough.
+**Estimated effort:** 14–16 weeks for the six of us. Compute, upper plan (§8, `docs/compute/`):
+653 GPU-hours, 6,861 CPU core-hours and 1 TB of storage, about 52K ACCESS credits (26% of
+a 200K Explore allocation). This needs a cluster allocation; Kaggle alone is not enough.
 
 ---
 
@@ -232,28 +232,36 @@ Option B goes in the paper whatever we pick; option A or C is the showcase.
 
 ## 8. Compute budget
 
-Full method, assumptions and tables: `docs/compute/README.md`, printed by
-`docs/compute/budget.py` (GPU-hours = variants × epochs × epoch time). Measured anchors:
-our 2D training and evaluation times, a CPU benchmark of DM2's NequIP against our EGNN
-(`bench_models.py`), DM2's reported A6000 training time, and a LAMMPS silica benchmark.
+Plan of record: the **upper plan** (64 screening variants, 3,000 sampler steps, DFT at its
+upper end, the 2D work left, and a 20% margin). Method, assumptions and all tables:
+`docs/compute/README.md`, printed by `docs/compute/budget.py` (GPU-hours = variants ×
+epochs × epoch time). Measured anchors: our 2D training and evaluation times, a CPU benchmark
+of DM2's NequIP against our EGNN (`bench_models.py`), DM2's reported A6000 training time, and
+a LAMMPS silica benchmark.
 
-| Item | Base plan | Where |
+| Item | Upper plan | Where |
 |---|---|---|
-| NequIP training: 32-variant screen → top 6 → top 2 → 3 seeds, plus a model without labels (11,723 epochs × 45 s) | 147 GPU-h | cluster GPUs |
-| EGNN-3D ablation: 4-variant screen, 3 seeds | 17 GPU-h | Kaggle / Colab or cluster |
-| Sampling: ~55 rows of 256 samples at 1,000 steps (28 / 91 / 271 GPU-h at 300 / 1,000 / 3,000 steps) | 91 GPU-h | cluster GPUs |
+| NequIP training: 64-variant screen → top 6 → top 2 → 3 seeds, plus a model without labels (15,979 epochs × 45 s) | 200 GPU-h | cluster GPUs |
+| EGNN-3D ablation: 4-variant screen, 3 seeds | 17 GPU-h | cluster or Kaggle |
+| Sampling: ~55 rows of 256 samples at 3,000 steps | 271 GPU-h | cluster GPUs |
 | Physics checks (MACE re-relaxation, vibrations) and setup | 35 GPU-h | either |
-| **GPU total with 20% contingency** | **347 GPU-h (upper 627)** | ≈ 19K (34K) credits |
+| 2D work left | 22 GPU-h | Kaggle or cluster |
+| **GPU total with 20% margin** | **653 GPU-h** | **35.3K credits** |
 | MD dataset | 735 core-h | cluster CPUs |
 | Local melt-quench baseline (1,536 attempts) | 641 core-h | cluster CPUs |
 | Relaxations, hand-built baseline, NEB application | 175 core-h | cluster CPUs |
-| **CPU total** | **1,551 core-h** (+2,000–5,000 for DFT) | ≈ 1.6K credits |
+| DFT check (upper end) | 5,000 core-h | cluster CPUs |
+| **CPU total** (20% margin on all but DFT) | **6,861 core-h** | **~6.9K credits** |
 | Storage | 1 TB | 10K credits |
+| **Total** | | **≈ 52K credits** |
+
+By phase: M0 18 GPU-h; M1 882 core-h; M2 156 GPU-h; M3 429 GPU-h and 799 core-h; M4 24
+GPU-h and 5,180 core-h; the 2D work 26 GPU-h. If every GPU job runs twice as slowly as
+planned, the total rises to about 87K credits, still within an Explore allocation.
 
 **Action for week 1:** apply for an NSF ACCESS *Explore* allocation (200K credits ≈ 3,700
-GPU-hours on PSC Bridges-2), which covers the upper estimate about four times over. Also ask
-about CMU and CMU-Africa clusters. Kaggle's ~30 GPU-hours a week covers the 2D work left
-(22 GPU-h) and the EGNN-3D ablation, not the main model.
+GPU-hours on PSC Bridges-2). Also ask about CMU and CMU-Africa clusters. Kaggle's ~30
+GPU-hours a week covers the 2D work and the EGNN-3D ablation, not the main model.
 
 ## 9. Risks
 

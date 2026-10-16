@@ -111,36 +111,103 @@ def cpu_rows() -> list[tuple]:
     ]
 
 
-def scenario(name: str, screen_variants: int, steps: int, show: bool = True) -> dict:
-    nq = training("NequIP", nequip_stages(screen_variants))
-    eg = training("EGNN-3D", EGNN_STAGES)
-    smp = sampling_rows(steps)
+GPU_CONTINGENCY = 1.2  # failed runs, reruns, surprises
+CPU_CONTINGENCY = 1.2
+DFT_CORE_H = 5_000  # optional DFT check, upper end of 2,000-5,000
+STORAGE_TB = 1
+
+
+def gpu_3d(screen_variants: int, steps: int) -> dict[str, list]:
     other = [
-        ("Physics checks: MACE re-relaxation of ~2,300 structures, vibrations", 20),
-        ("Setup, benchmarks and debugging", 15),
+        ("Physics checks: MACE re-relaxation of ~2,300 structures, vibrations", 20.0),
+        ("Setup, benchmarks and debugging", 15.0),
     ]
-    sub = sum(r[4] for r in nq) + sum(r[4] for r in eg) + sum(r[2] for r in smp)
-    sub += sum(h for _, h in other)
-    total = 1.2 * sub
-    if show:
-        print(f"\n## {name}: screening {screen_variants} variants, {steps} sampler steps\n")
-        for title, rows in (("NequIP", nq), ("EGNN-3D", eg)):
-            print(
-                f"| {title} stage | variants | epochs each | epochs | GPU-h |\n|---|---|---|---|---|"
+    return {
+        "nequip": training("NequIP", nequip_stages(screen_variants)),
+        "egnn": training("EGNN-3D", EGNN_STAGES),
+        "sampling": sampling_rows(steps),
+        "other": other,
+    }
+
+
+def gpu_3d_hours(parts: dict[str, list]) -> float:
+    return (
+        sum(r[4] for r in parts["nequip"])
+        + sum(r[4] for r in parts["egnn"])
+        + sum(r[2] for r in parts["sampling"])
+        + sum(h for _, h in parts["other"])
+    )
+
+
+def rows_2d() -> list[tuple]:
+    return [
+        ("Train with a range of region sizes (D2 and D1- recipes)", 2, 1000 * T4_EPOCH_2D / 3600),
+        ("Size test on 1,024-atom glasses (5 rows, 4x atoms)", 5, 4 * T4_ROW_2D),
+        ("Slowly cooled hosts (5 rows)", 5, T4_ROW_2D),
+        ("Choose w per model on validation (6 models x 3 weights)", 18, T4_ROW_2D),
+        ("Evaluate the region-range models (2 x 3 sizes)", 6, T4_ROW_2D),
+        ("Larger region for D1+ (3 rows)", 3, T4_ROW_2D),
+    ]
+
+
+def phases(parts: dict[str, list], gpu_2d: float, cpu: list[tuple]) -> list[tuple]:
+    """(weeks, milestone, GPU-h, core-h), contingency included."""
+    nq = {r[0].split(" (")[0]: r[4] for r in parts["nequip"]}
+    eg = {r[0].split(" (")[0]: r[4] for r in parts["egnn"]}
+    smp = {r[0]: r[2] for r in parts["sampling"]}
+    other = dict(parts["other"])
+    calib = smp.pop("Step-count calibration (100-3,000 steps, 64 samples)")
+    md, lmq, relax, neb = (h for _, h in cpu)
+    g, c = GPU_CONTINGENCY, CPU_CONTINGENCY
+    return [
+        ("1-3", "Finish the 2D paper (optional runs)", gpu_2d * g, 0.0),
+        (
+            "1-2",
+            "M0 Setup: allocation, potential check, benchmarks",
+            other["Setup, benchmarks and debugging"] * g,
+            0.0,
+        ),
+        ("2-5", "M1 Data: silica glasses, detectors, stability checks", 0.0, md * c),
+        (
+            "4-8",
+            "M2 Model: screening, top 6, step calibration",
+            (nq["Screening"] + nq["Top 6 continue"] + eg["Screening"] + calib) * g,
+            0.0,
+        ),
+        (
+            "7-11",
+            "M3 Main results: full runs, seeds, all sampling rows, baselines",
+            (
+                nq["Top 2 continue to full length"]
+                + nq["Best variant, 2 more seeds"]
+                + nq["Model without labels"]
+                + eg["Best variant, 3 seeds"]
+                + sum(smp.values())
             )
-            for d, v, e, te, h in rows:
-                print(f"| {d} | {v} | {e:,} | {te:,} | {h:.1f} |")
-            print()
-        print("| Sampling | rows | GPU-h |\n|---|---|---|")
-        for d, r, h in smp:
-            print(f"| {d} | {r} | {h:.1f} |")
-        for d, h in other:
-            print(f"| {d} | | {h:.0f} |")
-        print(
-            f"\nSubtotal {sub:.0f} GPU-h; with 20% contingency {total:.0f} GPU-h "
-            f"= {total * CREDITS_PER_GPU_HOUR:,.0f} credits"
-        )
-    return {"gpu_h": total}
+            * g,
+            (lmq + relax) * c,
+        ),
+        (
+            "10-13",
+            "M4 Physics checks, energy barriers, DFT",
+            other["Physics checks: MACE re-relaxation of ~2,300 structures, vibrations"] * g,
+            neb * c + DFT_CORE_H,
+        ),
+        ("12-16", "M5 Paper: figures, release", 0.0, 0.0),
+    ]
+
+
+def print_parts(parts: dict[str, list]) -> None:
+    for title, key in (("NequIP", "nequip"), ("EGNN-3D", "egnn")):
+        print(f"| {title} stage | variants | epochs each | epochs | GPU-h |\n|---|---|---|---|---|")
+        for d, v, e, te, h in parts[key]:
+            print(f"| {d} | {v} | {e:,} | {te:,} | {h:.1f} |")
+        print()
+    print("| Sampling and checks | rows | GPU-h |\n|---|---|---|")
+    for d, r, h in parts["sampling"]:
+        print(f"| {d} | {r} | {h:.1f} |")
+    for d, h in parts["other"]:
+        print(f"| {d} | | {h:.0f} |")
 
 
 def main() -> None:
@@ -155,44 +222,57 @@ def main() -> None:
         f"100 K/ps {glass_core_hours(100):.2f} h, 1 K/ps {glass_core_hours(1):.2f} h"
     )
 
-    # 2D work left (Kaggle T4 GPUs, free)
-    rows_2d = [
-        ("Train with a range of region sizes (D2 and D1- recipes)", 2, 1000 * T4_EPOCH_2D / 3600),
-        ("Size test on 1,024-atom glasses (5 rows, 4x atoms)", 5, 4 * T4_ROW_2D),
-        ("Slowly cooled hosts (5 rows)", 5, T4_ROW_2D),
-        ("Choose w per model on validation (6 models x 3 weights)", 18, T4_ROW_2D),
-        ("Evaluate the region-range models (2 x 3 sizes)", 6, T4_ROW_2D),
-        ("Larger region for D1+ (3 rows)", 3, T4_ROW_2D),
-    ]
-    t2d = sum(n * h for _, n, h in rows_2d)
-    print("\n## 2D work left (T4 GPU-hours)\n\n| Item | runs/rows | GPU-h |\n|---|---|---|")
-    for d, n, h in rows_2d:
-        print(f"| {d} | {n} | {n * h:.1f} |")
-    print(f"\nTotal {t2d:.0f} T4 GPU-h (about one week of Kaggle's free quota)")
-
-    base = scenario("3D base plan", 32, 1000)
-    upper = scenario("3D upper estimate", 64, 3000)
+    # ---- plan of record: the upper plan (64 screening variants, 3,000 sampler steps)
+    plan = gpu_3d(64, 3000)
+    gpu3d = gpu_3d_hours(plan)
+    gpu2d = sum(n * h for _, n, h in rows_2d())
     cpu = cpu_rows()
-    cpu_total = sum(h for _, h in cpu)
+    cpu_sub = sum(h for _, h in cpu)
+    gpu_total = (gpu3d + gpu2d) * GPU_CONTINGENCY
+    cpu_total = cpu_sub * CPU_CONTINGENCY + DFT_CORE_H
+
+    print("\n# Plan of record: upper plan (64 screening variants, 3,000 sampler steps)")
+    print("\n## 2D work left (T4 GPU-hours)\n\n| Item | runs/rows | GPU-h |\n|---|---|---|")
+    for d, n, h in rows_2d():
+        print(f"| {d} | {n} | {n * h:.1f} |")
+    print(f"\n2D subtotal {gpu2d:.1f} GPU-h\n\n## 3D GPU work\n")
+    print_parts(plan)
+    print(f"\n3D subtotal {gpu3d:.1f} GPU-h")
     print("\n## CPU (core-hours)\n\n| Item | core-h |\n|---|---|")
     for d, h in cpu:
         print(f"| {d} | {h:.0f} |")
+    print(f"| Optional DFT check (upper end) | {DFT_CORE_H:,} |")
+
+    g_cr = gpu_total * CREDITS_PER_GPU_HOUR
+    c_cr = cpu_total * CREDITS_PER_CORE_HOUR
+    s_cr = STORAGE_TB * CREDITS_PER_TB
+    print("\n## Totals (20% contingency on GPU and on non-DFT CPU)\n")
+    print("| Resource | Amount | ACCESS credits |\n|---|---|---|")
+    print(f"| GPU | ({gpu3d:.0f} + {gpu2d:.0f}) x 1.2 = {gpu_total:.0f} GPU-h | {g_cr:,.0f} |")
     print(
-        f"\nTotal {cpu_total:,.0f} core-h (+2,000-5,000 core-h if the optional DFT check is done)"
+        f"| CPU | {cpu_sub:,.0f} x 1.2 + {DFT_CORE_H:,} = {cpu_total:,.0f} core-h | {c_cr:,.0f} |"
+    )
+    print(f"| Storage | {STORAGE_TB} TB | {s_cr:,.0f} |")
+    print(f"| Total | | {g_cr + c_cr + s_cr:,.0f} ({(g_cr + c_cr + s_cr) / 2000:.0f}% of 200K) |")
+
+    print(
+        "\n## By phase\n\n| Weeks | Milestone | GPU-h | core-h | credits |\n|---|---|---|---|---|"
+    )
+    tg = tc = 0.0
+    for weeks, name, gh, ch in phases(plan, gpu2d, cpu):
+        tg, tc = tg + gh, tc + ch
+        print(
+            f"| {weeks} | {name} | {gh:.0f} | {ch:,.0f} | {gh * CREDITS_PER_GPU_HOUR + ch * CREDITS_PER_CORE_HOUR:,.0f} |"
+        )
+    print(
+        f"| | Total (+ storage {s_cr:,.0f}) | {tg:.0f} | {tc:,.0f} | {tg * CREDITS_PER_GPU_HOUR + tc * CREDITS_PER_CORE_HOUR + s_cr:,.0f} |"
     )
 
-    print("\n## ACCESS credits\n\n| | Base | Upper |\n|---|---|---|")
-    g_b, g_u = base["gpu_h"] * CREDITS_PER_GPU_HOUR, upper["gpu_h"] * CREDITS_PER_GPU_HOUR
-    c_b, c_u = cpu_total * CREDITS_PER_CORE_HOUR, (cpu_total + 5000) * CREDITS_PER_CORE_HOUR
+    base = gpu_3d_hours(gpu_3d(32, 1000))
     print(
-        f"| GPU | {base['gpu_h']:.0f} GPU-h = {g_b:,.0f} | {upper['gpu_h']:.0f} GPU-h = {g_u:,.0f} |"
+        f"\nLower bound for reference (32 screening variants, 1,000 sampler steps): "
+        f"{(base + gpu2d) * GPU_CONTINGENCY:.0f} GPU-h"
     )
-    print(
-        f"| CPU | {cpu_total:,.0f} core-h = {c_b:,.0f} | {cpu_total + 5000:,.0f} core-h (with DFT) "
-        f"= {c_u:,.0f} |"
-    )
-    print(f"| Storage | 1 TB = {CREDITS_PER_TB:,} | 1 TB = {CREDITS_PER_TB:,} |")
-    print(f"| Total | {g_b + c_b + CREDITS_PER_TB:,.0f} | {g_u + c_u + CREDITS_PER_TB:,.0f} |")
 
 
 if __name__ == "__main__":
