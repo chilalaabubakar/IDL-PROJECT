@@ -8,7 +8,8 @@
 Needs <run>/samples.npz and <run>/relaxed.npz. Writes <run>/metrics.json: for each metric
 an estimate with a 95% bootstrap CI over samples ([estimate, lower, upper]).
 ``also_unrelaxed=true`` adds local realism before relaxation (the "ceiling" row for B2).
-[Ticket E-4]
+Samples made on validation hosts (``sample.py split=val``) are compared with the validation
+split's natural defects and glasses, so the test split stays untouched. [Ticket E-4]
 """
 
 from __future__ import annotations
@@ -112,14 +113,16 @@ def main() -> None:
 
     ok_before = success(pre, request, th).double().numpy()
     ok_after = success(post, request, th).double().numpy()
-    test = load_split(data_dir / "test.npz")  # global-realism reference
-    ref = cached_natural_windows(data_dir, "test", defect, r_loc)
+    ref_split = str(samp["split"]) if "split" in samp else "test"  # where the hosts came from
+    test = load_split(data_dir / f"{ref_split}.npz")  # global-realism reference
+    ref = cached_natural_windows(data_dir, ref_split, defect, r_loc)
     gen = local_features(post, request.target, torch.from_numpy(rel["disp"]).double(), r_loc)
     seconds = float(timing.get("sampling_seconds", 0.0)) + float(timing.get("relax_seconds", 0.0))
     metrics = {
         "run": str(run),
         "defect": DefectClass(defect).name,
         "mode": str(samp["mode"]),
+        "split": ref_split,
         "n_samples": n,
         "relax_converged": float(rel["converged"].mean()),
         "success_before_relax": list(bootstrap_ci(ok_before)),
