@@ -35,3 +35,14 @@ def test_request_bootstrap_is_repeatable_and_retains_point_estimate():
     assert result == analysis.ci([0.0, 1.0, 1.0, 0.0], np.mean, 100, 7)
     assert result[0] == 0.5
     assert 0 <= result[1] <= result[2] <= 1
+
+
+def test_weighted_bootstrap_matches_expanded_samples_with_empty_windows():
+    from glassdiff.eval.metrics import QUANTILE_LEVELS, quantile_w1
+
+    rng = np.random.default_rng(8)
+    items = [rng.normal(size=n) for n in [0, 3, 12, 1, 8, 2]]
+    reference = [rng.normal(size=19)]
+    q = np.quantile(reference[0], QUANTILE_LEVELS)
+    expected = analysis.ci(items, lambda x: quantile_w1(analysis.pooled(x), q), 100, 17)
+    assert analysis.w1(items, reference, 100, 17) == pytest.approx(expected, abs=1e-12)
