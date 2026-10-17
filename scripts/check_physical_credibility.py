@@ -30,6 +30,7 @@ from glassdiff.data.dataset import load_split
 from glassdiff.eval.metrics import QUANTILE_LEVELS, nearest_atom, success
 from glassdiff.geometry import minimum_image
 from glassdiff.md.lammps_quench import _PAIR_COMMANDS
+from glassdiff.physics.fire import fire_minimize
 from glassdiff.physics.ka_potential import ka_energy
 from glassdiff.types import Request, Structures
 
@@ -417,6 +418,19 @@ def md_worker(job):
             probe.commands_string("minimize 0 1e-6 100000 1000000\nrun 0")
             qxyz = np.array(probe.gather_atoms("x", 1, 3)).reshape(-1, 3).copy()
             quenched = Structures(torch.tensor(qxyz[:, :2])[None].double(), s.types, s.box)
+            residual = float(probe.get_thermo("fmax"))
+            minimizer = "cg"
+            polish_steps = 0
+            if residual > 1e-6:
+                polished = fire_minimize(quenched, fmax=1e-6, max_steps=100000)
+                if not bool(polished.converged[0]):
+                    raise ValueError(
+                        f"Snapshot refinement failed: {group} sample={i} T={temperature} step={step}"
+                    )
+                quenched = polished.structures
+                residual = float(polished.max_force[0])
+                polish_steps = int(polished.n_steps[0])
+                minimizer = "cg+torch_fire"
             label = int(detect_defects(quenched, th)[0, atom])
             disp = minimum_image(
                 quenched.pos[:, atom : atom + 1] - torch.tensor(target)[None, None], s.box
@@ -428,7 +442,9 @@ def md_worker(job):
                     thermal_same_atom=int(thermal_label == 3),
                     quenched_same_atom=int(label == 3),
                     quenched_site=int(label == 3 and disp < 0.5),
-                    max_force=float(probe.get_thermo("fmax")),
+                    max_force=residual,
+                    minimizer=minimizer,
+                    polish_steps=polish_steps,
                     temperature=float(main.get_thermo("temp")),
                 )
             )
