@@ -1,0 +1,94 @@
+[
+  {
+    "setting": "fixed w = 2",
+    "rows": [
+      "cond_smax1_w2_s100_host_D2",
+      "seed1_cond_smax1_w2_s100_host_D2",
+      "seed2_cond_smax1_w2_s100_host_D2"
+    ],
+    "complete": true,
+    "success": [
+      0.559,
+      0.344,
+      0.434
+    ],
+    "w1": [
+      0.056,
+      0.045,
+      0.05
+    ],
+    "success_mean": 0.4453125,
+    "success_sd": 0.1079002134135401,
+    "w1_mean": 0.0506579456793605,
+    "w1_sd": 0.005536791535485773
+  },
+  {
+    "setting": "fixed w = 6",
+    "rows": [
+      "cond_smax1_w6_s100_host_D2",
+      "seed1_cond_smax1_w6_s100_host_D2",
+      "seed2_cond_smax1_w6_s100_host_D2"
+    ],
+    "complete": true,
+    "success": [
+      0.793,
+      0.625,
+      0.719
+    ],
+    "w1": [
+      0.089,
+      0.058,
+      0.068
+    ],
+    "success_mean": 0.7122395833333334,
+    "success_sd": 0.08417341853590618,
+    "w1_mean": 0.0717496607785715,
+    "w1_sd": 0.015907478362761445
+  },
+  {
+    "setting": "w per model, realism rule {0: 2.0, 1: 2.0, 2: 2.0}",
+    "rows": [
+      "cond_smax1_w2_s100_host_D2",
+      "seed1_cond_smax1_w2_s100_host_D2",
+      "seed2_cond_smax1_w2_s100_host_D2"
+    ],
+    "complete": true,
+    "success": [
+      0.559,
+      0.344,
+      0.434
+    ],
+    "w1": [
+      0.056,
+      0.045,
+      0.05
+    ],
+    "success_mean": 0.4453125,
+    "success_sd": 0.1079002134135401,
+    "w1_mean": 0.0506579456793605,
+    "w1_sd": 0.005536791535485773
+  },
+  {
+    "setting": "w per model, success rule {0: 4.0, 1: 8.0, 2: 8.0}",
+    "rows": [
+      "wtest_seed0_cond_smax1_w4_s100_host_D2",
+      "wtest_seed1_cond_smax1_w8_s100_host_D2",
+      "wtest_seed2_cond_smax1_w8_s100_host_D2"
+    ],
+    "complete": true,
+    "success": [
+      0.742,
+      0.695,
+      0.773
+    ],
+    "w1": [
+      0.069,
+      0.069,
+      0.091
+    ],
+    "success_mean": 0.7369791666666666,
+    "success_sd": 0.039322054350368486,
+    "w1_mean": 0.07636954646645742,
+    "w1_sd": 0.013050823488301047
+  }
+]
