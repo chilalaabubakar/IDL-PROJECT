@@ -1,0 +1,11 @@
+# Choosing the guidance weight w for each trained model on validation hosts
+# (scripts/select_w.py; notebooks/kaggle_extras.ipynb, row 1). Fixed before any results.
+#
+# realism rule: the most successful w whose validation local W1 is at most w1_max.
+#   w1_max = 0.07, about the three-seed mean of the headline D2 rows at w = 6 (0.072) and
+#   below hand insertion (0.087): "as natural as the headline rows".
+# success rule: the smallest w whose validation success is at least success_min.
+#   success_min = 0.70, about the three-seed mean of the headline D2 rows at w = 6 (0.71).
+rules:
+  realism: {w1_max: 0.07}
+  success: {success_min: 0.70}

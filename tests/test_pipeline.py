@@ -80,6 +80,7 @@ def test_pipeline_end_to_end(tmp_path, make_lattice, monkeypatch):
         "optim.n_updates=3",
         "val_every=3",
         "noise.sigma_max=0.8",
+        "requests.host_r_out_range=[2.0, 3.0]",  # R_out drawn per host request
         monkeypatch=monkeypatch,
     )
     ckpt = next(runs.glob("*_egnn_cond/ckpt.pt"))
@@ -134,6 +135,74 @@ def test_pipeline_end_to_end(tmp_path, make_lattice, monkeypatch):
     )
     metrics = json.loads((run / "metrics.json").read_text())
     assert len(metrics["success_after_relax"]) == 3 and "w1_pe_atom" in metrics["local"]
+    assert metrics["split"] == "test"
+
+    # choosing w on validation hosts, then the seam profile of a test run
+    wval = tmp_path / "wval"
+    for w in (1, 3):
+        _run(
+            "sample",
+            "--config",
+            str(ROOT / "configs/sampler/cfg.yaml"),
+            f"data={data}",
+            f"runs_root={wval}",
+            "threads=1",
+            f"ckpt={ckpt}",
+            "defect=D2",
+            "split=val",
+            "request.mode=host",
+            "request.host_r_out=2.5",
+            "n_samples=2",
+            "batch_size=2",
+            "schedule.n_noisy=3",
+            "schedule.n_final=1",
+            f"strategy.guidance_w={w}",
+            f"name=wval_m0_w{w}_s4_host_D2",
+            monkeypatch=monkeypatch,
+        )
+        vrun = next(wval.glob(f"*_wval_m0_w{w}_s4_host_D2"))
+        _run(
+            "relax", "--config", eval_cfg, f"run={vrun}", "relax.fmax=1e-3", monkeypatch=monkeypatch
+        )
+        _run(
+            "evaluate",
+            "--config",
+            eval_cfg,
+            f"run={vrun}",
+            f"data={data}",
+            "bootstrap.n_resamples_w1=10",
+            "local.r_loc=2.0",
+            monkeypatch=monkeypatch,
+        )
+        assert json.loads((vrun / "metrics.json").read_text())["split"] == "val"
+    sel = tmp_path / "selection.json"
+    _run(
+        "select_w",
+        "--config",
+        str(ROOT / "configs/eval/select_w.yaml"),
+        f"runs=[{wval}/*]",
+        f"out={sel}",
+        monkeypatch=monkeypatch,
+    )
+    chosen = json.loads(sel.read_text())["models"]["wval_m0_s4_host_D2"]["chosen_w"]
+    assert set(chosen) == {"realism", "success"} and set(chosen.values()) <= {1.0, 3.0}
+    seam = tmp_path / "seam" / "seam.json"
+    _run(
+        "seam_profile",
+        "--config",
+        eval_cfg,
+        f"data={data}",
+        f"runs=[{run}]",
+        f"out={seam}",
+        "r_max=3.0",
+        "r_locs=[1.5, 2.5]",
+        "n_boot=10",
+        monkeypatch=monkeypatch,
+    )
+    profile = json.loads(seam.read_text())
+    row = profile["runs"][run.name.split("_", 1)[1]]
+    assert row["r_out"] == 2.5 and len(row["shells"]) == 3 and len(row["windows"]) == 2
+    assert seam.with_suffix(".png").exists() and "D2" in profile["floor"]
     sens_args = (f"data={data}", "bootstrap.n_resamples_w1=10", "local.r_loc=2.0")
     _run("sensitivity", "--config", eval_cfg, f"run={run}", *sens_args, monkeypatch=monkeypatch)
     sens = json.loads((run / "sensitivity.json").read_text())["variants"]

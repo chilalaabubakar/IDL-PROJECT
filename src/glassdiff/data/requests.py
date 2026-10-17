@@ -7,7 +7,9 @@ drop the label to NULL with probability ``p_uncond`` (classifier-free guidance; 
 
 Modes: "centre" pins only the centre atom; "patch" pins the centre and every atom within
 ``patch_radius``; "host" (Task B) pins the centre and every atom farther than
-``host_r_out``, so the model regenerates the disk around the centre.
+``host_r_out``, so the model regenerates the disk around the centre. With
+``host_r_out_range = (lo, hi)`` each host request draws its own R_out uniformly from that
+range instead, so one model can be sampled at any R_out inside it.
 """
 
 from __future__ import annotations
@@ -39,19 +41,28 @@ class RequestSamplerConfig:
     p_defect_centre: float = 0.5  # otherwise a uniform random atom with its true label
     patch_radius: float = 1.5  # first shell
     host_r_out: float = 4.0  # Task B: pin every atom farther than this from the centre
+    host_r_out_range: tuple[float, float] | None = None  # if set, R_out ~ U(lo, hi) per request
     p_uncond: float = 0.15  # classifier-free guidance dropout (label -> NULL, pins kept)
 
 
 def pin_mask_for_mode(
-    s: Structures, centre: Tensor, mode: Tensor, patch_radius: float, host_r_out: float
+    s: Structures,
+    centre: Tensor,
+    mode: Tensor,
+    patch_radius: float,
+    host_r_out: float | Tensor,
 ) -> Tensor:
-    """[B, N] bool pins for per-structure centre indices [B] and mode indices [B] (into MODES)."""
+    """[B, N] bool pins for per-structure centre indices [B] and mode indices [B] (into MODES).
+    ``host_r_out`` is one radius, or one per structure ([B])."""
     bidx = torch.arange(s.batch_size, device=s.pos.device)
     target = s.pos[bidx, centre]
     dist = minimum_image(s.pos - target[:, None, :], s.box).norm(dim=-1)
+    r_out = torch.as_tensor(host_r_out, dtype=dist.dtype, device=dist.device)
+    if r_out.ndim == 1:
+        r_out = r_out[:, None]
     pin = torch.zeros_like(dist, dtype=torch.bool)
     pin |= (mode == MODES.index("patch"))[:, None] & (dist <= patch_radius)
-    pin |= (mode == MODES.index("host"))[:, None] & (dist > host_r_out)
+    pin |= (mode == MODES.index("host"))[:, None] & (dist > r_out)
     pin[bidx, centre] = True
     return pin
 
@@ -83,6 +94,10 @@ class RequestSampler:
             sites = torch.nonzero(labels_cpu[b] == cls).flatten()
             centre[b] = sites[int(torch.randint(len(sites), (1,), generator=generator))]
         drop = torch.rand(b_size, generator=generator) < self.cfg.p_uncond
+        r_out: float | Tensor = self.cfg.host_r_out
+        if self.cfg.host_r_out_range is not None:  # drawn after the others: same stream as before
+            lo, hi = (float(v) for v in self.cfg.host_r_out_range)
+            r_out = (lo + (hi - lo) * torch.rand(b_size, generator=generator)).to(dev)
 
         mode, centre, drop = mode.to(dev), centre.to(dev), drop.to(dev)
         bidx = torch.arange(b_size, device=dev)
@@ -91,7 +106,7 @@ class RequestSampler:
         label[bidx, centre] = torch.where(
             drop, torch.full_like(defect, int(LabelToken.NULL)), defect_token(defect)
         )
-        pin = pin_mask_for_mode(clean, centre, mode, self.cfg.patch_radius, self.cfg.host_r_out)
+        pin = pin_mask_for_mode(clean, centre, mode, self.cfg.patch_radius, r_out)
         return Request(
             target=clean.pos[bidx, centre],
             defect=defect,

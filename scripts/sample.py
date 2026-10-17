@@ -6,8 +6,9 @@
         request.mode=host strategy.guidance_w=2
 
 Species and boxes are taken from the test split (cycled), so every sample has the dataset's
-composition. Task B ("host" requests) uses test glasses as hosts. Writes a run directory
-with samples.npz (positions, types, boxes, the requests) and timing.json.
+composition. Task B ("host" requests) uses test glasses as hosts. ``split=val`` takes them
+from the validation split instead (for choosing settings without touching test). Writes a run
+directory with samples.npz (positions, types, boxes, the requests, the split) and timing.json.
 """
 
 from __future__ import annotations
@@ -56,7 +57,8 @@ def main() -> None:
     schedule = ScoreDynamicsSchedule(**schedule_cfg)
 
     data_dir = Path(cfg["data"])
-    test = load_split(data_dir / "test.npz").structures
+    split = str(cfg.get("split", "test"))
+    test = load_split(data_dir / f"{split}.npz").structures  # hosts (named test: the default)
     patches = PatchLibrary.load(data_dir / "patches_train.npz") if mode == "patch" else None
     n_samples, batch_size = int(cfg["n_samples"]), int(cfg["batch_size"])
 
@@ -98,7 +100,9 @@ def main() -> None:
             out[key].append(val.detach().cpu())
 
     arrays = {k: torch.cat(v).numpy() for k, v in out.items()}
-    np.savez_compressed(run_dir / "samples.npz", defect=np.int64(defect), mode=mode, **arrays)
+    np.savez_compressed(
+        run_dir / "samples.npz", defect=np.int64(defect), mode=mode, split=split, **arrays
+    )
     timing = {
         "sampling_seconds": float(sum(seconds)),
         "seconds_per_sample": float(sum(seconds)) / n_samples,
