@@ -24,7 +24,7 @@ import torch
 
 from glassdiff.analysis.defects import DefectThresholds
 from glassdiff.data.dataset import load_split
-from glassdiff.eval.metrics import QUANTILE_LEVELS, local_features, quantile_w1, success
+from glassdiff.eval.metrics import QUANTILE_LEVELS, local_features, success
 from glassdiff.geometry import minimum_image
 from glassdiff.physics.ka_potential import ka_energy
 from glassdiff.types import DefectClass, Request, Structures
@@ -54,11 +54,47 @@ def pooled(items):
 
 
 def w1(items, reference, nboot, seed):
+    """Exact request bootstrap with sorted weighted order statistics.
+
+    Each atomic value has its request's bootstrap multiplicity. Searching cumulative
+    multiplicities reproduces NumPy's linear quantiles of the expanded bootstrap
+    sample without concatenating and sorting that sample on every iteration.
+    """
     ref = pooled(reference)
-    if not len(ref):
+    values = pooled(items)
+    if not len(ref) or not len(values):
         return [None, None, None]
     q = np.quantile(ref, QUANTILE_LEVELS)
-    return ci(items, lambda x: quantile_w1(pooled(x), q), nboot, seed)
+    order = np.argsort(values)
+    values = values[order]
+    owners = np.repeat(np.arange(len(items)), [len(x) for x in items])[order]
+
+    def statistic(counts):
+        cumulative = np.cumsum(counts[owners])
+        if cumulative[-1] == 0:
+            return float("nan")
+        ranks = QUANTILE_LEVELS * (cumulative[-1] - 1)
+        lower = np.floor(ranks).astype(np.int64)
+        upper = np.ceil(ranks).astype(np.int64)
+        a = values[np.searchsorted(cumulative, lower, side="right")]
+        b = values[np.searchsorted(cumulative, upper, side="right")]
+        quantiles = a + (b - a) * (ranks - lower)
+        return float(np.abs(quantiles - q).mean())
+
+    point = statistic(np.ones(len(items), dtype=np.int64))
+    if len(items) < 2:
+        return [point, None, None]
+    rng = np.random.default_rng(seed)
+    vals = np.asarray(
+        [
+            statistic(np.bincount(rng.integers(len(items), size=len(items)), minlength=len(items)))
+            for _ in range(nboot)
+        ]
+    )
+    vals = vals[np.isfinite(vals)]
+    if len(vals) < nboot * 0.95:
+        return [point, None, None]
+    return [point, *map(float, np.quantile(vals, [0.025, 0.975]))]
 
 
 def features(s, centres, radius):
@@ -128,6 +164,7 @@ def main():
         json.loads((args.data / "meta.json").read_text())["defects"]["thresholds"]
     )
     rows, shells, masks, skipped, cache = [], [], [], [], {}
+    floor_metrics, floor_shells = {}, {}
     with torch.no_grad():
         for path in paths:
             if not all((path / f).exists() for f in ["samples.npz", "relaxed.npz"]):
@@ -217,7 +254,13 @@ def main():
                 )
                 f = floor if ix is None else {k: [v[i] for i in ix] for k, v in gen.items()}
                 for k in ref:
-                    v = w1(f[k], ref[k], args.bootstrap, args.seed)
+                    floor_key = (key, k)
+                    if ix is None and floor_key in floor_metrics:
+                        v = floor_metrics[floor_key]
+                    else:
+                        v = w1(f[k], ref[k], args.bootstrap, args.seed)
+                        if ix is None:
+                            floor_metrics[floor_key] = v
                     row.update({f"w1_{k}{suffix}": z for suffix, z in zip(["", "_lo", "_hi"], v)})
                 rows.append(row)
                 rad, energy = (
@@ -230,7 +273,13 @@ def main():
                     hi = min(lo + 1.0, args.r_max)
                     items = [e[(r >= lo) & (r < hi)] for r, e in zip(rad, energy)]
                     reference = [e[(r >= lo) & (r < hi)] for r, e in zip(*ref_rad)]
-                    v = w1(items, reference, args.bootstrap, args.seed)
+                    floor_key = (key, float(lo), float(hi))
+                    if ix is None and floor_key in floor_shells:
+                        v = floor_shells[floor_key]
+                    else:
+                        v = w1(items, reference, args.bootstrap, args.seed)
+                        if ix is None:
+                            floor_shells[floor_key] = v
                     shells.append(
                         dict(
                             run=str(path),
