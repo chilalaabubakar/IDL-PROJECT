@@ -21,10 +21,11 @@ CREDITS_PER_CORE_HOUR = 1.0  # assumption: check allocations.access-ci.org/excha
 # one 256-sample evaluation row (200 sampler steps + relaxation) takes 15 min (median).
 T4_EPOCH_2D = 50 * 0.32  # s; 800 training glasses / batch 16 = 50 updates per epoch
 T4_ROW_2D = 0.25  # GPU-h per evaluation row
-# 3D silica, 576-atom cells, batch 16 (V100/A6000-class GPU). DM2 trains 30,000 updates on
-# 3,000-atom cells in ~40 h on an A6000 (4.8 s per update for 48,000 atoms), i.e. 0.1 ms per
-# atom per update; our CPU benchmark (bench_models.py) gives NequIP 2.9x our EGNN per atom,
-# which predicts about half that. We plan with the slower DM2 figure:
+# 3D silica, 576-atom cells, batch 16, on a V100. Our CPU benchmark (bench_models.py) gives
+# DM2's NequIP 2.9x our EGNN per atom; our EGNN takes 66-90 us per atom per update on a T4
+# (0.27-0.37 s for 16 x 256 atoms), so NequIP needs ~1.8-2.4 s per update on a T4 and
+# ~0.9-1.2 s on a V100 (about twice a T4). DM2's paper gives no training time. We plan with
+# the slow end; every training run writes its measured time to timing.json.
 UPDATE_NEQUIP = 1.2  # s per update (16 x 576 atoms)
 UPDATE_EGNN3D = 0.35  # s per update (EGNN measured in 2D x 3D neighbour count)
 FORWARD_FRACTION = 0.21  # measured: forward pass / training step, per atom (NequIP, CPU)

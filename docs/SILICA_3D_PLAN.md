@@ -236,8 +236,8 @@ Plan of record: the **upper plan** (64 screening variants, 3,000 sampler steps, 
 upper end, the 2D work left, and a 20% margin). Method, assumptions and all tables:
 `docs/compute/README.md`, printed by `docs/compute/budget.py` (GPU-hours = variants ×
 epochs × epoch time). Measured anchors: our 2D training and evaluation times, a CPU benchmark
-of DM2's NequIP against our EGNN (`bench_models.py`), DM2's reported A6000 training time, and
-a LAMMPS silica benchmark.
+of DM2's NequIP against our EGNN (`bench_models.py`) applied to our T4 timings, and a LAMMPS
+silica benchmark. Training scripts and launchers: `docs/SILICA_QUICKSTART.md`.
 
 | Item | Upper plan | Where |
 |---|---|---|
