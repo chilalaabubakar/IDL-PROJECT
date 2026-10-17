@@ -7,7 +7,8 @@ Measured 2026-10-14 on 4 CPU cores: NequIP (DM2 settings, 0.60 M parameters) 8.3
 training step and 1.8 s per forward pass on a 3,000-atom glass (33 edges per atom within
 5 A); our EGNN 0.25 s per training step on a 256-atom 2D glass. Per atom, a NequIP training
 step costs 2.9x an EGNN one, and a NequIP forward pass 0.21x a NequIP training step.
-These ratios are used in budget.py.
+These ratios are used in budget.py. (Our conditional model, src/glassdiff/silica/model.py,
+1.0 M parameters, takes 6.7 s per step on the same 3,000-atom glass.)
 """
 
 # e3nn loads a pickled constants file at import, so torch.load must be patched first.

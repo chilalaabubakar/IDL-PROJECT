@@ -56,8 +56,9 @@ day, or 4 GPUs for under five days. The 882 core-hours of M1 take about 7 hours 
 |---|---|---|
 | 2D training, EGNN | 0.27–0.37 s per update (batch 16 × 256 atoms), 16 s per epoch | measured, our 11 Kaggle/Colab T4 runs |
 | 2D evaluation row (256 samples, 200 steps, relaxed) | 15 min | measured, median of 73 rows |
-| 3D training, NequIP (DM2 settings, 0.60 M parameters) | 1.2 s per update (batch 16 × 576 atoms), V100/A6000 class | DM2: 30,000 updates on 3,000-atom cells in ~40 h on an A6000, scaled by atom count |
-| Cross-check: NequIP vs our EGNN, per atom | 2.9× per training step | measured on CPU, `bench_models.py`; predicts ~0.6 s per update, so 1.2 s is conservative |
+| 3D training, NequIP (DM2's conditional settings, 1.0 M parameters) | 1.2 s per update (batch 16 × 576 atoms) on a V100 | our CPU ratio applied to our T4 timings: NequIP costs 2.9× our EGNN per atom, and our EGNN takes 66–90 µs per atom per update on a T4, so ~1.8–2.4 s per update on a T4 and ~0.9–1.2 s on a V100 (about twice a T4). We plan with the slow end. DM2's paper gives no training time |
+| NequIP vs our EGNN, per atom | 2.9× per training step | measured on CPU, `bench_models.py` (DM2's model, 8.3 s per step for 3,000 atoms); our conditional model takes 6.7 s on the same kind of CPU (`scripts/silica/train.py`), so it is no slower |
+| NequIP training memory | ~0.5 GB per 576-atom glass (2.5 GB per 3,000 atoms) | measured on CPU; batch 16 × 576 atoms fits a 16 GB T4 |
 | NequIP forward pass vs training step | 0.21× | measured on CPU, `bench_models.py` |
 | 3D EGNN | 0.35 s per update | 2D EGNN measurement, 3D neighbour count |
 | Silica MD (8 Å Born + DSF Coulomb) | 200,000 atom-steps per second per core (2.9 ms per step for 576 atoms) | measured, LAMMPS, `in.silica_md_bench` |
@@ -65,7 +66,8 @@ day, or 4 GPUs for under five days. The 882 core-hours of M1 take about 7 hours 
 | One full training run | 50,000 updates = 1,333 epochs = 16.7 GPU-h (NequIP) | derived (same length as our 2D runs) |
 
 These are planning numbers. The first week of the 3D work replaces them with timings on the
-GPU we are given. On PSC's H100 nodes, which reportedly cost twice as many credits per hour,
+GPU we are given: every training run writes its seconds per update and GPU name to
+`timing.json` (`docs/SILICA_QUICKSTART.md`). On PSC's H100 nodes, which reportedly cost twice as many credits per hour,
 the faster GPU should roughly cancel the higher rate.
 
 ## 3D model training
