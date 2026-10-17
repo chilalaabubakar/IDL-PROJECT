@@ -1,0 +1,234 @@
+{
+  "rules": {
+    "realism": {
+      "w1_max": 0.07
+    },
+    "success": {
+      "success_min": 0.7
+    }
+  },
+  "models": {
+    "wval_seed0_cond_smax1_s100_host_D2": {
+      "chosen_w": {
+        "realism": 2.0,
+        "success": 4.0
+      },
+      "validation": [
+        {
+          "w": 1.0,
+          "success": 0.3671875,
+          "success_ci": [
+            0.30859375,
+            0.42578125
+          ],
+          "w1": 0.06288258658157049,
+          "split": "val",
+          "run": "/kaggle/working/idl-project/eval/20261017-135052Z_wval_seed0_cond_smax1_w1_s100_host_D2"
+        },
+        {
+          "w": 2.0,
+          "success": 0.53515625,
+          "success_ci": [
+            0.4765625,
+            0.59765625
+          ],
+          "w1": 0.06335484611645684,
+          "split": "val",
+          "run": "/kaggle/working/idl-project/eval/20261017-140730Z_wval_seed0_cond_smax1_w2_s100_host_D2"
+        },
+        {
+          "w": 3.0,
+          "success": 0.65625,
+          "success_ci": [
+            0.59765625,
+            0.7109375
+          ],
+          "w1": 0.07781458592578365,
+          "split": "val",
+          "run": "/kaggle/working/idl-project/eval/20261017-143813Z_wval_seed0_cond_smax1_w3_s100_host_D2"
+        },
+        {
+          "w": 4.0,
+          "success": 0.71875,
+          "success_ci": [
+            0.6640625,
+            0.7734375
+          ],
+          "w1": 0.08539865474354644,
+          "split": "val",
+          "run": "/kaggle/working/idl-project/eval/20261017-145503Z_wval_seed0_cond_smax1_w4_s100_host_D2"
+        },
+        {
+          "w": 6.0,
+          "success": 0.83203125,
+          "success_ci": [
+            0.78515625,
+            0.87890625
+          ],
+          "w1": 0.10804300581684043,
+          "split": "val",
+          "run": "/kaggle/working/idl-project/eval/20261017-152400Z_wval_seed0_cond_smax1_w6_s100_host_D2"
+        },
+        {
+          "w": 8.0,
+          "success": 0.8671875,
+          "success_ci": [
+            0.82421875,
+            0.90625
+          ],
+          "w1": 0.1315306722353866,
+          "split": "val",
+          "run": "/kaggle/working/idl-project/eval/20261017-154417Z_wval_seed0_cond_smax1_w8_s100_host_D2"
+        }
+      ]
+    },
+    "wval_seed1_cond_smax1_s100_host_D2": {
+      "chosen_w": {
+        "realism": 2.0,
+        "success": 8.0
+      },
+      "validation": [
+        {
+          "w": 1.0,
+          "success": 0.2578125,
+          "success_ci": [
+            0.20703125,
+            0.3125
+          ],
+          "w1": 0.06813381417625375,
+          "split": "val",
+          "run": "/kaggle/working/idl-project/eval/20261017-135052Z_wval_seed1_cond_smax1_w1_s100_host_D2"
+        },
+        {
+          "w": 2.0,
+          "success": 0.33984375,
+          "success_ci": [
+            0.28125,
+            0.3984375
+          ],
+          "w1": 0.06590292709598639,
+          "split": "val",
+          "run": "/kaggle/working/idl-project/eval/20261017-142251Z_wval_seed1_cond_smax1_w2_s100_host_D2"
+        },
+        {
+          "w": 3.0,
+          "success": 0.4765625,
+          "success_ci": [
+            0.4140625,
+            0.5390625
+          ],
+          "w1": 0.07202997466863274,
+          "split": "val",
+          "run": "/kaggle/working/idl-project/eval/20261017-143829Z_wval_seed1_cond_smax1_w3_s100_host_D2"
+        },
+        {
+          "w": 4.0,
+          "success": 0.52734375,
+          "success_ci": [
+            0.46484375,
+            0.58984375
+          ],
+          "w1": 0.0754998849165899,
+          "split": "val",
+          "run": "/kaggle/working/idl-project/eval/20261017-150809Z_wval_seed1_cond_smax1_w4_s100_host_D2"
+        },
+        {
+          "w": 6.0,
+          "success": 0.66015625,
+          "success_ci": [
+            0.6015625,
+            0.71875
+          ],
+          "w1": 0.07721476751050503,
+          "split": "val",
+          "run": "/kaggle/working/idl-project/eval/20261017-152750Z_wval_seed1_cond_smax1_w6_s100_host_D2"
+        },
+        {
+          "w": 8.0,
+          "success": 0.7265625,
+          "success_ci": [
+            0.671875,
+            0.78125
+          ],
+          "w1": 0.08673260974359269,
+          "split": "val",
+          "run": "/kaggle/working/idl-project/eval/20261017-155331Z_wval_seed1_cond_smax1_w8_s100_host_D2"
+        }
+      ]
+    },
+    "wval_seed2_cond_smax1_s100_host_D2": {
+      "chosen_w": {
+        "realism": 2.0,
+        "success": 8.0
+      },
+      "validation": [
+        {
+          "w": 1.0,
+          "success": 0.33984375,
+          "success_ci": [
+            0.28125,
+            0.3984375
+          ],
+          "w1": 0.07047274018912629,
+          "split": "val",
+          "run": "/kaggle/working/idl-project/eval/20261017-140729Z_wval_seed2_cond_smax1_w1_s100_host_D2"
+        },
+        {
+          "w": 2.0,
+          "success": 0.41796875,
+          "success_ci": [
+            0.359375,
+            0.48046875
+          ],
+          "w1": 0.0686315962790068,
+          "split": "val",
+          "run": "/kaggle/working/idl-project/eval/20261017-142312Z_wval_seed2_cond_smax1_w2_s100_host_D2"
+        },
+        {
+          "w": 3.0,
+          "success": 0.49609375,
+          "success_ci": [
+            0.43359375,
+            0.55859375
+          ],
+          "w1": 0.08288215804999835,
+          "split": "val",
+          "run": "/kaggle/working/idl-project/eval/20261017-145300Z_wval_seed2_cond_smax1_w3_s100_host_D2"
+        },
+        {
+          "w": 4.0,
+          "success": 0.578125,
+          "success_ci": [
+            0.515625,
+            0.63671875
+          ],
+          "w1": 0.08466973301406647,
+          "split": "val",
+          "run": "/kaggle/working/idl-project/eval/20261017-151158Z_wval_seed2_cond_smax1_w4_s100_host_D2"
+        },
+        {
+          "w": 6.0,
+          "success": 0.6953125,
+          "success_ci": [
+            0.63671875,
+            0.75390625
+          ],
+          "w1": 0.089707732364767,
+          "split": "val",
+          "run": "/kaggle/working/idl-project/eval/20261017-153851Z_wval_seed2_cond_smax1_w6_s100_host_D2"
+        },
+        {
+          "w": 8.0,
+          "success": 0.77734375,
+          "success_ci": [
+            0.7265625,
+            0.828125
+          ],
+          "w1": 0.10641021908986152,
+          "split": "val",
+          "run": "/kaggle/working/idl-project/eval/20261017-155957Z_wval_seed2_cond_smax1_w8_s100_host_D2"
+        }
+      ]
+    }
+  }
+}
