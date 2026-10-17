@@ -16,6 +16,8 @@ venv/
 runs/*
 !runs/README.md
 data/**/.cache/
+slurm/logs/
+data/*_dry/
 
 # LAMMPS / visualisation scratch
 log.lammps

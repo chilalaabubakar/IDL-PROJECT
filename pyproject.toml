@@ -20,6 +20,13 @@ dependencies = [
 [project.optional-dependencies]
 # Dataset generation and the local melt-quench baseline (LAMMPS Python wheel needs MPI).
 md = ["lammps", "mpich"]
+# 3D silica model: DM2's graphite package (its NequIP layers) and e3nn 0.4.4, as DM2 pins.
+silica = [
+    "e3nn==0.4.4",
+    "torch_geometric",
+    "ase",
+    "dm2 @ git+https://github.com/digital-synthesis-lab/DM2",
+]
 dev = ["pytest", "ruff>=0.15,<0.16"]
 
 [tool.setuptools.packages.find]

@@ -1,0 +1,36 @@
+# Unconditional baseline: no defect labels, no held atoms (still noise- and rate-aware).
+# The funnel's last row (docs/compute/README.md).
+#   python scripts/silica/train.py --config configs/silica/train_uncond.yaml run_dir=runs/silica/uncond_s0
+name: silica_uncond
+seed: 0
+data: data/sio2_576
+conditional: false
+model:
+  n_species: 2
+  node_dim: 8
+  cond_dim: 16
+  hidden_irreps: "64x0e + 32x1e"
+  edge_irreps: "4x0e + 4x1e + 2x2e"
+  n_convs: 3
+  cutoff: 5.0
+  n_basis: 16
+  radial_neurons: [16, 64]
+  num_neighbors: 12.0
+  sigma_aware: true
+  rate_aware: true
+noise:
+  sigma_min: 1.0e-3
+  sigma_max: 1.0
+optim:
+  lr: 2.0e-4
+  weight_decay: 0.0
+  batch_size: 16
+  accumulate: 1
+  n_updates: 50000
+  grad_clip: 1.0
+  ema: 0.999
+val_sigmas: [0.05, 0.2, 0.5, 1.0]
+val_batches: 4
+log_every: 50
+val_every: 500
+ckpt_every: 500

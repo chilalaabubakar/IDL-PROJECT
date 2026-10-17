@@ -1,0 +1,45 @@
+# Conditional NequIP denoiser trained on DM2's 3,000-atom glasses (data/sio2_dm2, made by
+# scripts/silica/import_dm2.py): the run that can start now, before our own glasses exist.
+#   python scripts/silica/train.py --config configs/silica/train_cond_dm2.yaml run_dir=runs/silica/dm2_s0
+# Memory: ~2.5 GB per 3,000-atom glass, so batch 4 fits a 16 GB T4.
+name: silica_cond_dm2
+seed: 0
+data: data/sio2_dm2
+conditional: true
+defects: configs/silica/defects.yaml     # label thresholds; train.py checks the digest
+screen: configs/silica/screen.yaml       # used by variant=k
+model:                                   # src/glassdiff/silica/model.py ConditionalNequIP
+  n_species: 2
+  node_dim: 8                            # as DM2's conditional model ('8x0e')
+  cond_dim: 16
+  hidden_irreps: "64x0e + 32x1e"         # as DM2
+  edge_irreps: "4x0e + 4x1e + 2x2e"      # as DM2
+  n_convs: 3
+  cutoff: 5.0                            # A, as DM2
+  n_basis: 16
+  radial_neurons: [16, 64]
+  num_neighbors: 12.0
+  sigma_aware: true
+  rate_aware: true
+requests:                                # src/glassdiff/silica/requests.py
+  mode_probs: {centre: 0.5, patch: 0.3, host: 0.2}
+  p_defect_centre: 0.5
+  patch_radius: 3.3                      # A, first two shells around a Si
+  r_out_range: [5.0, 8.0]                # A, drawn per host request
+  p_uncond: 0.15                         # classifier-free guidance dropout
+noise:
+  sigma_min: 1.0e-3                      # A
+  sigma_max: 1.0                         # A, where the sampler starts (DM2 trains to 0.75)
+optim:
+  lr: 2.0e-4                             # as DM2
+  weight_decay: 0.0
+  batch_size: 4                          # 4 x 3,000 atoms fits a 16 GB T4
+  accumulate: 2                          # 8 glasses (24,000 atoms) per update
+  n_updates: 15000                       # ~2 Kaggle sessions on a T4 (estimate; see timing.json)
+  grad_clip: 1.0
+  ema: 0.999
+val_sigmas: [0.05, 0.2, 0.5, 1.0]        # A; logged as the fraction of the noise not removed
+val_batches: 4
+log_every: 50
+val_every: 500
+ckpt_every: 500

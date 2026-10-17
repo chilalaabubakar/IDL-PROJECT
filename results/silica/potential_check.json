@@ -1,0 +1,68 @@
+{
+  "protocol": {
+    "n_sio2": 192,
+    "rate": 10.0,
+    "rho_init": 1.5,
+    "min_dist": 1.8,
+    "dt": 1.0,
+    "t_low": 300.0,
+    "t_melt": 5000.0,
+    "equil_nvt_ps": 50.0,
+    "equil_npt_ps": 50.0,
+    "melt_ps": 50.0,
+    "final_ps": 100.0,
+    "pressure": 1.0,
+    "tdamp": 100.0,
+    "pdamp": 1000.0,
+    "alpha": 0.25,
+    "cutoff": 8.0
+  },
+  "check": {
+    "glasses": "data/sio2_dm2/test.npz",
+    "n_glasses": 2,
+    "ps": 20.0,
+    "max_density_change": 0.03,
+    "max_cn4_change": 0.02,
+    "out": "results/silica/potential_check.json"
+  },
+  "glasses": [
+    {
+      "glass": 0,
+      "before": {
+        "density": 2.0930144694824238,
+        "si_cn4": 1.0,
+        "o_cn2": 0.998,
+        "min_dist": 1.5707453751212157
+      },
+      "after": {
+        "density": 2.087439460922793,
+        "si_cn4": 1.0,
+        "o_cn2": 0.998,
+        "min_dist": 1.561828835658742
+      },
+      "pe_per_atom": -426.03578724054444,
+      "temp": 301.09955427920005,
+      "seconds": 260.4694564342499,
+      "pass": true
+    },
+    {
+      "glass": 1,
+      "before": {
+        "density": 2.2007573453243423,
+        "si_cn4": 0.998,
+        "o_cn2": 0.978,
+        "min_dist": 1.56792894730979
+      },
+      "after": {
+        "density": 2.19507210237714,
+        "si_cn4": 0.997,
+        "o_cn2": 0.9775,
+        "min_dist": 1.5540531385740746
+      },
+      "pe_per_atom": -424.7886194592321,
+      "temp": 295.76713768867364,
+      "seconds": 265.55584263801575,
+      "pass": true
+    }
+  ]
+}
