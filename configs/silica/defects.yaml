@@ -1,0 +1,13 @@
+# Defect detectors for silica (src/glassdiff/silica/defects.py; docs/SILICA_3D_PLAN.md 2.3).
+# Frozen once the training split exists: changing a threshold changes every label, so the
+# digest of these values is stored in each dataset's meta.json and checked by train.py.
+thresholds:
+  si_o_cutoff: 2.2          # A, first minimum of g_SiO
+gate:                       # end-of-week-5 gate: >= min_train_count instances per group
+  min_train_count: 300
+  groups:
+    RING3: [RING3]
+    NBO: [NBO]
+    SI_V_or_III: [SI_V, SI_III]   # the rare class; merged if either alone is short
+  stretch:
+    RING2: [RING2]

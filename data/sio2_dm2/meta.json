@@ -1,0 +1,219 @@
+{
+  "name": "sio2_dm2",
+  "source": "DM2 published glasses (github.com/digital-synthesis-lab/dm2, MIT licence)",
+  "potential": "Bouhadja-Jakse-Pasturel BMH, DSF Coulomb 0.25 1/A, 8 A cutoffs",
+  "species": {
+    "0": "O",
+    "1": "Si"
+  },
+  "units": {
+    "length": "Angstrom",
+    "cooling_rate": "K/ps"
+  },
+  "rates": {
+    "0_1k": 0.1,
+    "1k": 1.0,
+    "10k": 10.0,
+    "100k": 100.0
+  },
+  "split": {
+    "train": [
+      0,
+      1,
+      2,
+      3
+    ],
+    "val": [
+      4
+    ],
+    "test": [
+      5
+    ]
+  },
+  "files": {
+    "train": [
+      "sio2_3000_glass_0_1k_sample0.dat",
+      "sio2_3000_glass_0_1k_sample1.dat",
+      "sio2_3000_glass_0_1k_sample2.dat",
+      "sio2_3000_glass_0_1k_sample3.dat",
+      "sio2_3000_glass_100k_sample0.dat",
+      "sio2_3000_glass_100k_sample1.dat",
+      "sio2_3000_glass_100k_sample2.dat",
+      "sio2_3000_glass_100k_sample3.dat",
+      "sio2_3000_glass_10k_sample0.dat",
+      "sio2_3000_glass_10k_sample1.dat",
+      "sio2_3000_glass_10k_sample2.dat",
+      "sio2_3000_glass_10k_sample3.dat",
+      "sio2_3000_glass_1k_sample0.dat",
+      "sio2_3000_glass_1k_sample1.dat",
+      "sio2_3000_glass_1k_sample2.dat",
+      "sio2_3000_glass_1k_sample3.dat"
+    ],
+    "val": [
+      "sio2_3000_glass_0_1k_sample4.dat",
+      "sio2_3000_glass_100k_sample4.dat",
+      "sio2_3000_glass_10k_sample4.dat",
+      "sio2_3000_glass_1k_sample4.dat"
+    ],
+    "test": [
+      "sio2_3000_glass_0_1k_sample5.dat",
+      "sio2_3000_glass_100k_sample5.dat",
+      "sio2_3000_glass_10k_sample5.dat",
+      "sio2_3000_glass_1k_sample5.dat"
+    ]
+  },
+  "git": "97e41f04ad6ddd8951c087cea06ca6a3f03c3150 (dirty)",
+  "labels": {
+    "thresholds": {
+      "si_o_cutoff": 2.2
+    },
+    "digest": "4eefd302b156",
+    "git": "97e41f04ad6ddd8951c087cea06ca6a3f03c3150 (dirty)",
+    "splits": {
+      "test": {
+        "glasses": 4,
+        "atoms": 3000,
+        "gate_counts": {
+          "RING3": 268,
+          "NBO": 40,
+          "SI_V_or_III": 4,
+          "RING2": 4
+        },
+        "by_rate": {
+          "0.1": {
+            "glasses": 1,
+            "SI_III_per_glass": 0.0,
+            "SI_V_per_glass": 0.0,
+            "NBO_per_glass": 2.0,
+            "O_III_per_glass": 2.0,
+            "RING2_per_glass": 0.0,
+            "RING3_per_glass": 39.0
+          },
+          "1": {
+            "glasses": 1,
+            "SI_III_per_glass": 1.0,
+            "SI_V_per_glass": 0.0,
+            "NBO_per_glass": 5.0,
+            "O_III_per_glass": 4.0,
+            "RING2_per_glass": 0.0,
+            "RING3_per_glass": 35.0
+          },
+          "10": {
+            "glasses": 1,
+            "SI_III_per_glass": 0.0,
+            "SI_V_per_glass": 1.0,
+            "NBO_per_glass": 10.0,
+            "O_III_per_glass": 11.0,
+            "RING2_per_glass": 2.0,
+            "RING3_per_glass": 84.0
+          },
+          "100": {
+            "glasses": 1,
+            "SI_III_per_glass": 2.0,
+            "SI_V_per_glass": 0.0,
+            "NBO_per_glass": 23.0,
+            "O_III_per_glass": 21.0,
+            "RING2_per_glass": 2.0,
+            "RING3_per_glass": 110.0
+          }
+        }
+      },
+      "train": {
+        "glasses": 16,
+        "atoms": 3000,
+        "gate_counts": {
+          "RING3": 965,
+          "NBO": 160,
+          "SI_V_or_III": 19,
+          "RING2": 30
+        },
+        "by_rate": {
+          "0.1": {
+            "glasses": 4,
+            "SI_III_per_glass": 0.0,
+            "SI_V_per_glass": 0.25,
+            "NBO_per_glass": 3.25,
+            "O_III_per_glass": 3.5,
+            "RING2_per_glass": 0.5,
+            "RING3_per_glass": 37.5
+          },
+          "1": {
+            "glasses": 4,
+            "SI_III_per_glass": 0.25,
+            "SI_V_per_glass": 0.25,
+            "NBO_per_glass": 4.5,
+            "O_III_per_glass": 4.5,
+            "RING2_per_glass": 0.5,
+            "RING3_per_glass": 43.0
+          },
+          "10": {
+            "glasses": 4,
+            "SI_III_per_glass": 0.5,
+            "SI_V_per_glass": 0.5,
+            "NBO_per_glass": 12.25,
+            "O_III_per_glass": 12.25,
+            "RING2_per_glass": 2.5,
+            "RING3_per_glass": 66.0
+          },
+          "100": {
+            "glasses": 4,
+            "SI_III_per_glass": 2.5,
+            "SI_V_per_glass": 0.5,
+            "NBO_per_glass": 20.0,
+            "O_III_per_glass": 18.0,
+            "RING2_per_glass": 4.0,
+            "RING3_per_glass": 94.75
+          }
+        }
+      },
+      "val": {
+        "glasses": 4,
+        "atoms": 3000,
+        "gate_counts": {
+          "RING3": 212,
+          "NBO": 36,
+          "SI_V_or_III": 6,
+          "RING2": 14
+        },
+        "by_rate": {
+          "0.1": {
+            "glasses": 1,
+            "SI_III_per_glass": 0.0,
+            "SI_V_per_glass": 0.0,
+            "NBO_per_glass": 3.0,
+            "O_III_per_glass": 3.0,
+            "RING2_per_glass": 0.0,
+            "RING3_per_glass": 21.0
+          },
+          "1": {
+            "glasses": 1,
+            "SI_III_per_glass": 0.0,
+            "SI_V_per_glass": 0.0,
+            "NBO_per_glass": 6.0,
+            "O_III_per_glass": 6.0,
+            "RING2_per_glass": 0.0,
+            "RING3_per_glass": 57.0
+          },
+          "10": {
+            "glasses": 1,
+            "SI_III_per_glass": 1.0,
+            "SI_V_per_glass": 0.0,
+            "NBO_per_glass": 11.0,
+            "O_III_per_glass": 10.0,
+            "RING2_per_glass": 6.0,
+            "RING3_per_glass": 45.0
+          },
+          "100": {
+            "glasses": 1,
+            "SI_III_per_glass": 4.0,
+            "SI_V_per_glass": 1.0,
+            "NBO_per_glass": 16.0,
+            "O_III_per_glass": 13.0,
+            "RING2_per_glass": 8.0,
+            "RING3_per_glass": 89.0
+          }
+        }
+      }
+    }
+  }
+}

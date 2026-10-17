@@ -16,6 +16,7 @@ whether its surroundings look like naturally formed ones. The work builds on DM2
 - [Team summary](docs/Project_Summary.docx) (Word): plain-language summary of what was done, the data, models, training runs, results, next steps and compute
 - [Workshop paper](paper/main.pdf) (about 8.5 pages, plain language; LaTeX source in `paper/`)
 - [3D silica extension plan](docs/SILICA_3D_PLAN.md): the next step toward a materials-journal paper (defects in amorphous SiO₂, physical validation)
+- [3D silica quickstart](docs/SILICA_QUICKSTART.md): data, defect labels, the conditional 3D model and how to start training it (Kaggle or PSC Bridges-2)
 - [Compute estimate](docs/compute/README.md): GPU-hours, CPU core-hours and ACCESS credits for the rest of the project, from measured timings
 
 ## Status
@@ -101,10 +102,11 @@ and `docs/DATASET.md` §4.
 configs/        YAML configs: data, defects, model, train, sampler, eval
 data/           generated datasets (committed, ~20 MB; see data/README.md)
 docs/           plans and the feasibility pilot
-notebooks/      Stage 0 notebook, figures
+notebooks/      Stage 0 notebook, figures, Kaggle training notebooks
 results/        small summary tables and figures that go in the report
 runs/           training / sampling / evaluation run directories (gitignored)
-scripts/        command-line entry points (one per pipeline step)
+scripts/        command-line entry points (one per pipeline step); scripts/silica/ for 3D
+slurm/          PSC Bridges-2 job scripts (3D silica)
 src/glassdiff/
   types.py      Structures, Request, label conventions
   geometry.py   periodic minimum-image vectors, neighbour lists
@@ -117,6 +119,7 @@ src/glassdiff/
   eval/         success, realism, diversity, cost metrics; bootstrap CIs
   baselines.py  hand insertion (B2)
   viz.py        configuration plots
+  silica/       3D silica: data, defect detectors, requests, conditional NequIP, LAMMPS
   utils/        configs, seeding, run directories
 tests/          unit, acceptance and end-to-end pipeline tests (CPU, ~30 s)
 ```
@@ -124,7 +127,7 @@ tests/          unit, acceptance and end-to-end pipeline tests (CPU, ~30 s)
 ## Setup
 ```bash
 pip install torch --index-url https://download.pytorch.org/whl/cpu   # or a CUDA build
-pip install -e ".[dev]"          # add ",md" for LAMMPS (dataset generation)
+pip install -e ".[dev]"          # add ",md" for LAMMPS, ",silica" for the 3D model
 ruff check src tests scripts && pytest -q
 ```
 LAMMPS via pip needs `libmpi.so.12`. The `mpich` wheel provides it; put its directory on

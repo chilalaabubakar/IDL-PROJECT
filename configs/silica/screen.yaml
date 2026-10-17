@@ -1,0 +1,36 @@
+# Screening grid for the 3D model (docs/compute/README.md, upper plan): 2^6 = 64 variants.
+#   python scripts/silica/train.py --config configs/silica/train_cond.yaml variant=k   (k = 0..63)
+# Variant k is the k-th combination in itertools.product order (last factor fastest).
+# Each level's "set" overrides keys of the training config (dotted paths).
+factors:
+  - name: sigma_max
+    levels:
+      - {name: s0.75, set: {noise.sigma_max: 0.75}}
+      - {name: s1.0, set: {noise.sigma_max: 1.0}}
+  - name: r_out
+    levels:
+      - {name: rfix6, set: {requests.r_out_range: [6.0, 6.0]}}
+      - {name: r5-8, set: {requests.r_out_range: [5.0, 8.0]}}
+  - name: size
+    levels:
+      - {name: dm2, set: {model.hidden_irreps: "64x0e + 32x1e"}}
+      - {name: half, set: {model.hidden_irreps: "32x0e + 16x1e"}}
+  - name: layers
+    levels:
+      - {name: L3, set: {model.n_convs: 3}}
+      - {name: L4, set: {model.n_convs: 4}}
+  - name: lr
+    levels:
+      - {name: lr2e-4, set: {optim.lr: 2.0e-4}}
+      - {name: lr5e-4, set: {optim.lr: 5.0e-4}}
+  - name: label_dropout
+    levels:
+      - {name: p0.1, set: {requests.p_uncond: 0.1}}
+      - {name: p0.2, set: {requests.p_uncond: 0.2}}
+# Funnel (updates are totals; one epoch of 600 glasses at batch 16 = 37.5 updates):
+funnel:
+  - {stage: screen, keep: 64, n_updates: 5000}     # ~133 epochs each
+  - {stage: extend, keep: 6, n_updates: 15000}     # +267 epochs
+  - {stage: full, keep: 2, n_updates: 50000}       # +933 epochs (1,333 in total)
+  - {stage: seeds, keep: 1, n_updates: 50000, seeds: [1, 2]}
+rank_by: valn_0.2          # validation column of log.csv (lower is better), last row

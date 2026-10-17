@@ -1,0 +1,16 @@
+# DM2's 24 published glasses (3,000 atoms; 6 each at 0.1, 1, 10 and 100 K/ps) as a first
+# training set, so training can start before our own 576-atom glasses exist.
+#   python scripts/silica/import_dm2.py --config configs/silica/data_dm2.yaml
+name: sio2_dm2
+dm2_dir: null               # null -> $DM2_DIR/demo/demo_training/simu_data
+out_dir: data/sio2_dm2
+rates:                      # file tag -> cooling rate in K/ps
+  "0_1k": 0.1
+  "1k": 1.0
+  "10k": 10.0
+  "100k": 100.0
+split:                      # sample numbers per rate (4 / 1 / 1)
+  train: [0, 1, 2, 3]
+  val: [4]
+  test: [5]
+defects: configs/silica/defects.yaml
