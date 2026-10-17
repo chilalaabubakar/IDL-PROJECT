@@ -136,7 +136,7 @@ def natural(data, split, defect, cap, radius):
 def write_csv(path, rows):
     if rows:
         with path.open("w", newline="") as f:
-            w = csv.DictWriter(f, fieldnames=list(rows[0]))
+            w = csv.DictWriter(f, fieldnames=list(rows[0]), lineterminator="\n")
             w.writeheader()
             w.writerows(rows)
 
