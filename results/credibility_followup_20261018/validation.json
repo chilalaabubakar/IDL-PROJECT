@@ -1,0 +1,10 @@
+{
+  "trajectories": 768,
+  "snapshots": 3072,
+  "max_force": 9.982481674779184e-07,
+  "max_initial_energy_error": 2.8421709430404007e-12,
+  "fire_polished_snapshots": 11,
+  "max_polish_steps": 818,
+  "pilot_comparison_observations": 112,
+  "pilot_comparison_label_differences": 1
+}

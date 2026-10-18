@@ -1,0 +1,15 @@
+{
+  "name": "seed0",
+  "checkpoint": "results/kaggle_20261006-0454Z/training/egnn_cond_smax1/ema.pt",
+  "checkpoint_sha256": "4517d520892e91ab7ab1e89f9900ac0376999d2fa4c437905218580b8706e99d",
+  "n": 8,
+  "device": "cpu",
+  "source": "results/kaggle_20261017-1739Z/experiments/seam_cond_smax1_w2_rout6_host_D2",
+  "batch_size": 2,
+  "n_noisy": 100,
+  "n_final": 100,
+  "w": 2,
+  "radius": 6,
+  "batch_seed_rule": "1000 + batch_start",
+  "null_label": false
+}

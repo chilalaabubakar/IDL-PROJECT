@@ -1,0 +1,27 @@
+{
+  "temperatures": [
+    0.01,
+    0.1
+  ],
+  "temperature_rationale": "dataset final T=0.01; 10x temperature stress test is not claimed to be a calibrated material operating temperature",
+  "dt": 0.005,
+  "tdamp": 0.1,
+  "steps": [
+    0,
+    1000,
+    4000,
+    10000
+  ],
+  "velocity_seeds": [
+    101,
+    202,
+    303
+  ],
+  "ensemble": "whole-box free NVT; no pins; fixed density",
+  "potential": "repository shifted KA Lennard-Jones, species-specific cutoffs",
+  "n_trajectories": 768,
+  "interpretation": "pointwise defect occupancy of the initially nearest B atom, thermal and independently minimized snapshots; not continuous lifetime or long-term stability",
+  "natural_controls": "same-class natural defects on 32 distinct test hosts",
+  "unedited_controls": "original hosts and sites paired with generated cohort",
+  "max_initial_energy_error": 2.8421709430404007e-12
+}

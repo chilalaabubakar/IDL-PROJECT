@@ -1,0 +1,16 @@
+{
+  "runs": {
+    "fixed_r4": "results/kaggle_20261017-1739Z/experiments/seam_cond_smax1_w2_rout4_host_D2",
+    "fixed_r5": "results/kaggle_20261017-1739Z/experiments/seam_cond_smax1_w2_rout5_host_D2",
+    "fixed_r6": "results/kaggle_20261017-1739Z/experiments/seam_cond_smax1_w2_rout6_host_D2",
+    "hand_insert": "results/kaggle_20261017-1739Z/experiments/seam_hand_insert_D2",
+    "range_r5": "results/kaggle_20261017-2217Z/experiments/rr_cond_smax1_w2_rout5_host_D2"
+  },
+  "bootstrap": 500,
+  "natural_reference": "one uniformly selected D2 site per test host",
+  "natural_floor": "one site per 256 randomly selected train hosts; repeatedly subsampled to the successful request count",
+  "uncertainty": "host bootstrap in both ensembles; matched-floor band is subsampling variability, not a CI on a population floor",
+  "host_recovery": "full saved host-coordinate check for model runs; sequential-host and saved target validation for hand insertion",
+  "cohort_selection": "32 randomly selected distinct successful hosts, one request per host",
+  "seed": 17
+}
