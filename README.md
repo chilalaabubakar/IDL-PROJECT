@@ -35,9 +35,9 @@ round 3: [`results/round3_ANALYSIS.md`](results/round3_ANALYSIS.md); training se
 [`results/seeds/`](results/seeds/README.md)): averaged over three training runs, the
 conditional EGNN places D2 defects inside existing glasses 1.5–2.4× as often as hand
 insertion (0.45 ± 0.11 at guidance w = 2, 0.71 ± 0.08 at w = 6, vs 0.30), with surroundings
-as natural or more natural, and D1− defects 3.5× as often (0.22 ± 0.02 vs 0.06); local
+closer on the original all-request local-energy metric, and D1− defects 3.5× as often (0.22 ± 0.02 vs 0.06); local
 melt-quench almost never succeeds. In the whole-box task it reaches D2 success 0.58 ± 0.03
-with surroundings at the natural floor. D1+ fails for every method. D2 success varies
+with pooled local-energy W1 near its finite-sample natural reference. D1+ fails for every method. D2 success varies
 between training runs more than the evaluation noise (each run ends with a different
 effective guidance strength). The DM2
 sampler's step count acts like a cooling rate (100 steps give the natural energy), and in
@@ -49,6 +49,20 @@ notebook reproduces the proposal's Fig. 1. Sensitivity checks
 ([`results/sensitivity/`](results/sensitivity/README.md)): the method ranking holds when the
 defect cutoffs, success radius, realism window and regenerated-disk size are varied; the
 absolute success rates move by up to about 0.1.
+
+## Physical credibility: scope of the claim
+
+[Host-aware structure and finite-temperature follow-up](results/credibility_followup_20261018/README.md)
+shows that successful D2 placements remain structurally different from natural defects.
+For the tested radius-6 setting, host-aware successful-only energy W1 is 0.029 versus a
+count-matched natural median of 0.012, and outer-host displacement is larger than for
+hand insertion. At T=0.01 after 50 LJ time units, the tracked D2 persists in 80/96
+velocity trajectories for generated defects, 90/96 for successful hand insertions and
+96/96 for natural defects (32 independent hosts per group). These observations support
+short-term persistence for many generated defects; they do not establish natural-equivalent
+surroundings or long-term stability. The new matched seed/sham repeat has only eight
+requests per model so far. Historical tables average energy realism over successes and
+failures unless explicitly labelled successful-only.
 
 ## Run on Colab (GPU)
 
