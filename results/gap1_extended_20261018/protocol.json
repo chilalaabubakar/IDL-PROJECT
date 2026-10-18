@@ -1,0 +1,31 @@
+{
+  "options": {
+    "protocol": "gap1-250-v1",
+    "steps": [
+      0,
+      1000,
+      10000,
+      30000,
+      50000
+    ],
+    "site_definition": "nearest B within 0.5 carries frozen D2 label"
+  },
+  "n_hosts_per_method": 56,
+  "cohort_sizes": [
+    32,
+    24
+  ],
+  "disjoint_within_method": true,
+  "temperatures": [
+    0.01,
+    0.1
+  ],
+  "velocity_seeds": [
+    101,
+    202,
+    303
+  ],
+  "n_trajectories": 1344,
+  "interpretation": "pointwise occupancy, not continuous lifetime",
+  "all_snapshot_residuals_within_tolerance": true
+}

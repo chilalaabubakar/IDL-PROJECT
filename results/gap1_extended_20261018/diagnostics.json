@@ -1,0 +1,7 @@
+{
+  "n_trajectories": 1344,
+  "n_observations": 6720,
+  "max_residual_force": 9.982481674779184e-07,
+  "polished_observations": 10,
+  "max_initial_energy_error": 2.8421709430404007e-12
+}
