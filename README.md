@@ -64,6 +64,10 @@ surroundings or long-term stability. The new matched seed/sham repeat has only e
 requests per model so far. Historical tables average energy realism over successes and
 failures unless explicitly labelled successful-only.
 
+Full matched replication and longer stability checks: see the
+[completion workflow](docs/GAP1_COMPLETION.md) and
+[Kaggle notebook](notebooks/kaggle_gap1_completion.ipynb).
+
 ## Run on Colab (GPU)
 
 Open [`notebooks/colab_train.ipynb`](notebooks/colab_train.ipynb) in Colab:
