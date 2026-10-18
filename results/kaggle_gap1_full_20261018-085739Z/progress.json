@@ -5,5 +5,5 @@
   "cuda": "12.8",
   "batch_size": 64,
   "n_requests_per_model": 256,
-  "updated_utc": "2026-10-18T12:49:22.479291+00:00"
+  "updated_utc": "2026-10-18T12:54:24.981348+00:00"
 }
