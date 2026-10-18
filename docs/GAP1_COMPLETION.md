@@ -6,13 +6,15 @@ The defensible current claim is controlled geometric defect placement with reduc
 
 Import `notebooks/kaggle_gap1_completion.ipynb` into Kaggle. Select GPU T4 ×2 (one GPU also works), enable Internet, and grant access to the existing `GITHUB_TOKEN` secret with write access to this repository. Run All. The notebook checks GitHub write access and LAMMPS initialization before starting generation.
 
+The evaluation source checkout stays fixed at its recorded Git revision while a separate publishing checkout merges repository updates. Resumed runs restore the recorded source revision.
+
 The notebook runs all 256 retained requests for each of seed0, seed1, seed2 and a null-label seed0 sham, at guidance 2 and radius 6. Hosts, sites, pinning and initialization rule are matched. Checkpoint weights are hashed; batch size 64 and the CUDA device setting are part of the resume configuration. The GPU batch noise assignment differs from the earlier CPU batch-size-2 pilot, so numerical pilot/full results need not coincide. The four full runs share the same full-run noise rule.
 
 After generation, successful placements undergo freely evolving NVT MD to time 250 at T=0.01 with three velocity seeds. Failed placements count as zero in the joint creation-and-retention yield over **all 256 requests**. A second denominator excludes sites already D2 in the unedited host. The retained 256-request insertion baseline is included. The requested-site detector is the original predicate: the nearest B atom within 0.5 must carry the frozen D2 label. This differs from following the initially targeted atom regardless of its current location.
 
 Valid completed batches and trajectories are pushed every five minutes to `results/kaggle_gap1_full_<UTC timestamp>/`. `progress.json` says `complete` only after generation and joint MD both finish; `running` or `incomplete` means partial evidence. Re-running the notebook restores the most recent incomplete run from GitHub. It stops at an 11-hour budget and saves available checkpoints. GPU runtime and peak memory remain unbenchmarked until the first Kaggle execution. Logs remain in `/kaggle/working/gap1-completion/`; save Kaggle output files if diagnosing a failure.
 
-`joint_yield.csv` reports request-weighted estimates with whole-host bootstrap intervals; velocity realizations are averaged within requests. A zero-event bootstrap interval can be degenerate and is not proof of zero probability. Pointwise occupancy is not a continuous survival curve or an energy-barrier measurement.
+`joint_yield.csv` reports request-weighted estimates with whole-host bootstrap intervals; velocity realizations are averaged within requests. A zero-event bootstrap interval can be degenerate and is not proof of zero probability. Separate `host_incidence_wilson_*` columns bound the fraction of eligible hosts with any joint retention, preserving finite uncertainty at zero events; these describe host incidence, not the request-weighted yield. Pointwise occupancy is not a continuous survival curve or an energy-barrier measurement.
 
 ## Longer local stability evaluation
 

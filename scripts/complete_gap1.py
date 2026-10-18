@@ -283,6 +283,12 @@ def joint(out, repeats, workers):
                 ("initially_nonD2", ~data["original_success"]),
             ]:
                 ci = host_ratio_ci(values, data["host_ids"], eligible)
+                eligible_hosts = np.unique(data["host_ids"][eligible])
+                any_retention = sum(
+                    bool(np.any(values[(data["host_ids"] == h) & eligible] > 0))
+                    for h in eligible_hosts
+                )
+                host_lo, host_hi = p.wilson_interval(any_retention, len(eligible_hosts))
                 rows.append(
                     dict(
                         method=method,
@@ -293,7 +299,10 @@ def joint(out, repeats, workers):
                         joint_fraction=ci[0],
                         lo=ci[1],
                         hi=ci[2],
-                        n_hosts=len(np.unique(data["host_ids"][eligible])),
+                        n_hosts=len(eligible_hosts),
+                        hosts_with_any_joint_retention=any_retention,
+                        host_incidence_wilson_lo=host_lo,
+                        host_incidence_wilson_hi=host_hi,
                     )
                 )
             for i in range(256):
