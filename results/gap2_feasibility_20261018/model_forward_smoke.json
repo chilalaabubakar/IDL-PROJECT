@@ -1,0 +1,41 @@
+[
+  {
+    "training_seed": "seed0",
+    "n_atoms": 1024,
+    "output_shape": [
+      1,
+      1024,
+      2
+    ],
+    "finite": true,
+    "pinned_displacement_zero": true,
+    "seconds": 4.932691000998602,
+    "purpose": "single forward pass only; no placement success measured"
+  },
+  {
+    "training_seed": "seed1",
+    "n_atoms": 1024,
+    "output_shape": [
+      1,
+      1024,
+      2
+    ],
+    "finite": true,
+    "pinned_displacement_zero": true,
+    "seconds": 3.4286636500037275,
+    "purpose": "single forward pass only; no placement success measured"
+  },
+  {
+    "training_seed": "seed2",
+    "n_atoms": 1024,
+    "output_shape": [
+      1,
+      1024,
+      2
+    ],
+    "finite": true,
+    "pinned_displacement_zero": true,
+    "seconds": 3.1400728830049047,
+    "purpose": "single forward pass only; no placement success measured"
+  }
+]

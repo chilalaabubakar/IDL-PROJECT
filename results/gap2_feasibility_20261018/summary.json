@@ -1,0 +1,104 @@
+[
+  {
+    "condition": "gap2_ka2d_1024_fast",
+    "config_sha256": "c8e163cdd14b6b8ed5ea43b414adb436f7595a040edb3c3ad981dcac7ef38645",
+    "n_atoms": 1024,
+    "rate": 0.1,
+    "seed": 450000,
+    "seconds": 11.889604534997488,
+    "quality_pass": true,
+    "stats": {
+      "n_b": 358.0,
+      "psi6_global": 0.031164002173381916,
+      "min_pair_dist": 0.8338522750873965,
+      "max_force": 1.2056885351219293e-09,
+      "pe_mean": -3.635959922632476
+    },
+    "purpose": "single-host feasibility only; not a generalization result"
+  },
+  {
+    "condition": "gap2_ka2d_1024_slow",
+    "config_sha256": "90c1805190b7a83ab5e2a8cf2d9afb0e10465868d68d3217c439e957be1207ac",
+    "n_atoms": 1024,
+    "rate": 0.001,
+    "seed": 410000,
+    "seconds": 156.1057260230009,
+    "quality_pass": true,
+    "stats": {
+      "n_b": 358.0,
+      "psi6_global": 0.024648340686554394,
+      "min_pair_dist": 0.8429976726810255,
+      "max_force": 7.684912706196201e-10,
+      "pe_mean": -3.701705880525254
+    },
+    "purpose": "single-host feasibility only; not a generalization result"
+  },
+  {
+    "condition": "gap2_ka2d_1024_standard",
+    "config_sha256": "27558c17c5d82a72efa2b105c8778acadc8408e06b364407610730231c29180a",
+    "n_atoms": 1024,
+    "rate": 0.01,
+    "seed": 430000,
+    "seconds": 42.15561950200936,
+    "quality_pass": true,
+    "stats": {
+      "n_b": 358.0,
+      "psi6_global": 0.030317487987881534,
+      "min_pair_dist": 0.8406241523832876,
+      "max_force": 5.517833967516594e-10,
+      "pe_mean": -3.6691436237156854
+    },
+    "purpose": "single-host feasibility only; not a generalization result"
+  },
+  {
+    "condition": "gap2_ka2d_256_fast",
+    "config_sha256": "a61818fc21dd7a0bb9a28a02af3b55b7bb67dce3b7adbdc084b4657ae4a7e526",
+    "n_atoms": 256,
+    "rate": 0.1,
+    "seed": 350000,
+    "seconds": 6.910647646989673,
+    "quality_pass": true,
+    "stats": {
+      "n_b": 90.0,
+      "psi6_global": 0.06627064243715293,
+      "min_pair_dist": 0.8369055263027012,
+      "max_force": 1.2850285002752315e-09,
+      "pe_mean": -3.6132466150181637
+    },
+    "purpose": "single-host feasibility only; not a generalization result"
+  },
+  {
+    "condition": "gap2_ka2d_256_slow",
+    "config_sha256": "74933e6fc73421329d30bd86926a31f06f08969612a6bafe412a642215a76d9e",
+    "n_atoms": 256,
+    "rate": 0.001,
+    "seed": 310000,
+    "seconds": 35.68038200700539,
+    "quality_pass": true,
+    "stats": {
+      "n_b": 90.0,
+      "psi6_global": 0.008448861673745816,
+      "min_pair_dist": 0.8425136260205612,
+      "max_force": 1.4714589269271272e-09,
+      "pe_mean": -3.723759375876666
+    },
+    "purpose": "single-host feasibility only; not a generalization result"
+  },
+  {
+    "condition": "gap2_ka2d_256_standard",
+    "config_sha256": "1a5d5a35b5fafbc92080d4e756482eff6e48227ee42595aea9ae294cfb2160f6",
+    "n_atoms": 256,
+    "rate": 0.01,
+    "seed": 330000,
+    "seconds": 5.612829398000031,
+    "quality_pass": true,
+    "stats": {
+      "n_b": 90.0,
+      "psi6_global": 0.042064846579451504,
+      "min_pair_dist": 0.8431894900041643,
+      "max_force": 1.9591204145075203e-09,
+      "pe_mean": -3.6754832097104964
+    },
+    "purpose": "single-host feasibility only; not a generalization result"
+  }
+]
