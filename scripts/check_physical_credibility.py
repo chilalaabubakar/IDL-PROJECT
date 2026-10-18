@@ -368,13 +368,20 @@ thermo_modify norm no
 
 
 def md_worker(job):
-    group, i, temperature, velseed, arrays, output = job
+    group, i, temperature, velseed, arrays, output = job[:6]
+    options = job[6] if len(job) > 6 else None
+    observation_steps = [0, 1000, 4000, 10000] if options is None else options["steps"]
+    if observation_steps[0] != 0 or any(
+        b <= a for a, b in zip(observation_steps, observation_steps[1:])
+    ):
+        raise ValueError("Observation steps must start at zero and strictly increase")
+    protocol_bytes = (
+        b"free-ka-2d-nvt-cg-v2" if options is None else json.dumps(options, sort_keys=True).encode()
+    )
     torch.set_num_threads(1)
     file = Path(output) / "md_trajectories" / f"{group}_{i:02d}_T{temperature:g}_v{velseed}.json"
     fingerprint = hashlib.sha256(
-        b"free-ka-2d-nvt-cg-v2"
-        + _PAIR_COMMANDS.encode()
-        + b"".join(np.asarray(x).tobytes() for x in arrays)
+        protocol_bytes + _PAIR_COMMANDS.encode() + b"".join(np.asarray(x).tobytes() for x in arrays)
     ).hexdigest()
     if file.exists():
         saved = json.loads(file.read_text())
@@ -407,7 +414,7 @@ def md_worker(job):
         probe.command("min_style cg")
         previous = 0
         rows = []
-        for step in [0, 1000, 4000, 10000]:
+        for step in observation_steps:
             if step > previous:
                 main.command(f"run {step - previous}")
             xyz = np.array(main.gather_atoms("x", 1, 3)).reshape(-1, 3).copy()
@@ -431,7 +438,12 @@ def md_worker(job):
                 residual = float(polished.max_force[0])
                 polish_steps = int(polished.n_steps[0])
                 minimizer = "cg+torch_fire"
-            label = int(detect_defects(quenched, th)[0, atom])
+            labels = detect_defects(quenched, th)
+            label = int(labels[0, atom])
+            site_atom, site_distance = nearest_atom(
+                quenched, torch.tensor(target)[None].double(), torch.ones(1, dtype=torch.long)
+            )
+            requested_site = int(labels[0, site_atom[0]] == 3 and site_distance[0] < 0.5)
             disp = minimum_image(
                 quenched.pos[:, atom : atom + 1] - torch.tensor(target)[None, None], s.box
             ).norm()
@@ -442,6 +454,7 @@ def md_worker(job):
                     thermal_same_atom=int(thermal_label == 3),
                     quenched_same_atom=int(label == 3),
                     quenched_site=int(label == 3 and disp < 0.5),
+                    quenched_requested_site=requested_site,
                     max_force=residual,
                     minimizer=minimizer,
                     polish_steps=polish_steps,
