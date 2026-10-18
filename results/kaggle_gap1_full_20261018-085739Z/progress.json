@@ -1,0 +1,9 @@
+{
+  "status": "running",
+  "code_revision": "5ee087fbcf875b4092dfe385c0dd929026571e42",
+  "torch": "2.11.0+cu128",
+  "cuda": "12.8",
+  "batch_size": 64,
+  "n_requests_per_model": 256,
+  "updated_utc": "2026-10-18T08:57:39.164692+00:00"
+}
