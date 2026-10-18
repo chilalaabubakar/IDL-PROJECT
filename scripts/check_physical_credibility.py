@@ -591,7 +591,7 @@ def md(out, workers):
         ax.set(
             title=f"T={t:g}",
             xlabel="LJ time",
-            ylabel="Hosts retaining D2 in all three velocity seeds",
+            ylabel="Hosts with D2 in all three velocity seeds",
             ylim=(-0.02, 1.02),
         )
         ax.legend(fontsize=7)
