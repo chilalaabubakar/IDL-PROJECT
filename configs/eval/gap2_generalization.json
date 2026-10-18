@@ -49,5 +49,9 @@
     "configs/data/gap2/ka2d_256_fast.yaml",
     "configs/data/gap2/ka2d_256_slow.yaml",
     "configs/data/gap2/ka2d_256_standard.yaml"
-  ]
+  ],
+  "training_patch_library": {
+    "path": "data/ka2d_256/patches_train.npz",
+    "sha256": "8b26aad8acabb82af2234f34d004d0da2abcb6fca67fb89a08cba08b6dd2c55a"
+  }
 }
