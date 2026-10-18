@@ -1,0 +1,71 @@
+{
+  "input_fingerprint": "d7bb2d840ae2fd8bd39ca592d7bbbd2f9065a5baf08d2f435b370ecb451144bb",
+  "group": "seed1",
+  "sample": 85,
+  "host": 85,
+  "temperature": 0.01,
+  "velocity_seed": 101,
+  "initial_energy_error": 4.547473508864641e-13,
+  "observations": [
+    {
+      "step": 0,
+      "time": 0.0,
+      "thermal_same_atom": 1,
+      "quenched_same_atom": 1,
+      "quenched_site": 1,
+      "quenched_requested_site": 1,
+      "max_force": 1.1659950633485794e-08,
+      "minimizer": "cg",
+      "polish_steps": 0,
+      "temperature": 0.009999999999999998
+    },
+    {
+      "step": 1000,
+      "time": 5.0,
+      "thermal_same_atom": 1,
+      "quenched_same_atom": 1,
+      "quenched_site": 1,
+      "quenched_requested_site": 1,
+      "max_force": 1.888131380134439e-07,
+      "minimizer": "cg",
+      "polish_steps": 0,
+      "temperature": 0.009813979328809052
+    },
+    {
+      "step": 10000,
+      "time": 50.0,
+      "thermal_same_atom": 1,
+      "quenched_same_atom": 1,
+      "quenched_site": 1,
+      "quenched_requested_site": 1,
+      "max_force": 1.5037060479422548e-07,
+      "minimizer": "cg",
+      "polish_steps": 0,
+      "temperature": 0.009569803661007006
+    },
+    {
+      "step": 30000,
+      "time": 150.0,
+      "thermal_same_atom": 1,
+      "quenched_same_atom": 1,
+      "quenched_site": 1,
+      "quenched_requested_site": 1,
+      "max_force": 1.5377790972548322e-07,
+      "minimizer": "cg",
+      "polish_steps": 0,
+      "temperature": 0.008326247788666896
+    },
+    {
+      "step": 50000,
+      "time": 250.0,
+      "thermal_same_atom": 1,
+      "quenched_same_atom": 1,
+      "quenched_site": 1,
+      "quenched_requested_site": 1,
+      "max_force": 1.7205304392309273e-07,
+      "minimizer": "cg",
+      "polish_steps": 0,
+      "temperature": 0.010764909933169359
+    }
+  ]
+}
