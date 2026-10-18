@@ -19,7 +19,7 @@ Host disturbance is measured against original coordinates in shells around the r
 
 ```bash
 # If needed for the pip LAMMPS/MPICH installation:
-export LD_LIBRARY_PATH="$VIRTUAL_ENV/lib${LD_LIBRARY_PATH:+:$LD_LIBRARY_PATH}"
+export LD_LIBRARY_PATH="$(python -c 'import sys; print(sys.prefix)')/lib${LD_LIBRARY_PATH:+:$LD_LIBRARY_PATH}"
 python scripts/check_physical_credibility.py cohorts --out results/credibility_followup_20261018
 python scripts/check_physical_credibility.py md --out results/credibility_followup_20261018 --workers 2
 ```

@@ -138,6 +138,42 @@ def main():
     fig.savefig(out / "representative_structures.png", dpi=160)
     plt.close(fig)
     physical.write_csv(out / "representative_selection.csv", picks)
+    # Distinguish creation at initially non-D2 sites from preserving pre-existing D2.
+    test = physical.load_split(physical.DATA / "test.npz").structures
+    th = physical.DefectThresholds.from_dict(
+        json.loads((physical.DATA / "meta.json").read_text())["defects"]["thresholds"]
+    )
+    creation, outcomes = [], []
+    for method, path in physical.RUNS.items():
+        final, request, saved = physical.load_run(path)
+        ids = physical.recover_hosts(saved, test)
+        original = Structures(test.pos[ids], test.types[ids], test.box[ids])
+        prior = physical.success(original, request, th).numpy()
+        after = physical.success(final, request, th).numpy()
+        clean = ~prior
+        creation.append(
+            dict(
+                method=method,
+                n=len(prior),
+                originally_D2=int(prior.sum()),
+                finally_D2=int(after.sum()),
+                newly_D2=int((clean & after).sum()),
+                initially_nonD2=int(clean.sum()),
+                creation_fraction_on_initially_nonD2=float(after[clean].mean()),
+            )
+        )
+        for i in range(len(prior)):
+            outcomes.append(
+                dict(
+                    method=method,
+                    sample=i,
+                    host_id=int(ids[i]),
+                    originally_D2=int(prior[i]),
+                    finally_D2=int(after[i]),
+                )
+            )
+    physical.write_csv(out / "creation_summary.csv", creation)
+    physical.write_csv(out / "host_creation_outcomes.csv", outcomes)
     repeat = []
     for path in sorted((out / "repeats").glob("*/samples.npz")):
         with np.load(path) as f:
