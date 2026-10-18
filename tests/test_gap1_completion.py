@@ -38,3 +38,28 @@ def test_kaggle_notebook_has_executable_python_and_no_saved_outputs():
             ast.parse("".join(cell["source"]))
             assert cell["outputs"] == []
             assert cell["execution_count"] is None
+
+
+def test_matched_host_validation_allows_sampling_cast_but_rejects_changes():
+    from types import SimpleNamespace
+
+    import torch
+
+    original = torch.tensor([[[1.123456789, 2.987654321]]], dtype=torch.float64)
+    test = SimpleNamespace(pos=original)
+    data = dict(
+        host_ids=np.array([0]),
+        host_pos=original.float().numpy(),
+        target=np.array([[1.0, 2.0]]),
+        types=np.array([[1]]),
+        box=np.array([[10.0, 10.0]]),
+        pin_mask=np.array([[False]]),
+    )
+    reference = gap1.check_matched_requests(data, test)
+    changed = {key: value.copy() for key, value in data.items()}
+    changed["target"][0, 0] += 0.1
+    with pytest.raises(ValueError, match="identical matched requests"):
+        gap1.check_matched_requests(changed, test, reference)
+    changed["host_pos"][0, 0, 0] += 0.1
+    with pytest.raises(ValueError, match="original host positions"):
+        gap1.check_matched_requests(changed, test, reference)
