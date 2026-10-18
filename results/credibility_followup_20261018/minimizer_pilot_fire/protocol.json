@@ -1,0 +1,10 @@
+{
+  "purpose": "Diagnostic successful FIRE pilot trajectories only; not a randomly selected minimizer-equivalence study",
+  "main_dynamics": "same KA, NVT, dt, temperatures, velocity seeds and observation times as final suite",
+  "snapshot_minimizer": "LAMMPS FIRE",
+  "max_iterations": 10000,
+  "max_force_evaluations": 100000,
+  "ftol": 1e-06,
+  "selection": "only trajectories whose all four FIRE snapshot residual checks passed were saved",
+  "n_saved_trajectories": 28
+}
