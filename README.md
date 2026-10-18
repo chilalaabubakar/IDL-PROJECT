@@ -68,6 +68,14 @@ Full matched replication and longer stability checks: see the
 [completion workflow](docs/GAP1_COMPLETION.md) and
 [Kaggle notebook](notebooks/kaggle_gap1_completion.ipynb).
 
+## Generalization study (gap 2)
+
+Run the dedicated [Kaggle generalization notebook](notebooks/kaggle_gap2_generalization.ipynb)
+for fresh 256/1024-atom hosts at three cooling rates, all three frozen training seeds,
+and matched controls. See the [protocol and resume instructions](docs/GAP2_GENERALIZATION.md).
+The preparation checks are complete; production placement-transfer results require running
+this notebook. It supports checkpointing across multiple Kaggle sessions.
+
 ## Run on Colab (GPU)
 
 Open [`notebooks/colab_train.ipynb`](notebooks/colab_train.ipynb) in Colab:
