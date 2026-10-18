@@ -116,6 +116,10 @@ def worker(job):
                 req.label.cpu(),
             )
             ok = success(relax.structures, reqcpu, threshold).numpy()
+        if not bool(relax.converged.all()):
+            raise RuntimeError(
+                f"Unconverged relaxation in {name}, batch {start}: {relax.max_force.tolist()}"
+            )
         np.savez_compressed(
             file,
             pos=relax.structures.pos.numpy(),
@@ -151,13 +155,19 @@ def main():
     p.add_argument("--workers", type=int, default=4)
     p.add_argument("--device", default="cpu")
     p.add_argument("--batch-size", type=int, default=2)
+    p.add_argument("--models", nargs="+", choices=list(MODELS), default=list(MODELS))
     a = p.parse_args()
     if not 1 <= a.n <= 256 or a.workers < 1 or a.batch_size < 1:
         p.error("n must be 1..256 and workers positive")
-    jobs = [(name, ckpt, a.n, a.out, a.device, a.batch_size) for name, ckpt in MODELS.items()]
+    jobs = [(name, MODELS[name], a.n, a.out, a.device, a.batch_size) for name in a.models]
     with ProcessPoolExecutor(max_workers=a.workers) as pool:
         result = list(pool.map(worker, jobs))
-    Path(a.out, "summary.json").write_text(json.dumps(result, indent=2) + "\n")
+    filename = (
+        "summary.json"
+        if len(a.models) == len(MODELS)
+        else "summary_" + "_".join(a.models) + ".json"
+    )
+    Path(a.out, filename).write_text(json.dumps(result, indent=2) + "\n")
     print(result, flush=True)
 
 
