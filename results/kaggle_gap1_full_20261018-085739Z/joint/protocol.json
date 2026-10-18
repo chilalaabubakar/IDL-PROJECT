@@ -1,0 +1,23 @@
+{
+  "options": {
+    "protocol": "gap1-250-v1",
+    "steps": [
+      0,
+      1000,
+      10000,
+      30000,
+      50000
+    ],
+    "site_definition": "nearest B within 0.5 carries frozen D2 label"
+  },
+  "temperature": 0.01,
+  "velocity_seeds": [
+    101,
+    202,
+    303
+  ],
+  "n_trajectories": 1305,
+  "denominator": "all 256 requests; initially failed placements count as zero; separate initially-nonD2 denominator",
+  "uncertainty": "request-weighted ratio with whole-host bootstrap; velocity realizations averaged within requests",
+  "all_snapshot_residuals_within_tolerance": true
+}
