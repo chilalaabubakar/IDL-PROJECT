@@ -177,6 +177,22 @@ def local(out, workers):
     print("Extended local stability complete", flush=True)
 
 
+def check_matched_requests(data, test, reference=None):
+    # Sampling loads dataset coordinates in float32; compare after that exact cast,
+    # rather than rejecting the known float64-to-float32 input conversion.
+    original = test.pos[data["host_ids"]].numpy().astype(data["host_pos"].dtype)
+    if not np.array_equal(data["host_pos"], original):
+        raise ValueError("Saved host IDs disagree with original host positions")
+    matched = {
+        key: data[key] for key in ["host_ids", "target", "types", "box", "pin_mask", "host_pos"]
+    }
+    if reference is not None and any(
+        not np.array_equal(matched[key], reference[key]) for key in reference
+    ):
+        raise ValueError("Full runs do not use identical matched requests")
+    return matched
+
+
 def request_arrays(repeats):
     test = p.load_split(p.DATA / "test.npz").structures
     th = p.DefectThresholds.from_dict(
@@ -194,15 +210,7 @@ def request_arrays(repeats):
         if len(d["pos"]) != 256:
             raise ValueError("Joint full evaluation requires 256 requests per model")
         ids = d["host_ids"]
-        if not np.array_equal(d["host_pos"], test.pos[ids].numpy()):
-            raise ValueError("Saved host IDs disagree with original host positions")
-        matched = {
-            key: d[key] for key in ["host_ids", "target", "types", "box", "pin_mask", "host_pos"]
-        }
-        if reference is None:
-            reference = matched
-        elif any(not np.array_equal(matched[key], reference[key]) for key in reference):
-            raise ValueError("Full runs do not use identical matched requests")
+        reference = check_matched_requests(d, test, reference)
         s = p.Structures(
             torch.from_numpy(d["pos"]).double(),
             torch.from_numpy(d["types"]).long(),
