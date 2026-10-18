@@ -1,0 +1,17 @@
+{
+  "condition": "gap2_ka2d_1024_standard",
+  "config_sha256": "27558c17c5d82a72efa2b105c8778acadc8408e06b364407610730231c29180a",
+  "n_atoms": 1024,
+  "rate": 0.01,
+  "seed": 430000,
+  "seconds": 42.15561950200936,
+  "quality_pass": true,
+  "stats": {
+    "n_b": 358.0,
+    "psi6_global": 0.030317487987881534,
+    "min_pair_dist": 0.8406241523832876,
+    "max_force": 5.517833967516594e-10,
+    "pe_mean": -3.6691436237156854
+  },
+  "purpose": "single-host feasibility only; not a generalization result"
+}
