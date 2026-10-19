@@ -1,0 +1,19 @@
+{
+  "requests_sha256": "26c189b0533e04cec3f9e407ec12fe1527f4afda88c1074f3f21a8fbb87a8183",
+  "manifest_sha256": "ca39c637dd8fbc9d63c3e0781f5be0add662ba1c8fed9102da8b35f5f7691228",
+  "model": "sham_seed0",
+  "checkpoint": {
+    "path": "results/kaggle_20261006-0454Z/training/egnn_cond_smax1/ema.pt",
+    "sha256": "4517d520892e91ab7ab1e89f9900ac0376999d2fa4c437905218580b8706e99d"
+  },
+  "batch_size": 4,
+  "device": "cuda",
+  "noise_seed_rule": "1000+batch_start",
+  "patch_library_sha256": null,
+  "relaxation": {
+    "fmax": 1e-06,
+    "max_steps": 100000,
+    "all_atoms_free": true
+  },
+  "failure_policy": "nonfinite or unconverged outputs count as failed requests"
+}
