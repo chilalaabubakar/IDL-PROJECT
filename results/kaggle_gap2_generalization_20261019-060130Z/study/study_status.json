@@ -1,0 +1,20 @@
+{
+  "complete": false,
+  "completed_conditions": [
+    "ka2d_256_standard"
+  ],
+  "expected_conditions": [
+    "ka2d_1024_fast",
+    "ka2d_1024_slow",
+    "ka2d_1024_standard",
+    "ka2d_256_fast",
+    "ka2d_256_slow",
+    "ka2d_256_standard"
+  ],
+  "uncertainty": "whole-host request-weighted bootstrap; seed_mean conditions on these three trained models",
+  "caveats": [
+    "zero-event bootstrap intervals can be degenerate, not proof of zero probability",
+    "seed0 sham is a same-checkpoint control only for seed0; other seeds use a cross-checkpoint control",
+    "placement transfer only; structural equivalence and thermal transfer are not established"
+  ]
+}
