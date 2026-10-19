@@ -1,0 +1,1530 @@
+{
+  "config": {
+    "config_sha256": "90c1805190b7a83ab5e2a8cf2d9afb0e10465868d68d3217c439e957be1207ac",
+    "n_hosts": 100,
+    "seed_rule": "seed0+slot+1000*attempt; attempts0..9"
+  },
+  "n_atoms": 1024,
+  "protocol": {
+    "rho": 1.2,
+    "frac_a": 0.65,
+    "t_melt": 2.0,
+    "melt_steps": 20000,
+    "t_final": 0.01,
+    "rate": 0.001,
+    "dt": 0.005,
+    "tdamp": 0.1,
+    "min_ftol": 1e-08
+  },
+  "quality": {
+    "max_global_psi6": 0.3,
+    "min_pair_dist": 0.56,
+    "pe_max_z": 5.0
+  },
+  "n_hosts": 100,
+  "n_candidates": 100,
+  "quality_rejections": [],
+  "pe_rejections": [],
+  "accepted": [
+    {
+      "seed": 400000,
+      "slot": 0,
+      "attempt": 0,
+      "quality_pass": true,
+      "stats": {
+        "n_b": 358.0,
+        "psi6_global": 0.026275717523325158,
+        "min_pair_dist": 0.8434335577798823,
+        "max_force": 6.551426068313049e-10,
+        "pe_mean": -3.7082733431163284
+      },
+      "seconds": 148.94737040099972,
+      "config_sha256": "90c1805190b7a83ab5e2a8cf2d9afb0e10465868d68d3217c439e957be1207ac"
+    },
+    {
+      "seed": 400001,
+      "slot": 1,
+      "attempt": 0,
+      "quality_pass": true,
+      "stats": {
+        "n_b": 358.0,
+        "psi6_global": 0.005404537323547879,
+        "min_pair_dist": 0.8439306122323648,
+        "max_force": 7.772906207570429e-10,
+        "pe_mean": -3.705344603880633
+      },
+      "seconds": 149.12280538599953,
+      "config_sha256": "90c1805190b7a83ab5e2a8cf2d9afb0e10465868d68d3217c439e957be1207ac"
+    },
+    {
+      "seed": 400002,
+      "slot": 2,
+      "attempt": 0,
+      "quality_pass": true,
+      "stats": {
+        "n_b": 358.0,
+        "psi6_global": 0.017046966182468024,
+        "min_pair_dist": 0.8422200292045017,
+        "max_force": 1.3262237003042188e-09,
+        "pe_mean": -3.700267703834499
+      },
+      "seconds": 151.6004371229992,
+      "config_sha256": "90c1805190b7a83ab5e2a8cf2d9afb0e10465868d68d3217c439e957be1207ac"
+    },
+    {
+      "seed": 400003,
+      "slot": 3,
+      "attempt": 0,
+      "quality_pass": true,
+      "stats": {
+        "n_b": 358.0,
+        "psi6_global": 0.01683135170264727,
+        "min_pair_dist": 0.8424365144160465,
+        "max_force": 1.0873916211906476e-09,
+        "pe_mean": -3.700812858127228
+      },
+      "seconds": 148.4079607470012,
+      "config_sha256": "90c1805190b7a83ab5e2a8cf2d9afb0e10465868d68d3217c439e957be1207ac"
+    },
+    {
+      "seed": 400004,
+      "slot": 4,
+      "attempt": 0,
+      "quality_pass": true,
+      "stats": {
+        "n_b": 358.0,
+        "psi6_global": 0.008682323714520879,
+        "min_pair_dist": 0.839336194013158,
+        "max_force": 9.109617921110313e-10,
+        "pe_mean": -3.706195104949108
+      },
+      "seconds": 144.06336274000023,
+      "config_sha256": "90c1805190b7a83ab5e2a8cf2d9afb0e10465868d68d3217c439e957be1207ac"
+    },
+    {
+      "seed": 400005,
+      "slot": 5,
+      "attempt": 0,
+      "quality_pass": true,
+      "stats": {
+        "n_b": 358.0,
+        "psi6_global": 0.01526178045064936,
+        "min_pair_dist": 0.8448738729124917,
+        "max_force": 1.2720845939118153e-09,
+        "pe_mean": -3.7029510582671232
+      },
+      "seconds": 144.59845874799976,
+      "config_sha256": "90c1805190b7a83ab5e2a8cf2d9afb0e10465868d68d3217c439e957be1207ac"
+    },
+    {
+      "seed": 400006,
+      "slot": 6,
+      "attempt": 0,
+      "quality_pass": true,
+      "stats": {
+        "n_b": 358.0,
+        "psi6_global": 0.03484933444051621,
+        "min_pair_dist": 0.8394813813541993,
+        "max_force": 1.132632543310308e-09,
+        "pe_mean": -3.7040896276924475
+      },
+      "seconds": 146.2061604699993,
+      "config_sha256": "90c1805190b7a83ab5e2a8cf2d9afb0e10465868d68d3217c439e957be1207ac"
+    },
+    {
+      "seed": 400007,
+      "slot": 7,
+      "attempt": 0,
+      "quality_pass": true,
+      "stats": {
+        "n_b": 358.0,
+        "psi6_global": 0.02337732122746769,
+        "min_pair_dist": 0.8418215230018408,
+        "max_force": 8.594741168765907e-10,
+        "pe_mean": -3.708834227534973
+      },
+      "seconds": 144.65311572000064,
+      "config_sha256": "90c1805190b7a83ab5e2a8cf2d9afb0e10465868d68d3217c439e957be1207ac"
+    },
+    {
+      "seed": 400008,
+      "slot": 8,
+      "attempt": 0,
+      "quality_pass": true,
+      "stats": {
+        "n_b": 358.0,
+        "psi6_global": 0.023303912420902382,
+        "min_pair_dist": 0.8385811820149977,
+        "max_force": 9.516996635205999e-10,
+        "pe_mean": -3.7019795509534172
+      },
+      "seconds": 143.23130829899856,
+      "config_sha256": "90c1805190b7a83ab5e2a8cf2d9afb0e10465868d68d3217c439e957be1207ac"
+    },
+    {
+      "seed": 400009,
+      "slot": 9,
+      "attempt": 0,
+      "quality_pass": true,
+      "stats": {
+        "n_b": 358.0,
+        "psi6_global": 0.018849941235303643,
+        "min_pair_dist": 0.8406014935076042,
+        "max_force": 7.237114102442987e-10,
+        "pe_mean": -3.6975267659467246
+      },
+      "seconds": 143.15033852399938,
+      "config_sha256": "90c1805190b7a83ab5e2a8cf2d9afb0e10465868d68d3217c439e957be1207ac"
+    },
+    {
+      "seed": 400010,
+      "slot": 10,
+      "attempt": 0,
+      "quality_pass": true,
+      "stats": {
+        "n_b": 358.0,
+        "psi6_global": 0.025724812460432005,
+        "min_pair_dist": 0.8462893328292938,
+        "max_force": 5.704320349408931e-10,
+        "pe_mean": -3.6935192013398366
+      },
+      "seconds": 145.18290667899964,
+      "config_sha256": "90c1805190b7a83ab5e2a8cf2d9afb0e10465868d68d3217c439e957be1207ac"
+    },
+    {
+      "seed": 400011,
+      "slot": 11,
+      "attempt": 0,
+      "quality_pass": true,
+      "stats": {
+        "n_b": 358.0,
+        "psi6_global": 0.024063033090772193,
+        "min_pair_dist": 0.8385098672975593,
+        "max_force": 1.7960726031440721e-09,
+        "pe_mean": -3.696230472408176
+      },
+      "seconds": 145.71603129399955,
+      "config_sha256": "90c1805190b7a83ab5e2a8cf2d9afb0e10465868d68d3217c439e957be1207ac"
+    },
+    {
+      "seed": 400012,
+      "slot": 12,
+      "attempt": 0,
+      "quality_pass": true,
+      "stats": {
+        "n_b": 358.0,
+        "psi6_global": 0.014653379223053712,
+        "min_pair_dist": 0.8462321443154217,
+        "max_force": 1.4544749432632287e-09,
+        "pe_mean": -3.7031344189426028
+      },
+      "seconds": 143.2331305250009,
+      "config_sha256": "90c1805190b7a83ab5e2a8cf2d9afb0e10465868d68d3217c439e957be1207ac"
+    },
+    {
+      "seed": 400013,
+      "slot": 13,
+      "attempt": 0,
+      "quality_pass": true,
+      "stats": {
+        "n_b": 358.0,
+        "psi6_global": 0.034682122299743455,
+        "min_pair_dist": 0.8442676203174756,
+        "max_force": 8.455344202573656e-10,
+        "pe_mean": -3.6937940669606313
+      },
+      "seconds": 143.4012429049999,
+      "config_sha256": "90c1805190b7a83ab5e2a8cf2d9afb0e10465868d68d3217c439e957be1207ac"
+    },
+    {
+      "seed": 400014,
+      "slot": 14,
+      "attempt": 0,
+      "quality_pass": true,
+      "stats": {
+        "n_b": 358.0,
+        "psi6_global": 0.010558582801259608,
+        "min_pair_dist": 0.8407544200426724,
+        "max_force": 8.383052307880945e-10,
+        "pe_mean": -3.699112401100445
+      },
+      "seconds": 144.3183366889989,
+      "config_sha256": "90c1805190b7a83ab5e2a8cf2d9afb0e10465868d68d3217c439e957be1207ac"
+    },
+    {
+      "seed": 400015,
+      "slot": 15,
+      "attempt": 0,
+      "quality_pass": true,
+      "stats": {
+        "n_b": 358.0,
+        "psi6_global": 0.03128910119260038,
+        "min_pair_dist": 0.8422740948902442,
+        "max_force": 6.353062520503272e-10,
+        "pe_mean": -3.710506167375714
+      },
+      "seconds": 141.88335168900085,
+      "config_sha256": "90c1805190b7a83ab5e2a8cf2d9afb0e10465868d68d3217c439e957be1207ac"
+    },
+    {
+      "seed": 400016,
+      "slot": 16,
+      "attempt": 0,
+      "quality_pass": true,
+      "stats": {
+        "n_b": 358.0,
+        "psi6_global": 0.020283473696908572,
+        "min_pair_dist": 0.8423265031325975,
+        "max_force": 1.3715147073600775e-09,
+        "pe_mean": -3.7053962388573876
+      },
+      "seconds": 146.88114521900025,
+      "config_sha256": "90c1805190b7a83ab5e2a8cf2d9afb0e10465868d68d3217c439e957be1207ac"
+    },
+    {
+      "seed": 400017,
+      "slot": 17,
+      "attempt": 0,
+      "quality_pass": true,
+      "stats": {
+        "n_b": 358.0,
+        "psi6_global": 0.014629309792746573,
+        "min_pair_dist": 0.8415770705668686,
+        "max_force": 9.195417691176822e-10,
+        "pe_mean": -3.7003968730096393
+      },
+      "seconds": 143.75959652799975,
+      "config_sha256": "90c1805190b7a83ab5e2a8cf2d9afb0e10465868d68d3217c439e957be1207ac"
+    },
+    {
+      "seed": 400018,
+      "slot": 18,
+      "attempt": 0,
+      "quality_pass": true,
+      "stats": {
+        "n_b": 358.0,
+        "psi6_global": 0.018989682594255416,
+        "min_pair_dist": 0.843027391159591,
+        "max_force": 1.207810740311288e-09,
+        "pe_mean": -3.7082376472799092
+      },
+      "seconds": 146.46715759299877,
+      "config_sha256": "90c1805190b7a83ab5e2a8cf2d9afb0e10465868d68d3217c439e957be1207ac"
+    },
+    {
+      "seed": 400019,
+      "slot": 19,
+      "attempt": 0,
+      "quality_pass": true,
+      "stats": {
+        "n_b": 358.0,
+        "psi6_global": 0.015452609274046429,
+        "min_pair_dist": 0.8408072834494035,
+        "max_force": 1.7578988820154962e-09,
+        "pe_mean": -3.7014841756486323
+      },
+      "seconds": 143.95246824499918,
+      "config_sha256": "90c1805190b7a83ab5e2a8cf2d9afb0e10465868d68d3217c439e957be1207ac"
+    },
+    {
+      "seed": 400020,
+      "slot": 20,
+      "attempt": 0,
+      "quality_pass": true,
+      "stats": {
+        "n_b": 358.0,
+        "psi6_global": 0.0010701639856289169,
+        "min_pair_dist": 0.8381534747921604,
+        "max_force": 7.834254980854105e-10,
+        "pe_mean": -3.7004419784876346
+      },
+      "seconds": 142.93864904600014,
+      "config_sha256": "90c1805190b7a83ab5e2a8cf2d9afb0e10465868d68d3217c439e957be1207ac"
+    },
+    {
+      "seed": 400021,
+      "slot": 21,
+      "attempt": 0,
+      "quality_pass": true,
+      "stats": {
+        "n_b": 358.0,
+        "psi6_global": 0.032684993634066406,
+        "min_pair_dist": 0.8396642422441452,
+        "max_force": 8.970052339796197e-10,
+        "pe_mean": -3.69321006582711
+      },
+      "seconds": 146.32627014600075,
+      "config_sha256": "90c1805190b7a83ab5e2a8cf2d9afb0e10465868d68d3217c439e957be1207ac"
+    },
+    {
+      "seed": 400022,
+      "slot": 22,
+      "attempt": 0,
+      "quality_pass": true,
+      "stats": {
+        "n_b": 358.0,
+        "psi6_global": 0.027970120537772897,
+        "min_pair_dist": 0.8387840301081008,
+        "max_force": 5.107034239948405e-10,
+        "pe_mean": -3.688558391986342
+      },
+      "seconds": 143.92785627400008,
+      "config_sha256": "90c1805190b7a83ab5e2a8cf2d9afb0e10465868d68d3217c439e957be1207ac"
+    },
+    {
+      "seed": 400023,
+      "slot": 23,
+      "attempt": 0,
+      "quality_pass": true,
+      "stats": {
+        "n_b": 358.0,
+        "psi6_global": 0.005580999611331786,
+        "min_pair_dist": 0.8409607217153222,
+        "max_force": 5.567717398236027e-10,
+        "pe_mean": -3.709153963868139
+      },
+      "seconds": 143.13387955300095,
+      "config_sha256": "90c1805190b7a83ab5e2a8cf2d9afb0e10465868d68d3217c439e957be1207ac"
+    },
+    {
+      "seed": 400024,
+      "slot": 24,
+      "attempt": 0,
+      "quality_pass": true,
+      "stats": {
+        "n_b": 358.0,
+        "psi6_global": 0.022624867980149344,
+        "min_pair_dist": 0.8364141929914736,
+        "max_force": 8.097396642092747e-10,
+        "pe_mean": -3.707066682804752
+      },
+      "seconds": 144.72117206000075,
+      "config_sha256": "90c1805190b7a83ab5e2a8cf2d9afb0e10465868d68d3217c439e957be1207ac"
+    },
+    {
+      "seed": 400025,
+      "slot": 25,
+      "attempt": 0,
+      "quality_pass": true,
+      "stats": {
+        "n_b": 358.0,
+        "psi6_global": 0.04421743577763714,
+        "min_pair_dist": 0.8369861608196001,
+        "max_force": 7.853753203335145e-10,
+        "pe_mean": -3.696366794855818
+      },
+      "seconds": 145.8737280130008,
+      "config_sha256": "90c1805190b7a83ab5e2a8cf2d9afb0e10465868d68d3217c439e957be1207ac"
+    },
+    {
+      "seed": 400026,
+      "slot": 26,
+      "attempt": 0,
+      "quality_pass": true,
+      "stats": {
+        "n_b": 358.0,
+        "psi6_global": 0.011713932128150617,
+        "min_pair_dist": 0.8446659440288246,
+        "max_force": 6.670457970703314e-10,
+        "pe_mean": -3.708652881954539
+      },
+      "seconds": 146.7733729290012,
+      "config_sha256": "90c1805190b7a83ab5e2a8cf2d9afb0e10465868d68d3217c439e957be1207ac"
+    },
+    {
+      "seed": 400027,
+      "slot": 27,
+      "attempt": 0,
+      "quality_pass": true,
+      "stats": {
+        "n_b": 358.0,
+        "psi6_global": 0.04258800610366737,
+        "min_pair_dist": 0.8418741852867917,
+        "max_force": 8.015365732250146e-10,
+        "pe_mean": -3.6958850314091833
+      },
+      "seconds": 144.21669907999967,
+      "config_sha256": "90c1805190b7a83ab5e2a8cf2d9afb0e10465868d68d3217c439e957be1207ac"
+    },
+    {
+      "seed": 400028,
+      "slot": 28,
+      "attempt": 0,
+      "quality_pass": true,
+      "stats": {
+        "n_b": 358.0,
+        "psi6_global": 0.019532742814448136,
+        "min_pair_dist": 0.8389799244124129,
+        "max_force": 7.827647419134109e-10,
+        "pe_mean": -3.6939392185214457
+      },
+      "seconds": 143.3588323240001,
+      "config_sha256": "90c1805190b7a83ab5e2a8cf2d9afb0e10465868d68d3217c439e957be1207ac"
+    },
+    {
+      "seed": 400029,
+      "slot": 29,
+      "attempt": 0,
+      "quality_pass": true,
+      "stats": {
+        "n_b": 358.0,
+        "psi6_global": 0.03230041860346478,
+        "min_pair_dist": 0.8394799349633197,
+        "max_force": 8.562784925558731e-10,
+        "pe_mean": -3.7063774121728046
+      },
+      "seconds": 143.67097020599977,
+      "config_sha256": "90c1805190b7a83ab5e2a8cf2d9afb0e10465868d68d3217c439e957be1207ac"
+    },
+    {
+      "seed": 400030,
+      "slot": 30,
+      "attempt": 0,
+      "quality_pass": true,
+      "stats": {
+        "n_b": 358.0,
+        "psi6_global": 0.016876516615050213,
+        "min_pair_dist": 0.8386861635683202,
+        "max_force": 1.3159662387574045e-09,
+        "pe_mean": -3.6935190115151793
+      },
+      "seconds": 145.22345970899914,
+      "config_sha256": "90c1805190b7a83ab5e2a8cf2d9afb0e10465868d68d3217c439e957be1207ac"
+    },
+    {
+      "seed": 400031,
+      "slot": 31,
+      "attempt": 0,
+      "quality_pass": true,
+      "stats": {
+        "n_b": 358.0,
+        "psi6_global": 0.032631601020704205,
+        "min_pair_dist": 0.842375465832,
+        "max_force": 8.713369401003312e-10,
+        "pe_mean": -3.7038552916780794
+      },
+      "seconds": 144.56653886499953,
+      "config_sha256": "90c1805190b7a83ab5e2a8cf2d9afb0e10465868d68d3217c439e957be1207ac"
+    },
+    {
+      "seed": 400032,
+      "slot": 32,
+      "attempt": 0,
+      "quality_pass": true,
+      "stats": {
+        "n_b": 358.0,
+        "psi6_global": 0.025989216680453966,
+        "min_pair_dist": 0.8403148732240538,
+        "max_force": 7.523180411972419e-10,
+        "pe_mean": -3.6964463226555115
+      },
+      "seconds": 148.1601620270012,
+      "config_sha256": "90c1805190b7a83ab5e2a8cf2d9afb0e10465868d68d3217c439e957be1207ac"
+    },
+    {
+      "seed": 400033,
+      "slot": 33,
+      "attempt": 0,
+      "quality_pass": true,
+      "stats": {
+        "n_b": 358.0,
+        "psi6_global": 0.03946776336641462,
+        "min_pair_dist": 0.8386340695691952,
+        "max_force": 1.2867293688878512e-09,
+        "pe_mean": -3.7034092925359845
+      },
+      "seconds": 149.1409631000006,
+      "config_sha256": "90c1805190b7a83ab5e2a8cf2d9afb0e10465868d68d3217c439e957be1207ac"
+    },
+    {
+      "seed": 400034,
+      "slot": 34,
+      "attempt": 0,
+      "quality_pass": true,
+      "stats": {
+        "n_b": 358.0,
+        "psi6_global": 0.038346380024513925,
+        "min_pair_dist": 0.8436993332849639,
+        "max_force": 5.027663008139172e-10,
+        "pe_mean": -3.7003430847815055
+      },
+      "seconds": 144.7086143739998,
+      "config_sha256": "90c1805190b7a83ab5e2a8cf2d9afb0e10465868d68d3217c439e957be1207ac"
+    },
+    {
+      "seed": 400035,
+      "slot": 35,
+      "attempt": 0,
+      "quality_pass": true,
+      "stats": {
+        "n_b": 358.0,
+        "psi6_global": 0.026209028248697572,
+        "min_pair_dist": 0.8439422561818738,
+        "max_force": 1.3992533798301565e-09,
+        "pe_mean": -3.7006395536638665
+      },
+      "seconds": 151.185953021999,
+      "config_sha256": "90c1805190b7a83ab5e2a8cf2d9afb0e10465868d68d3217c439e957be1207ac"
+    },
+    {
+      "seed": 400036,
+      "slot": 36,
+      "attempt": 0,
+      "quality_pass": true,
+      "stats": {
+        "n_b": 358.0,
+        "psi6_global": 0.0388588704580828,
+        "min_pair_dist": 0.840760402101801,
+        "max_force": 9.938895262351366e-10,
+        "pe_mean": -3.70335243218072
+      },
+      "seconds": 148.09278848099893,
+      "config_sha256": "90c1805190b7a83ab5e2a8cf2d9afb0e10465868d68d3217c439e957be1207ac"
+    },
+    {
+      "seed": 400037,
+      "slot": 37,
+      "attempt": 0,
+      "quality_pass": true,
+      "stats": {
+        "n_b": 358.0,
+        "psi6_global": 0.009659031719466617,
+        "min_pair_dist": 0.8422800176759674,
+        "max_force": 1.472225452658904e-09,
+        "pe_mean": -3.696241198803679
+      },
+      "seconds": 146.77712873900055,
+      "config_sha256": "90c1805190b7a83ab5e2a8cf2d9afb0e10465868d68d3217c439e957be1207ac"
+    },
+    {
+      "seed": 400038,
+      "slot": 38,
+      "attempt": 0,
+      "quality_pass": true,
+      "stats": {
+        "n_b": 358.0,
+        "psi6_global": 0.007926470309848685,
+        "min_pair_dist": 0.8401104239448168,
+        "max_force": 9.902896315472365e-10,
+        "pe_mean": -3.695658487760843
+      },
+      "seconds": 144.9692080599998,
+      "config_sha256": "90c1805190b7a83ab5e2a8cf2d9afb0e10465868d68d3217c439e957be1207ac"
+    },
+    {
+      "seed": 400039,
+      "slot": 39,
+      "attempt": 0,
+      "quality_pass": true,
+      "stats": {
+        "n_b": 358.0,
+        "psi6_global": 0.007480813563503348,
+        "min_pair_dist": 0.8439331971548407,
+        "max_force": 6.112896300258797e-10,
+        "pe_mean": -3.696983681956258
+      },
+      "seconds": 144.36852765000003,
+      "config_sha256": "90c1805190b7a83ab5e2a8cf2d9afb0e10465868d68d3217c439e957be1207ac"
+    },
+    {
+      "seed": 400040,
+      "slot": 40,
+      "attempt": 0,
+      "quality_pass": true,
+      "stats": {
+        "n_b": 358.0,
+        "psi6_global": 0.01612128245488788,
+        "min_pair_dist": 0.8416640507211898,
+        "max_force": 8.021975028693618e-10,
+        "pe_mean": -3.6935330935571145
+      },
+      "seconds": 147.7636106530008,
+      "config_sha256": "90c1805190b7a83ab5e2a8cf2d9afb0e10465868d68d3217c439e957be1207ac"
+    },
+    {
+      "seed": 400041,
+      "slot": 41,
+      "attempt": 0,
+      "quality_pass": true,
+      "stats": {
+        "n_b": 358.0,
+        "psi6_global": 0.026136687343024614,
+        "min_pair_dist": 0.8445263245227002,
+        "max_force": 9.108361842535828e-10,
+        "pe_mean": -3.7039747128601253
+      },
+      "seconds": 146.5841330179992,
+      "config_sha256": "90c1805190b7a83ab5e2a8cf2d9afb0e10465868d68d3217c439e957be1207ac"
+    },
+    {
+      "seed": 400042,
+      "slot": 42,
+      "attempt": 0,
+      "quality_pass": true,
+      "stats": {
+        "n_b": 358.0,
+        "psi6_global": 0.010671004188453766,
+        "min_pair_dist": 0.844031485140329,
+        "max_force": 9.520126770246051e-10,
+        "pe_mean": -3.6905111875647574
+      },
+      "seconds": 147.9871934139992,
+      "config_sha256": "90c1805190b7a83ab5e2a8cf2d9afb0e10465868d68d3217c439e957be1207ac"
+    },
+    {
+      "seed": 400043,
+      "slot": 43,
+      "attempt": 0,
+      "quality_pass": true,
+      "stats": {
+        "n_b": 358.0,
+        "psi6_global": 0.03674129981764576,
+        "min_pair_dist": 0.8450808459235175,
+        "max_force": 9.14419970299285e-10,
+        "pe_mean": -3.7030705235075883
+      },
+      "seconds": 145.97274917999857,
+      "config_sha256": "90c1805190b7a83ab5e2a8cf2d9afb0e10465868d68d3217c439e957be1207ac"
+    },
+    {
+      "seed": 400044,
+      "slot": 44,
+      "attempt": 0,
+      "quality_pass": true,
+      "stats": {
+        "n_b": 358.0,
+        "psi6_global": 0.007960065145251124,
+        "min_pair_dist": 0.8409906192464404,
+        "max_force": 9.62391916159433e-10,
+        "pe_mean": -3.706283385278287
+      },
+      "seconds": 145.6148855880001,
+      "config_sha256": "90c1805190b7a83ab5e2a8cf2d9afb0e10465868d68d3217c439e957be1207ac"
+    },
+    {
+      "seed": 400045,
+      "slot": 45,
+      "attempt": 0,
+      "quality_pass": true,
+      "stats": {
+        "n_b": 358.0,
+        "psi6_global": 0.029300405251844613,
+        "min_pair_dist": 0.8411282129091242,
+        "max_force": 8.20887767483125e-10,
+        "pe_mean": -3.712525660585971
+      },
+      "seconds": 145.899689029,
+      "config_sha256": "90c1805190b7a83ab5e2a8cf2d9afb0e10465868d68d3217c439e957be1207ac"
+    },
+    {
+      "seed": 400046,
+      "slot": 46,
+      "attempt": 0,
+      "quality_pass": true,
+      "stats": {
+        "n_b": 358.0,
+        "psi6_global": 0.015054526659286202,
+        "min_pair_dist": 0.8410865191498054,
+        "max_force": 1.0807744282859133e-09,
+        "pe_mean": -3.7002792008887777
+      },
+      "seconds": 142.18142506200093,
+      "config_sha256": "90c1805190b7a83ab5e2a8cf2d9afb0e10465868d68d3217c439e957be1207ac"
+    },
+    {
+      "seed": 400047,
+      "slot": 47,
+      "attempt": 0,
+      "quality_pass": true,
+      "stats": {
+        "n_b": 358.0,
+        "psi6_global": 0.022599302455534365,
+        "min_pair_dist": 0.8345719356052546,
+        "max_force": 7.984880256994842e-10,
+        "pe_mean": -3.706621370955293
+      },
+      "seconds": 142.83344214800127,
+      "config_sha256": "90c1805190b7a83ab5e2a8cf2d9afb0e10465868d68d3217c439e957be1207ac"
+    },
+    {
+      "seed": 400048,
+      "slot": 48,
+      "attempt": 0,
+      "quality_pass": true,
+      "stats": {
+        "n_b": 358.0,
+        "psi6_global": 0.040418213863792164,
+        "min_pair_dist": 0.8411080067716552,
+        "max_force": 1.146754427527874e-09,
+        "pe_mean": -3.7080461636121207
+      },
+      "seconds": 144.06155054900046,
+      "config_sha256": "90c1805190b7a83ab5e2a8cf2d9afb0e10465868d68d3217c439e957be1207ac"
+    },
+    {
+      "seed": 400049,
+      "slot": 49,
+      "attempt": 0,
+      "quality_pass": true,
+      "stats": {
+        "n_b": 358.0,
+        "psi6_global": 0.04008927805694079,
+        "min_pair_dist": 0.8444982794387165,
+        "max_force": 6.133973606825549e-10,
+        "pe_mean": -3.7136015679933454
+      },
+      "seconds": 146.19162467099886,
+      "config_sha256": "90c1805190b7a83ab5e2a8cf2d9afb0e10465868d68d3217c439e957be1207ac"
+    },
+    {
+      "seed": 400050,
+      "slot": 50,
+      "attempt": 0,
+      "quality_pass": true,
+      "stats": {
+        "n_b": 358.0,
+        "psi6_global": 0.01585347430693124,
+        "min_pair_dist": 0.8404935906419692,
+        "max_force": 7.827909431767921e-10,
+        "pe_mean": -3.7020458620284575
+      },
+      "seconds": 145.5267190659997,
+      "config_sha256": "90c1805190b7a83ab5e2a8cf2d9afb0e10465868d68d3217c439e957be1207ac"
+    },
+    {
+      "seed": 400051,
+      "slot": 51,
+      "attempt": 0,
+      "quality_pass": true,
+      "stats": {
+        "n_b": 358.0,
+        "psi6_global": 0.037894169036107254,
+        "min_pair_dist": 0.8433314332857483,
+        "max_force": 1.1267148151972162e-09,
+        "pe_mean": -3.6998940633072084
+      },
+      "seconds": 147.53675810700042,
+      "config_sha256": "90c1805190b7a83ab5e2a8cf2d9afb0e10465868d68d3217c439e957be1207ac"
+    },
+    {
+      "seed": 400052,
+      "slot": 52,
+      "attempt": 0,
+      "quality_pass": true,
+      "stats": {
+        "n_b": 358.0,
+        "psi6_global": 0.022232848545862476,
+        "min_pair_dist": 0.8412203098668817,
+        "max_force": 1.2107625735335859e-09,
+        "pe_mean": -3.697369232563287
+      },
+      "seconds": 145.0706209079999,
+      "config_sha256": "90c1805190b7a83ab5e2a8cf2d9afb0e10465868d68d3217c439e957be1207ac"
+    },
+    {
+      "seed": 400053,
+      "slot": 53,
+      "attempt": 0,
+      "quality_pass": true,
+      "stats": {
+        "n_b": 358.0,
+        "psi6_global": 0.01838850901656427,
+        "min_pair_dist": 0.8423168493156897,
+        "max_force": 6.275659089616248e-10,
+        "pe_mean": -3.7010998832763047
+      },
+      "seconds": 146.56400483400103,
+      "config_sha256": "90c1805190b7a83ab5e2a8cf2d9afb0e10465868d68d3217c439e957be1207ac"
+    },
+    {
+      "seed": 400054,
+      "slot": 54,
+      "attempt": 0,
+      "quality_pass": true,
+      "stats": {
+        "n_b": 358.0,
+        "psi6_global": 0.0259300206971903,
+        "min_pair_dist": 0.8446228841665443,
+        "max_force": 5.860783802713598e-10,
+        "pe_mean": -3.699909097404954
+      },
+      "seconds": 146.21643070400023,
+      "config_sha256": "90c1805190b7a83ab5e2a8cf2d9afb0e10465868d68d3217c439e957be1207ac"
+    },
+    {
+      "seed": 400055,
+      "slot": 55,
+      "attempt": 0,
+      "quality_pass": true,
+      "stats": {
+        "n_b": 358.0,
+        "psi6_global": 0.0075182314178925515,
+        "min_pair_dist": 0.8396540773376666,
+        "max_force": 7.115409355468172e-10,
+        "pe_mean": -3.710537250022311
+      },
+      "seconds": 145.01353540499986,
+      "config_sha256": "90c1805190b7a83ab5e2a8cf2d9afb0e10465868d68d3217c439e957be1207ac"
+    },
+    {
+      "seed": 400056,
+      "slot": 56,
+      "attempt": 0,
+      "quality_pass": true,
+      "stats": {
+        "n_b": 358.0,
+        "psi6_global": 0.020297361615846884,
+        "min_pair_dist": 0.8404476333041833,
+        "max_force": 6.169459387805887e-10,
+        "pe_mean": -3.687781017596684
+      },
+      "seconds": 144.98580197400042,
+      "config_sha256": "90c1805190b7a83ab5e2a8cf2d9afb0e10465868d68d3217c439e957be1207ac"
+    },
+    {
+      "seed": 400057,
+      "slot": 57,
+      "attempt": 0,
+      "quality_pass": true,
+      "stats": {
+        "n_b": 358.0,
+        "psi6_global": 0.039259740575682885,
+        "min_pair_dist": 0.8387389666260049,
+        "max_force": 2.0971696323979216e-09,
+        "pe_mean": -3.688676043277696
+      },
+      "seconds": 147.24175709100018,
+      "config_sha256": "90c1805190b7a83ab5e2a8cf2d9afb0e10465868d68d3217c439e957be1207ac"
+    },
+    {
+      "seed": 400058,
+      "slot": 58,
+      "attempt": 0,
+      "quality_pass": true,
+      "stats": {
+        "n_b": 358.0,
+        "psi6_global": 0.01741943220776759,
+        "min_pair_dist": 0.8395361702024545,
+        "max_force": 5.277638881473479e-10,
+        "pe_mean": -3.702923676894084
+      },
+      "seconds": 145.23136553100085,
+      "config_sha256": "90c1805190b7a83ab5e2a8cf2d9afb0e10465868d68d3217c439e957be1207ac"
+    },
+    {
+      "seed": 400059,
+      "slot": 59,
+      "attempt": 0,
+      "quality_pass": true,
+      "stats": {
+        "n_b": 358.0,
+        "psi6_global": 0.036936348215629244,
+        "min_pair_dist": 0.8430118582400089,
+        "max_force": 6.134364682885973e-10,
+        "pe_mean": -3.711445658316065
+      },
+      "seconds": 144.85509787199953,
+      "config_sha256": "90c1805190b7a83ab5e2a8cf2d9afb0e10465868d68d3217c439e957be1207ac"
+    },
+    {
+      "seed": 400060,
+      "slot": 60,
+      "attempt": 0,
+      "quality_pass": true,
+      "stats": {
+        "n_b": 358.0,
+        "psi6_global": 0.01398926251156891,
+        "min_pair_dist": 0.8420055631499942,
+        "max_force": 8.958398051150951e-10,
+        "pe_mean": -3.699396787045424
+      },
+      "seconds": 142.36157799000102,
+      "config_sha256": "90c1805190b7a83ab5e2a8cf2d9afb0e10465868d68d3217c439e957be1207ac"
+    },
+    {
+      "seed": 400061,
+      "slot": 61,
+      "attempt": 0,
+      "quality_pass": true,
+      "stats": {
+        "n_b": 358.0,
+        "psi6_global": 0.01636609462434436,
+        "min_pair_dist": 0.8415703555330077,
+        "max_force": 5.353293398846493e-10,
+        "pe_mean": -3.6935547974252025
+      },
+      "seconds": 144.52409124800033,
+      "config_sha256": "90c1805190b7a83ab5e2a8cf2d9afb0e10465868d68d3217c439e957be1207ac"
+    },
+    {
+      "seed": 400062,
+      "slot": 62,
+      "attempt": 0,
+      "quality_pass": true,
+      "stats": {
+        "n_b": 358.0,
+        "psi6_global": 0.014472438971362979,
+        "min_pair_dist": 0.838367929098822,
+        "max_force": 1.2115654868249948e-09,
+        "pe_mean": -3.7060233354929566
+      },
+      "seconds": 144.8069819680004,
+      "config_sha256": "90c1805190b7a83ab5e2a8cf2d9afb0e10465868d68d3217c439e957be1207ac"
+    },
+    {
+      "seed": 400063,
+      "slot": 63,
+      "attempt": 0,
+      "quality_pass": true,
+      "stats": {
+        "n_b": 358.0,
+        "psi6_global": 0.05292693658894424,
+        "min_pair_dist": 0.8418365965550452,
+        "max_force": 6.35440935981002e-10,
+        "pe_mean": -3.696047291297969
+      },
+      "seconds": 143.2701706250009,
+      "config_sha256": "90c1805190b7a83ab5e2a8cf2d9afb0e10465868d68d3217c439e957be1207ac"
+    },
+    {
+      "seed": 400064,
+      "slot": 64,
+      "attempt": 0,
+      "quality_pass": true,
+      "stats": {
+        "n_b": 358.0,
+        "psi6_global": 0.023148341664582364,
+        "min_pair_dist": 0.838775375239676,
+        "max_force": 1.1293944668366862e-09,
+        "pe_mean": -3.699258439809368
+      },
+      "seconds": 143.87903068499872,
+      "config_sha256": "90c1805190b7a83ab5e2a8cf2d9afb0e10465868d68d3217c439e957be1207ac"
+    },
+    {
+      "seed": 400065,
+      "slot": 65,
+      "attempt": 0,
+      "quality_pass": true,
+      "stats": {
+        "n_b": 358.0,
+        "psi6_global": 0.008742132625177377,
+        "min_pair_dist": 0.8374609289581717,
+        "max_force": 5.598452257338238e-10,
+        "pe_mean": -3.7017712153043663
+      },
+      "seconds": 144.8080176959993,
+      "config_sha256": "90c1805190b7a83ab5e2a8cf2d9afb0e10465868d68d3217c439e957be1207ac"
+    },
+    {
+      "seed": 400066,
+      "slot": 66,
+      "attempt": 0,
+      "quality_pass": true,
+      "stats": {
+        "n_b": 358.0,
+        "psi6_global": 0.01734905575258873,
+        "min_pair_dist": 0.8438095440356885,
+        "max_force": 1.8120861061676763e-09,
+        "pe_mean": -3.6998804159882313
+      },
+      "seconds": 146.43648174100053,
+      "config_sha256": "90c1805190b7a83ab5e2a8cf2d9afb0e10465868d68d3217c439e957be1207ac"
+    },
+    {
+      "seed": 400067,
+      "slot": 67,
+      "attempt": 0,
+      "quality_pass": true,
+      "stats": {
+        "n_b": 358.0,
+        "psi6_global": 0.03426029129935621,
+        "min_pair_dist": 0.8424833731553073,
+        "max_force": 9.914525936349783e-10,
+        "pe_mean": -3.694763330369828
+      },
+      "seconds": 144.86621760399976,
+      "config_sha256": "90c1805190b7a83ab5e2a8cf2d9afb0e10465868d68d3217c439e957be1207ac"
+    },
+    {
+      "seed": 400068,
+      "slot": 68,
+      "attempt": 0,
+      "quality_pass": true,
+      "stats": {
+        "n_b": 358.0,
+        "psi6_global": 0.029527325431540064,
+        "min_pair_dist": 0.8430298222213324,
+        "max_force": 9.402837397587405e-10,
+        "pe_mean": -3.703440042399194
+      },
+      "seconds": 146.00773463899895,
+      "config_sha256": "90c1805190b7a83ab5e2a8cf2d9afb0e10465868d68d3217c439e957be1207ac"
+    },
+    {
+      "seed": 400069,
+      "slot": 69,
+      "attempt": 0,
+      "quality_pass": true,
+      "stats": {
+        "n_b": 358.0,
+        "psi6_global": 0.0076042092698657355,
+        "min_pair_dist": 0.8402105936609442,
+        "max_force": 6.827453949420637e-10,
+        "pe_mean": -3.704835416470239
+      },
+      "seconds": 143.36652138499994,
+      "config_sha256": "90c1805190b7a83ab5e2a8cf2d9afb0e10465868d68d3217c439e957be1207ac"
+    },
+    {
+      "seed": 400070,
+      "slot": 70,
+      "attempt": 0,
+      "quality_pass": true,
+      "stats": {
+        "n_b": 358.0,
+        "psi6_global": 0.027221519786573212,
+        "min_pair_dist": 0.8412643648725364,
+        "max_force": 1.2053111529686245e-09,
+        "pe_mean": -3.7083553543523484
+      },
+      "seconds": 144.7495490809997,
+      "config_sha256": "90c1805190b7a83ab5e2a8cf2d9afb0e10465868d68d3217c439e957be1207ac"
+    },
+    {
+      "seed": 400071,
+      "slot": 71,
+      "attempt": 0,
+      "quality_pass": true,
+      "stats": {
+        "n_b": 358.0,
+        "psi6_global": 0.02917779694668839,
+        "min_pair_dist": 0.8449358307718913,
+        "max_force": 6.39610003849711e-10,
+        "pe_mean": -3.698761913452362
+      },
+      "seconds": 145.47868003900112,
+      "config_sha256": "90c1805190b7a83ab5e2a8cf2d9afb0e10465868d68d3217c439e957be1207ac"
+    },
+    {
+      "seed": 400072,
+      "slot": 72,
+      "attempt": 0,
+      "quality_pass": true,
+      "stats": {
+        "n_b": 358.0,
+        "psi6_global": 0.019431494424362233,
+        "min_pair_dist": 0.8407571080281244,
+        "max_force": 7.714657801471958e-10,
+        "pe_mean": -3.7170085756399827
+      },
+      "seconds": 145.81788017600047,
+      "config_sha256": "90c1805190b7a83ab5e2a8cf2d9afb0e10465868d68d3217c439e957be1207ac"
+    },
+    {
+      "seed": 400073,
+      "slot": 73,
+      "attempt": 0,
+      "quality_pass": true,
+      "stats": {
+        "n_b": 358.0,
+        "psi6_global": 0.036477269507277046,
+        "min_pair_dist": 0.8410137876560614,
+        "max_force": 9.292851904652011e-10,
+        "pe_mean": -3.7057953801639645
+      },
+      "seconds": 145.4060203049994,
+      "config_sha256": "90c1805190b7a83ab5e2a8cf2d9afb0e10465868d68d3217c439e957be1207ac"
+    },
+    {
+      "seed": 400074,
+      "slot": 74,
+      "attempt": 0,
+      "quality_pass": true,
+      "stats": {
+        "n_b": 358.0,
+        "psi6_global": 0.026243203278343893,
+        "min_pair_dist": 0.8418746843047132,
+        "max_force": 1.1991558718227324e-09,
+        "pe_mean": -3.6966483707043047
+      },
+      "seconds": 146.9682638409995,
+      "config_sha256": "90c1805190b7a83ab5e2a8cf2d9afb0e10465868d68d3217c439e957be1207ac"
+    },
+    {
+      "seed": 400075,
+      "slot": 75,
+      "attempt": 0,
+      "quality_pass": true,
+      "stats": {
+        "n_b": 358.0,
+        "psi6_global": 0.016728325598740146,
+        "min_pair_dist": 0.8459247603945128,
+        "max_force": 7.52382156576914e-10,
+        "pe_mean": -3.7055746965435663
+      },
+      "seconds": 143.56333154099957,
+      "config_sha256": "90c1805190b7a83ab5e2a8cf2d9afb0e10465868d68d3217c439e957be1207ac"
+    },
+    {
+      "seed": 400076,
+      "slot": 76,
+      "attempt": 0,
+      "quality_pass": true,
+      "stats": {
+        "n_b": 358.0,
+        "psi6_global": 0.0028718329841242235,
+        "min_pair_dist": 0.844517783111721,
+        "max_force": 9.301639458669797e-10,
+        "pe_mean": -3.696836919025295
+      },
+      "seconds": 144.51203017899934,
+      "config_sha256": "90c1805190b7a83ab5e2a8cf2d9afb0e10465868d68d3217c439e957be1207ac"
+    },
+    {
+      "seed": 400077,
+      "slot": 77,
+      "attempt": 0,
+      "quality_pass": true,
+      "stats": {
+        "n_b": 358.0,
+        "psi6_global": 0.019254942771678846,
+        "min_pair_dist": 0.8416649245076507,
+        "max_force": 6.85942191935851e-10,
+        "pe_mean": -3.7059038715595585
+      },
+      "seconds": 143.2674339969999,
+      "config_sha256": "90c1805190b7a83ab5e2a8cf2d9afb0e10465868d68d3217c439e957be1207ac"
+    },
+    {
+      "seed": 400078,
+      "slot": 78,
+      "attempt": 0,
+      "quality_pass": true,
+      "stats": {
+        "n_b": 358.0,
+        "psi6_global": 0.048109902056314054,
+        "min_pair_dist": 0.8361546341472735,
+        "max_force": 5.217880225116822e-10,
+        "pe_mean": -3.6953537524464553
+      },
+      "seconds": 144.5735801009996,
+      "config_sha256": "90c1805190b7a83ab5e2a8cf2d9afb0e10465868d68d3217c439e957be1207ac"
+    },
+    {
+      "seed": 400079,
+      "slot": 79,
+      "attempt": 0,
+      "quality_pass": true,
+      "stats": {
+        "n_b": 358.0,
+        "psi6_global": 0.023290861272097004,
+        "min_pair_dist": 0.8434080903609659,
+        "max_force": 1.859794138137083e-09,
+        "pe_mean": -3.7066020283998045
+      },
+      "seconds": 142.76055371300026,
+      "config_sha256": "90c1805190b7a83ab5e2a8cf2d9afb0e10465868d68d3217c439e957be1207ac"
+    },
+    {
+      "seed": 400080,
+      "slot": 80,
+      "attempt": 0,
+      "quality_pass": true,
+      "stats": {
+        "n_b": 358.0,
+        "psi6_global": 0.037472100186808036,
+        "min_pair_dist": 0.8397650694094311,
+        "max_force": 1.1420490863764399e-09,
+        "pe_mean": -3.7026778904300657
+      },
+      "seconds": 145.52710538299834,
+      "config_sha256": "90c1805190b7a83ab5e2a8cf2d9afb0e10465868d68d3217c439e957be1207ac"
+    },
+    {
+      "seed": 400081,
+      "slot": 81,
+      "attempt": 0,
+      "quality_pass": true,
+      "stats": {
+        "n_b": 358.0,
+        "psi6_global": 0.03235562746830093,
+        "min_pair_dist": 0.8408925503857703,
+        "max_force": 1.3977966353828641e-09,
+        "pe_mean": -3.70381019314331
+      },
+      "seconds": 143.9734611040003,
+      "config_sha256": "90c1805190b7a83ab5e2a8cf2d9afb0e10465868d68d3217c439e957be1207ac"
+    },
+    {
+      "seed": 400082,
+      "slot": 82,
+      "attempt": 0,
+      "quality_pass": true,
+      "stats": {
+        "n_b": 358.0,
+        "psi6_global": 0.02686287638398874,
+        "min_pair_dist": 0.842540235375459,
+        "max_force": 1.6339858494029968e-09,
+        "pe_mean": -3.704587721833103
+      },
+      "seconds": 143.10788621699976,
+      "config_sha256": "90c1805190b7a83ab5e2a8cf2d9afb0e10465868d68d3217c439e957be1207ac"
+    },
+    {
+      "seed": 400083,
+      "slot": 83,
+      "attempt": 0,
+      "quality_pass": true,
+      "stats": {
+        "n_b": 358.0,
+        "psi6_global": 0.03348202953664779,
+        "min_pair_dist": 0.8372868555503952,
+        "max_force": 8.45100767143947e-10,
+        "pe_mean": -3.6981712393569426
+      },
+      "seconds": 143.6993213349997,
+      "config_sha256": "90c1805190b7a83ab5e2a8cf2d9afb0e10465868d68d3217c439e957be1207ac"
+    },
+    {
+      "seed": 400084,
+      "slot": 84,
+      "attempt": 0,
+      "quality_pass": true,
+      "stats": {
+        "n_b": 358.0,
+        "psi6_global": 0.03336000106595802,
+        "min_pair_dist": 0.8424881781627304,
+        "max_force": 9.540984391431806e-10,
+        "pe_mean": -3.7102646427693227
+      },
+      "seconds": 147.7345604889997,
+      "config_sha256": "90c1805190b7a83ab5e2a8cf2d9afb0e10465868d68d3217c439e957be1207ac"
+    },
+    {
+      "seed": 400085,
+      "slot": 85,
+      "attempt": 0,
+      "quality_pass": true,
+      "stats": {
+        "n_b": 358.0,
+        "psi6_global": 0.010370673088574728,
+        "min_pair_dist": 0.8423827546289566,
+        "max_force": 6.841651481459543e-10,
+        "pe_mean": -3.7053809724559934
+      },
+      "seconds": 145.36079477800013,
+      "config_sha256": "90c1805190b7a83ab5e2a8cf2d9afb0e10465868d68d3217c439e957be1207ac"
+    },
+    {
+      "seed": 400086,
+      "slot": 86,
+      "attempt": 0,
+      "quality_pass": true,
+      "stats": {
+        "n_b": 358.0,
+        "psi6_global": 0.011082135202502646,
+        "min_pair_dist": 0.8361123025697819,
+        "max_force": 1.4052119468033197e-09,
+        "pe_mean": -3.7080991782148334
+      },
+      "seconds": 147.6578544719996,
+      "config_sha256": "90c1805190b7a83ab5e2a8cf2d9afb0e10465868d68d3217c439e957be1207ac"
+    },
+    {
+      "seed": 400087,
+      "slot": 87,
+      "attempt": 0,
+      "quality_pass": true,
+      "stats": {
+        "n_b": 358.0,
+        "psi6_global": 0.003353836889132356,
+        "min_pair_dist": 0.8405349263127875,
+        "max_force": 7.277986269205172e-10,
+        "pe_mean": -3.7041309839884766
+      },
+      "seconds": 144.88561102599851,
+      "config_sha256": "90c1805190b7a83ab5e2a8cf2d9afb0e10465868d68d3217c439e957be1207ac"
+    },
+    {
+      "seed": 400088,
+      "slot": 88,
+      "attempt": 0,
+      "quality_pass": true,
+      "stats": {
+        "n_b": 358.0,
+        "psi6_global": 0.017909286480249996,
+        "min_pair_dist": 0.8422812447345396,
+        "max_force": 1.3042230490034612e-09,
+        "pe_mean": -3.695850772607834
+      },
+      "seconds": 144.25504709400047,
+      "config_sha256": "90c1805190b7a83ab5e2a8cf2d9afb0e10465868d68d3217c439e957be1207ac"
+    },
+    {
+      "seed": 400089,
+      "slot": 89,
+      "attempt": 0,
+      "quality_pass": true,
+      "stats": {
+        "n_b": 358.0,
+        "psi6_global": 0.02423605856904981,
+        "min_pair_dist": 0.8392633651747358,
+        "max_force": 5.950372139462701e-10,
+        "pe_mean": -3.70116028633084
+      },
+      "seconds": 143.38668932400105,
+      "config_sha256": "90c1805190b7a83ab5e2a8cf2d9afb0e10465868d68d3217c439e957be1207ac"
+    },
+    {
+      "seed": 400090,
+      "slot": 90,
+      "attempt": 0,
+      "quality_pass": true,
+      "stats": {
+        "n_b": 358.0,
+        "psi6_global": 0.02552614582606404,
+        "min_pair_dist": 0.8432262533853091,
+        "max_force": 7.362059122051345e-10,
+        "pe_mean": -3.703375667525962
+      },
+      "seconds": 143.57415151399982,
+      "config_sha256": "90c1805190b7a83ab5e2a8cf2d9afb0e10465868d68d3217c439e957be1207ac"
+    },
+    {
+      "seed": 400091,
+      "slot": 91,
+      "attempt": 0,
+      "quality_pass": true,
+      "stats": {
+        "n_b": 358.0,
+        "psi6_global": 0.018878006551410666,
+        "min_pair_dist": 0.8402732471950871,
+        "max_force": 1.6670629598980469e-09,
+        "pe_mean": -3.687852884219465
+      },
+      "seconds": 143.7864117549998,
+      "config_sha256": "90c1805190b7a83ab5e2a8cf2d9afb0e10465868d68d3217c439e957be1207ac"
+    },
+    {
+      "seed": 400092,
+      "slot": 92,
+      "attempt": 0,
+      "quality_pass": true,
+      "stats": {
+        "n_b": 358.0,
+        "psi6_global": 0.02361166633895663,
+        "min_pair_dist": 0.8449229459283162,
+        "max_force": 1.133241056550105e-09,
+        "pe_mean": -3.702825895976594
+      },
+      "seconds": 143.40015598799982,
+      "config_sha256": "90c1805190b7a83ab5e2a8cf2d9afb0e10465868d68d3217c439e957be1207ac"
+    },
+    {
+      "seed": 400093,
+      "slot": 93,
+      "attempt": 0,
+      "quality_pass": true,
+      "stats": {
+        "n_b": 358.0,
+        "psi6_global": 0.008823131882191854,
+        "min_pair_dist": 0.8378022280352518,
+        "max_force": 6.520837619872211e-10,
+        "pe_mean": -3.7020052143682696
+      },
+      "seconds": 145.38550102200134,
+      "config_sha256": "90c1805190b7a83ab5e2a8cf2d9afb0e10465868d68d3217c439e957be1207ac"
+    },
+    {
+      "seed": 400094,
+      "slot": 94,
+      "attempt": 0,
+      "quality_pass": true,
+      "stats": {
+        "n_b": 358.0,
+        "psi6_global": 0.02640315509327668,
+        "min_pair_dist": 0.8458056587225895,
+        "max_force": 1.0390663607307005e-09,
+        "pe_mean": -3.7002593913720423
+      },
+      "seconds": 145.0214800550002,
+      "config_sha256": "90c1805190b7a83ab5e2a8cf2d9afb0e10465868d68d3217c439e957be1207ac"
+    },
+    {
+      "seed": 400095,
+      "slot": 95,
+      "attempt": 0,
+      "quality_pass": true,
+      "stats": {
+        "n_b": 358.0,
+        "psi6_global": 0.020725427960428446,
+        "min_pair_dist": 0.8370479342064667,
+        "max_force": 1.040460918810826e-09,
+        "pe_mean": -3.7060849981069666
+      },
+      "seconds": 146.44267891600066,
+      "config_sha256": "90c1805190b7a83ab5e2a8cf2d9afb0e10465868d68d3217c439e957be1207ac"
+    },
+    {
+      "seed": 400096,
+      "slot": 96,
+      "attempt": 0,
+      "quality_pass": true,
+      "stats": {
+        "n_b": 358.0,
+        "psi6_global": 0.014973074036229942,
+        "min_pair_dist": 0.8456441461223249,
+        "max_force": 1.37387523579946e-09,
+        "pe_mean": -3.710135593902612
+      },
+      "seconds": 146.02662081800008,
+      "config_sha256": "90c1805190b7a83ab5e2a8cf2d9afb0e10465868d68d3217c439e957be1207ac"
+    },
+    {
+      "seed": 400097,
+      "slot": 97,
+      "attempt": 0,
+      "quality_pass": true,
+      "stats": {
+        "n_b": 358.0,
+        "psi6_global": 0.012489999820307636,
+        "min_pair_dist": 0.8412016483163052,
+        "max_force": 1.4053559496685075e-09,
+        "pe_mean": -3.6983912497085027
+      },
+      "seconds": 144.48883916900013,
+      "config_sha256": "90c1805190b7a83ab5e2a8cf2d9afb0e10465868d68d3217c439e957be1207ac"
+    },
+    {
+      "seed": 400098,
+      "slot": 98,
+      "attempt": 0,
+      "quality_pass": true,
+      "stats": {
+        "n_b": 358.0,
+        "psi6_global": 0.03391705248590729,
+        "min_pair_dist": 0.8329454838827232,
+        "max_force": 8.763819531187877e-10,
+        "pe_mean": -3.7049765902217446
+      },
+      "seconds": 144.20365142899936,
+      "config_sha256": "90c1805190b7a83ab5e2a8cf2d9afb0e10465868d68d3217c439e957be1207ac"
+    },
+    {
+      "seed": 400099,
+      "slot": 99,
+      "attempt": 0,
+      "quality_pass": true,
+      "stats": {
+        "n_b": 358.0,
+        "psi6_global": 0.05395477286935593,
+        "min_pair_dist": 0.8421536472823744,
+        "max_force": 9.974584491700966e-10,
+        "pe_mean": -3.694939558411653
+      },
+      "seconds": 142.93539627599966,
+      "config_sha256": "90c1805190b7a83ab5e2a8cf2d9afb0e10465868d68d3217c439e957be1207ac"
+    }
+  ]
+}
