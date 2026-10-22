@@ -51,7 +51,7 @@ Defects, small groups of atoms arranged differently from the rest, control how a
 
 Glasses have no regular crystal lattice, but they still contain defects, and how a defect behaves depends on the atoms around it. Studies of how glasses deform, age or absorb light therefore need many realistic examples of the same defect at chosen places. In a melt-and-cool (melt-quench) molecular dynamics (MD) simulation one waits for the defect to form by chance, which is slow for rare defects; in hand insertion atoms are moved by hand and relaxed, which is fast but can leave unnatural surroundings. Diffusion models such as DM2~\citep{yang2026dm2} generate realistic glasses but are controlled by whole-sample properties such as the cooling rate, not by a defect at a place. 
 
-Like image inpainting~\citep{lugmayr2022repaint}, the model fills in a region cut out of an existing glass (the rest held fixed) and is told which defect to put at its centre (Task~B, Figure~\ref{fig:overview}). Our objectives:
+Like image inpainting~\citep{lugmayr2022repaint}, the model fills in a region cut out of an existing glass (the rest held fixed) and is told which defect to put at its centre (Task~B). Our objectives:
 \begin{enumerate}
 \item[\textbf{O1}] \textbf{Placement:} after relaxation, the requested defect is at the site in more of 256 requests than with hand insertion or local melt-quench.
 \item[\textbf{O2}] \textbf{Realism:} atom energies around a placed defect are close to those around natural defects (local W1 near the natural floor, below hand insertion).
@@ -59,52 +59,79 @@ Like image inpainting~\citep{lugmayr2022repaint}, the model fills in a region cu
 \end{enumerate}
 We use a two-dimensional model glass, where every step is cheap enough to check carefully, before moving to three-dimensional silica (Section~\ref{sec:next}).
 
-\begin{figure}[t]
-\centering
-\includegraphics[width=0.8\linewidth]{figures/fig1_overview.pdf}
-\caption{Overview. \textbf{(a)} Workflow: make glasses by melting and cooling (1), label their defects (2), train the network (3); a request (4) names a glass, a site and a defect type; the model or a baseline fills the region (5); every result is relaxed with all atoms free (6) and scored (7). \textbf{(b)} Natural defects (rings) in a test glass; large blue atoms are type A, small pink atoms type B. \textbf{(c)} A real request: pale atoms are held fixed, including the atom at the site; atoms inside the solid circle ($R_\text{out}$) are rebuilt; the dashed circle ($r_\text{loc}$) is the area used to judge realism. \textbf{(d)} The model filling this region: atoms start at random positions and are cleaned up as the noise level falls; after relaxation the requested D2 defect sits at the site.}
-\label{fig:overview}
-\end{figure}
+
 
 \section{Related work and background}
 
-\textbf{Diffusion models for materials.} Diffusion models~\citep{ho2020ddpm,song2021sde} turn noise into data step by step and now generate crystals~\citep{xie2022cdvae,jiao2023diffcsp,zeni2025mattergen} and glasses. Our starting point is \textbf{DM2}~\citep{yang2026dm2}: a network learns to predict random shifts added to atom positions, and new glasses are built by repeating this clean-up with small random kicks (score dynamics). We keep its training target and sampler, use an unlabelled model like DM2's as the ``chance'' baseline, and follow DM2 in judging realism by comparing structural distributions with MD-made glasses; our local W1 does this around one defect. Other work steers whole samples with spectra or target properties~\citep{kwon2024spectroscopy,finkler2026inverse}.
+\textbf{Diffusion models for materials.} Diffusion models~\citep{ho2020ddpm,song2021sde} turn noise into data step by step and now generate crystals~\citep{xie2022cdvae,jiao2023diffcsp,zeni2025mattergen} and glasses. In \textbf{DM2}~\citep{yang2026dm2}, a network learns to predict random shifts added to atom positions, and glasses are built by repeating this clean-up with small random kicks. We keep its training target and sampler, use an unlabelled model like DM2's as the ``chance'' baseline, and follow DM2 in judging realism by comparing structural distributions with MD-made glasses; our local W1 does this around one defect. Other work steers whole samples with spectra or target properties~\citep{kwon2024spectroscopy,finkler2026inverse}.
 
 \textbf{Local control.} RePaint~\citep{lugmayr2022repaint} fills a masked image region (our Task~A baseline); classifier-free guidance~\citep{ho2022cfg} makes a model follow a label more strongly. In materials, the closest work fills in crystals around a fixed host~\citep{zhong2025inpainting} or relaxes crystals with point defects~\citep{cui2026constrained}; glasses have no lattice to compare with, so realism must be judged against many natural examples.
 
 \section{Data and methods}
 
-\textbf{Dataset.} We generate our own data with LAMMPS~\citep{thompson2022lammps}, using the two-dimensional Kob--Andersen glass~\citep{kob1995,bruning2009}: two atom types, A (large, 65\%) and B (small, 35\%), interacting through Lennard-Jones forces, in a periodic square box; $\sigma$, the size of an A atom, is the unit of length. Preparation: random placement, melt at $T=2.0$ for 100 time units, cool by $10^{-2}$ per time unit to $T=0.01$, minimise the energy, reject glasses that crystallise or contain overlapping atoms or outlier energies, and label defects with rules fixed on the training glasses. The main set has 800/100/100 train/validation/test glasses of $N=256$ atoms (box side $14.6\sigma$); 1600/200/200 glasses with $N=64$ serve a symmetry test. An atom's neighbours are the atoms within 1.4 times the contact distance. \Dm{} is an A atom with at most 5 neighbours (1.7 per glass), \Dp{} an A atom with at least 8 (1.4 per glass), and D2 a B atom with at least two B neighbours within $1.2\sigma$ (10 per glass). A library of 10,545 natural defects with their neighbourhoods, cut from the training glasses, supplies hand insertion.
+\subsection{Dataset}
+\textbf{Source and preparation.} We generate our own data with LAMMPS~\citep{thompson2022lammps}, using the two-dimensional Kob--Andersen glass~\citep{kob1995,bruning2009}: two atom types, A (large, 65\%) and B (small, 35\%), interacting through Lennard-Jones forces, in a periodic square box; $\sigma$, the size of an A atom, is the unit of length. Preparation: random placement, melt at $T=2.0$ for 100 time units, cool by $10^{-2}$ per time unit to $T=0.01$, minimise the energy, reject glasses that crystallise or contain overlapping atoms or outlier energies, and label defects with rules fixed on the training glasses. The main set has 800/100/100 train/validation/test glasses of $N=256$ atoms (box side $14.6\sigma$); 1600/200/200 glasses with $N=64$ serve a symmetry test. An atom's neighbours are the atoms within 1.4 times the contact distance. \Dm{} is an A atom with at most 5 neighbours (1.7 per glass), \Dp{} an A atom with at least 8 (1.4 per glass), and D2 a B atom with at least two B neighbours within $1.2\sigma$ (10 per glass). A library of 10,545 natural defects with their neighbourhoods, cut from the training glasses, supplies hand insertion.
 
 
 
-\textbf{Model.} The network $d_\theta(x_\sigma,\sigma,m,c)$ takes noisy atom positions $x_\sigma$, the noise level $\sigma$, a held-fixed flag $m_i$ and a label $c_i$ for each atom (``none'' everywhere except the site), and returns one 2D arrow per atom: its estimate of how far noise has moved that atom (Figure~\ref{fig:arch}). Shifting, rotating or renumbering a glass should do the same to the arrows, so we use an E($n$)-equivariant graph neural network (EGNN)~\citep{satorras2021egnn} adapted to periodic boxes: atoms within $2.5\sigma$ are linked, messages depend only on distances, and each output arrow is a weighted sum of neighbour vectors (zero on held atoms). Table~\ref{tab:models} lists the models and their settings.
+\subsection{Model description}
+We describe the layers of the denoising network (input layer, graph layer, EGNN layers and output layer), then the guidance used when sampling, the architectures we compared (Table~\ref{tab:models}) and how they were trained.
+
+\textbf{Input layer.} The input represents one glass at noise level $\sigma$ and must be encoded as numbers. Each of the $N$ atoms has a position $x_i\in\mathbb R^2$ in a periodic square box of side $L$ ($N=256$, $L=14.6\sigma$), a type $t_i\in\{\text{A},\text{B}\}$, a flag $m_i\in\{0,1\}$ that is 1 if the atom is held fixed, and a label token $c_i$: ``unlabelled'' everywhere except at the requested site, which carries the requested defect type (or ``null'' when the label is dropped). The noise level is encoded as 64 random Fourier features of $\log\sigma$ (sines and cosines at fixed random frequencies) followed by a small network. The starting feature vector of atom $i$ is
+\begin{equation}
+h_i^0=\mathrm{MLP}\big(E_t(t_i)+E_m(m_i)+E_c(c_i)+\mathrm{MLP}(\mathrm{Fourier}(\log\sigma))\big)\in\mathbb R^{128},
+\end{equation}
+where $E_t$, $E_m$ and $E_c$ are learned look-up tables (embeddings). Positions enter only through the graph, so $h_i^0$ does not depend on where the glass sits or how it is turned.
+
+\textbf{Graph layer.} Atoms closer than $r_c=2.5\sigma$ are linked (about 24 neighbours each). The vector $r_{ij}$ from atom $i$ to atom $j$ is the shortest one across the periodic box (minimum image), so atoms near opposite edges can be neighbours. Each distance $|r_{ij}|$ is expanded in 16 Gaussian radial basis functions spread evenly over $[0,r_c]$ and multiplied by a cut-off $f_c(r)=\tfrac12[\cos(\pi r/r_c)+1]$ that reaches zero at $r_c$, so links switch on and off smoothly as atoms move.
+
+\textbf{EGNN layers.} Four layers (Figure~\ref{fig:arch}b) pass messages between linked atoms, update the features and produce one vector per atom:
+\begin{equation}
+\begin{aligned}
+m_{ij}&=\phi_e\big(h_i,h_j,\mathrm{rbf}(|r_{ij}|)\big)\,f_c(|r_{ij}|),\qquad
+h_i\leftarrow h_i+\phi_h\Big(\mathrm{LN}(h_i),\ \tfrac{1}{K_0}\textstyle\sum_j g(m_{ij})\,m_{ij}\Big),\\
+v_i^\ell&=\tfrac{1}{K_0}\textstyle\sum_j r_{ij}\,\phi_x(m_{ij})\,f_c(|r_{ij}|).
+\end{aligned}
+\end{equation}
+Here $\phi_e$ ($272\to128\to128$), $\phi_h$ ($256\to128\to128$) and $\phi_x$ ($128\to128\to1$) are two-layer networks with SiLU activations, $g$ is a sigmoid gate, LN is layer normalisation and $K_0=24$ the typical number of neighbours. Messages depend only on distances, so they do not change when the glass is rotated; $v_i^\ell$ is a weighted sum of the vectors $r_{ij}$ and turns with the glass. Unlike the original EGNN~\citep{satorras2021egnn}, positions are not moved inside the network. Each layer has 117,890 parameters.
+
+\textbf{Output layer.} The prediction for atom $i$ is $d_i=(1-m_i)\sum_\ell v_i^\ell\in\mathbb R^2$, the network's estimate of how far the noise has moved that atom. It has no activation function (a regression output) and is zero for held atoms. Tests in the repository check numerically that shifting, rotating or renumbering the glass acts on the output as it should.
+
+\textbf{Classifier-free guidance.} When sampling, the same network runs with and without the site label (Figure~\ref{fig:arch}c) and the outputs are combined, $\tilde d=(1+w)\,d_\theta(\cdot,c)-w\,d_\theta(\cdot,\varnothing)$; the weight $w$ sets how strongly the model follows the label~\citep{ho2022cfg}.
 
 \begin{figure}[t]
 \centering
 \includegraphics[width=0.8\linewidth]{figures/fig2_architecture.pdf}
-\caption{The networks. \textbf{(a)} The conditional denoiser: noisy positions define a periodic graph, per-atom inputs define starting features, and four EGNN layers turn both into one arrow per atom. \textbf{(b)} One EGNN layer: blue items do not change when the glass is rotated; red items rotate with it. \textbf{(c)} Classifier-free guidance runs the same network with and without the site label. \textbf{(d)} The three networks of the symmetry test.}
+\caption{The networks. \textbf{(a)} The conditional EGNN denoiser: noisy positions define a periodic graph, per-atom inputs define starting features, and four EGNN layers turn both into one arrow per atom. \textbf{(b)} One EGNN layer: blue items do not change when the glass is rotated; red items rotate with it. \textbf{(c)} Classifier-free guidance runs the same network with and without the site label. \textbf{(d)} The three networks of the symmetry test.}
 \label{fig:arch}
 \end{figure}
 
+\textbf{Model architectures.} Table~\ref{tab:models} summarises the architectures we trained: EGNN\_cond, the main model; EGNN\_uncond, the same network without labels or held atoms (the chance baseline); and, to test whether built-in symmetry matters, two simpler networks on 64-atom glasses (Figure~\ref{fig:arch}d). The MPNN~\citep{gilmer2017mpnn} also receives the raw $x$ and $y$ parts of each neighbour vector, so it handles renumbering but not rotation; the flat MLP reads the sorted coordinates (as sines and cosines), types, flags and labels of all 64 atoms and respects only the periodic box.
+
 \begin{table}[t]
 \centering
-\caption{Model description. All models train with AdamW (learning rate $2\times10^{-4}$, batch 16, gradient clipping 1, weight moving average 0.999), 50,000 updates with labels or 40,000 without; one run takes about 4 hours on a T4 GPU. Sampling: 100 noisy plus 100 noise-free steps.}
+\caption{Deep learning models; $N\times\{\text{layer}\}$ is a layer repeated $N$ times. Values in brackets were tried. Fixed: 128 features, cutoff $2.5\sigma$, 16 radial basis functions, AdamW, learning rate $2\times10^{-4}$, batch size 16.}
 \label{tab:models}
 \small
-\begin{tabularx}{\linewidth}{@{}l>{\raggedright\arraybackslash}X>{\raggedright\arraybackslash}Xr@{}}
+\begin{tabularx}{\linewidth}{@{}l>{\raggedright\arraybackslash}p{3.5cm}>{\raggedright\arraybackslash}Xr@{}}
 \toprule
-Model & Layers & Settings tried & Params \\
+Model & Hidden layers & Parameters / hyper-parameters & Size \\
 \midrule
-EGNN (main) & 4 EGNN layers, 128 features, 16 radial basis functions, cutoff $2.5\sigma$ & $\sigma_\text{max}\in\{0.5,1.0\}$; $R_\text{out}=4\sigma$ or 3--6$\sigma$; guidance $w=0$--8; seeds 0--2 & 0.53\,M \\
-MPNN & same graph, raw $(dx,dy)$ edges, MLP read-out & $N=64$, no label & 0.48\,M \\
-Flat MLP & 4 layers of 512 units on sorted coordinates & $N=64$, no label & 1.32\,M \\
+EGNN\_cond (main) & $1\times\{$input embedding$\}$, $4\times\{$EGNN layer$\}$, output sum & training noise $\sigma_\text{max}$ (0.5, 1.0); rebuilt region $R_\text{out}$ ($4\sigma$, drawn from 3--6$\sigma$); seed (0, 1, 2); guidance $w$ (0, 1, 2, 3, 4, 6, 8); sampling steps (100, 300, 900, 2900) & 0.53\,M \\
+EGNN\_uncond & $1\times\{$input embedding$\}$, $4\times\{$EGNN layer$\}$, output sum; no label & training noise $\sigma_\text{max}$ (0.5, 1.0); glass size $N$ (64, 256) & 0.53\,M \\
+MPNN & $1\times\{$input embedding$\}$, $4\times\{$MPNN layer$\}$, $\{$Dense 128, Dense 2$\}$ & $N=64$; no label & 0.48\,M \\
+Flat MLP & $4\times\{$Dense 512$\}$, Dense 128 & $N=64$; no label & 1.32\,M \\
 \bottomrule
 \end{tabularx}
 \end{table}
 
-\textbf{Loss.} Following DM2, noise is added to the free atoms, $x_\sigma=x_0+\sigma\varepsilon$ with $\varepsilon\sim\mathcal N(0,I)$ and $\sigma\sim\mathcal U(10^{-3},\sigma_\text{max})$, and the network predicts the added shift. The loss is the mean squared error over the free atoms $U$: $\mathcal L=\mathbb E\big[\tfrac{1}{|U|}\sum_{i\in U}\lVert d_\theta(x_\sigma,\sigma,m,c)_i-\sigma\varepsilon_i\rVert^2\big]$. Training requests are whole boxes (50\%), small patches (30\%) or filled-in regions (20\%), centred on a natural defect half of the time; the label is hidden 15\% of the time, which classifier-free guidance needs. Sampling combines the predictions with and without the label, $\tilde d=(1+w)\,d_\theta(\cdot,c)-w\,d_\theta(\cdot,\varnothing)$.
+\textbf{Training.} The glasses were split into non-overlapping training, validation and test sets in the ratio 0.80:0.10:0.10. The training set was used to fit the weights, the validation set to watch for over-fitting and to choose settings, and the test set only for the final results. The networks were implemented in PyTorch. Following DM2, noise is added to the free atoms, $x_\sigma=x_0+\sigma\varepsilon$ with $\varepsilon\sim\mathcal N(0,I)$ and $\sigma\sim\mathcal U(10^{-3},\sigma_\text{max})$, and the network predicts the added shift, minimising the mean squared error over the free atoms $U$:
+\begin{equation}
+\mathcal L(\theta)=\mathbb E\Big[\tfrac{1}{|U|}\textstyle\sum_{i\in U}\big\lVert d_\theta(x_\sigma,\sigma,m,c)_i-\sigma\varepsilon_i\big\rVert^2\Big].
+\end{equation}
+Each training example is a whole box (50\%), a small patch (30\%) or a filled-in region (20\%), centred on a natural defect half of the time, and the label is replaced by ``null'' 15\% of the time, which guidance needs. We used the AdamW optimiser with gradient clipping at 1 for 50,000 updates (about 1,000 passes over the 800 training glasses; 40,000 without labels), kept a moving average of the weights (0.999) for sampling, and recorded the validation loss at four fixed noise levels ($\sigma=0.02$, 0.1, 0.3, 0.5) every 1,000 updates. One run takes about 4 hours on a T4 GPU (Colab or Kaggle).
 
+\subsection{Baselines and evaluation}
 \textbf{Baselines (implemented in our pipeline).} \emph{Chance}: fill the region with no label (DM2-style), showing how often the defect appears anyway. \emph{Hand insertion}, the common practice: paste a natural defect and its neighbours within $1.5\sigma$ from a training glass at the site. \emph{Local melt-quench}, the MD way: freeze the atoms beyond $R_\text{out}$, then melt and cool the region in LAMMPS. Task~A (a whole new box) adds clamping and RePaint~\citep{lugmayr2022repaint}. All methods answer the same 256 requests.
 
 \textbf{Evaluation metrics.}\label{sec:metrics}
@@ -113,9 +140,9 @@ Flat MLP & 4 layers of 512 units on sorted coordinates & $N=64$, no label & 1.32
 
 \section{Experiments and results}
 
-\textbf{Iterations so far.} We trained 13 models, all to completion: two without labels (the chance baseline), three conditional models per noise range and seed (seeds 0--2 for $\sigma_\text{max}=0.5$, used for \Dm{}, \Dp{} and Task~A, and for $\sigma_\text{max}=1.0$, used for D2), three networks for the symmetry test at $N=64$, and two conditional models trained on a range of region sizes. The first conditional model used DM2's noise range ($\sigma_\text{max}=0.5$), but sampling starts at $\sigma=1$, a level the network had never seen; retraining with $\sigma_\text{max}=1.0$ raised D2 success from 0.54 to 0.79 (seed 0, $w=6$). We cut the sampler from DM2's 2,900 steps to 100: longer runs over-cool the glass at 15 times the cost.
+\textbf{Iterations so far.} We trained 13 models to completion (Table~\ref{tab:models}): two without labels, three conditional runs (seeds 0--2) for each noise range, three networks for the symmetry test and two with a range of region sizes. The first conditional model used DM2's noise range ($\sigma_\text{max}=0.5$), but sampling starts at $\sigma=1$, a level it had never seen; retraining with $\sigma_\text{max}=1.0$ raised D2 success from 0.54 to 0.79 (seed 0, $w=6$). We cut the sampler from DM2's 2,900 steps to 100: longer runs over-cool the glass at 15 times the cost. The EGNN made more natural 64-atom glasses than the MPNN (local W1 0.044 vs.\ 0.064) despite a higher validation loss; the flat MLP did not learn.
 
-\textbf{Main result and baseline evidence.} Table~\ref{tab:main} gives Task~B over 256 requests per run. Every baseline row comes from our own code on the same requests; we also re-ran DM2's published silica model and confirmed its local structure (99.3\% of Si atoms with four O neighbours). The model beats both baselines for D2 and \Dm{} (O1). At $w=2$ its \Dm{} surroundings score 1.2--1.5 times the natural floor and its D2 surroundings 0.045--0.056 against 0.087 for hand insertion (O2). Local melt-quench almost never creates the defect: re-melting a 60-atom region is waiting on a small scale. No method places \Dp{}: a natural \Dp{} moved into another glass with its 47 nearest atoms disappears on relaxation 97\% of the time, so what holds it lies further away. The ranking of methods held when we moved the defect rules, success radius, realism window or region size, and re-runs with the same seed reproduced 8 of 9 rows exactly (O3).
+\textbf{Main result and baseline evidence.} Table~\ref{tab:main} gives Task~B over 256 requests per run. Every baseline row comes from our own code on the same requests; we also re-ran DM2's published silica model and confirmed its local structure (99.3\% of Si atoms with four O neighbours). The model beats both baselines for D2 and \Dm{} (O1); at $w=2$ its local W1 is 1.2--1.5 times the floor for \Dm{} and 0.045--0.056 for D2 (hand insertion 0.087; O2). Local melt-quench almost never creates the defect: re-melting a 60-atom region is waiting on a small scale. No method places \Dp{}: a natural \Dp{} moved into another glass with its 47 nearest atoms disappears on relaxation 97\% of the time, so what holds it lies further away. The ranking of methods held when we moved the defect rules, success radius, realism window or region size, and re-runs with the same seed reproduced 8 of 9 rows exactly (O3).
 
 \begin{table}[t]
 \centering
