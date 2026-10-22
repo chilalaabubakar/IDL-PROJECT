@@ -1,4 +1,10 @@
-# Workshop paper
+# Workshop paper and midterm report
+
+`midterm_report.tex` / `midterm_report.pdf`: the 11-785 midterm report (5 pages plus team
+contributions and references), organised by the midterm rubric and including the follow-up
+checks (Figure 6, `make_midterm_figures.py`). Build it like the paper:
+`python paper/make_midterm_figures.py; cd paper && latexmk -pdf -outdir=build midterm_report.tex && cp build/midterm_report.pdf .`
+
 
 *Placing Defects Where You Ask: Generating Defects at Chosen Sites in a Model Glass with a
 Diffusion Model*: about 8.5 pages of main text in plain language, then references and a
