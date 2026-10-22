@@ -18,7 +18,7 @@
 \usepackage[colorlinks=true,linkcolor=blue!50!black,citecolor=blue!50!black,urlcolor=blue!50!black]{hyperref}
 \setlist{nosep,leftmargin=1.4em}
 \setlength{\textfloatsep}{8pt plus 2pt minus 2pt}
-\setlength{\floatsep}{8pt plus 2pt minus 2pt}
+\setlength{\floatsep}{6pt plus 2pt minus 2pt}
 \renewcommand{\topfraction}{0.92}
 \renewcommand{\bottomfraction}{0.6}
 \renewcommand{\textfraction}{0.08}
@@ -34,9 +34,10 @@
 \title{Placing Defects Where You Ask:\\ Generating Defects at Chosen Sites in a Model Glass\\ with a Diffusion Model\\[4pt] \large Midterm report}
 
 \author{
-  Stacy Cheruto \quad Nicholaus Ladislaus \quad Abubakar Chilala\\ Gentille Uwera \quad Michel Sangwa \quad Boniface Godwin\\[2pt]
+  Stacy Cheruto \quad Nicholaus Ladislaus \quad Abubakar Chilala\\ Gentille Uwera \quad Michel Sangwa \quad Boniface Godwin$^{\dagger}$\\[2pt]
   College of Engineering, Carnegie Mellon University Africa\\
-  {\small\texttt{\{ccheruto, eladisla, achilala, guwera, sbmichel, bgodwin\}@andrew.cmu.edu}}
+  {\small\texttt{\{ccheruto, eladisla, achilala, guwera, sbmichel, bgodwin\}@andrew.cmu.edu}}\\
+  {\small $^{\dagger}$Teaching assistant supervising this project}
 }
 \date{}
 
@@ -44,7 +45,7 @@
 \maketitle
 
 \begin{abstract}
-Glasses contain \emph{defects}, small groups of atoms arranged differently from the rest, which decide how a glass breaks, ages or absorbs light. Studying one needs many realistic copies, but today one waits for it in slow melt-and-cool simulations or inserts it by hand, which can leave unnatural surroundings. We train a diffusion model, a neural network that turns random atom positions into realistic structure step by step, to rebuild a small region around a chosen site in an existing glass and create a requested defect there. On a two-dimensional model glass, over three training runs, it creates atoms with too few neighbours 3.5 times as often as hand insertion (0.22 vs.\ 0.06) and clusters of small atoms 1.5--2.4 times as often (0.45--0.71 vs.\ 0.30), with surroundings whose atom energies are closer to natural ones.
+Glasses contain \emph{defects}, small groups of atoms arranged differently from the rest, which decide how a glass breaks, ages or absorbs light. Studying one needs many realistic copies, but today one waits for it in slow melt-and-cool simulations or inserts it by hand, which can leave unnatural surroundings. We train a diffusion model, a neural network that turns random atom positions into realistic structure, to rebuild a small region of an existing glass with a requested defect at its centre. On a two-dimensional model glass, over three training runs, it creates atoms with too few neighbours 3.5 times as often as hand insertion (0.22 vs.\ 0.06) and clusters of small atoms 1.5--2.4 times as often (0.45--0.71 vs.\ 0.30), with surroundings whose atom energies are closer to natural ones.
 \end{abstract}
 
 \section{Introduction}
@@ -151,7 +152,7 @@ We trained 13 models (Table~\ref{tab:models}): two unlabelled, three seeds for e
 
 \section{Results}
 
-\textbf{Main comparison} (Table~\ref{tab:main}). The model beats both baselines for D2 and \Dm{} (O1), with local W1 1.2--1.5 times the floor for \Dm{} and 0.045--0.056 for D2 at $w=2$ (hand insertion 0.087; O2). No method places \Dp{}: a natural \Dp{} moved into another glass with its 47 nearest atoms vanishes on relaxation 97\% of the time. The ranking held when we changed the defect rules, success radius or realism window (O3).
+\textbf{Main comparison} (Table~\ref{tab:main}). The model beats both baselines for D2 and \Dm{} (O1), with local W1 1.2--1.5 times the floor for \Dm{} and 0.045--0.056 for D2 at $w=2$ (hand insertion 0.087; O2). No method places \Dp{}: a natural \Dp{} transplanted with its 47 nearest atoms vanishes 97\% of the time. The ranking held when we changed the defect rules, success radius or realism window (O3).
 
 \begin{table}[t]
 \centering
@@ -181,25 +182,25 @@ Natural floor & --- & 0.013 & --- & 0.016 & --- \\
 \begin{figure}[t]
 \centering
 \includegraphics[width=0.93\linewidth]{figures/fig6_followups.pdf}
-\caption{Guidance and region size (Task~B, D2). \textbf{(a)}~Test success for the three training runs at fixed $w$ and at the $w$ chosen per model on validation glasses ($w=4, 8, 8$); bars: means; red band: hand insertion. \textbf{(b)}~Local energy W1 in $1\sigma$ shells around the site for $R_\text{out}=3$--$6\sigma$ (ticks mark each $R_\text{out}$), hand insertion and the natural floor (grey). \textbf{(c)}~Success against local W1 for the model trained at $R_\text{out}=4\sigma$ (filled) and on 3--6$\sigma$ (open); labels give $R_\text{out}$.}
+\caption{Guidance and region size (Task~B, D2). \textbf{(a)}~Test success per training run at fixed $w$ and at $w$ chosen per model on validation glasses; bars: means; red: hand insertion. \textbf{(b)}~Local energy W1 in $1\sigma$ shells around the site for $R_\text{out}=3$--$6\sigma$ (axis ticks), hand insertion and the natural floor (grey). \textbf{(c)}~Model trained at $R_\text{out}=4\sigma$ (filled) and on 3--6$\sigma$ (open).}
 \label{fig:followups}
 \end{figure}
 
 \textbf{Choosing $w$ for each model.} The D2 runs follow the label with different strength despite near-equal validation losses. Picking on validation glasses the smallest $w$ with success $\ge0.70$ ($w=4, 8, 8$) gave test success 0.74 $\pm$ 0.04, half the spread of fixed $w=6$ (0.71 $\pm$ 0.08; Figure~\ref{fig:followups}a).
 
-\textbf{Region size.} A larger region lowers W1 (0.026 at $R_\text{out}=5\sigma$, 0.056 at $4\sigma$). Shell by shell (Figure~\ref{fig:followups}b), the mismatch stays about 3 times the floor up to the region's edge, while hand insertion disturbs only the first $3\sigma$; over a $6\sigma$ window all sizes score alike (0.024--0.026). Training on $R_\text{out}$ from 3--6$\sigma$ gave fewer D2 successes with lower W1 (Figure~\ref{fig:followups}c); a larger region does not help \Dp{} (0.03--0.05).
+\textbf{Region size.} A larger region lowers W1 (0.026 at $R_\text{out}=5\sigma$, 0.056 at $4\sigma$). Shell by shell (Figure~\ref{fig:followups}b), the mismatch stays about 3 times the floor up to the region's edge (hand insertion: first $3\sigma$ only); over a $6\sigma$ window all sizes score alike. Training on $R_\text{out}$ from 3--6$\sigma$ gave fewer D2 successes with lower W1 (Figure~\ref{fig:followups}c); a larger region does not help \Dp{} (0.03--0.05).
 
-\textbf{Physical checks.} Successful D2 placements alone have local W1 0.029 (natural 0.012, hand insertion 0.094). In free MD it survives 250 time units in 87\% of cases (hand insertion 91\%, natural 95\%). On 100 new glasses D2 success is 0.36--0.51 (hand insertion 0.23).
+\textbf{Physical checks.} Successful D2 placements alone score W1 0.029 (natural 0.012, hand insertion 0.094) and survive 250 time units of MD in 87\% of cases (hand insertion 91\%, natural 95\%); on 100 new glasses D2 success is 0.36--0.51 (hand insertion 0.23).
 
 \section{Discussion}
 
-O1--O3 are met for two of three defect types, though D2 surroundings stay about 4 times the floor. \textbf{Challenges:} runs with equal loss follow the label with different strength (eased by choosing $w$ per model); the rebuilt region disturbs the host up to its edge, and placed defects are slightly less stable than natural ones; \Dp{} needs more than a larger region. \textbf{Risks ahead:} 3D silica is costly (565 CPU core-hours of MD for data) and its rare defects occur well under once per glass.
+O1--O3 are met for two of three defect types, though D2 surroundings stay about 4 times the floor. \textbf{Challenges:} runs with equal loss follow the label differently (eased by per-model $w$); the region disturbs the host up to its edge; placed defects are slightly less stable than natural ones; \Dp{} needs more than a larger region. \textbf{Risks:} 3D silica is costly (565 CPU core-hours of MD for data) and its rare defects occur well under once per glass.
 
 \section{Future directions}
 \label{sec:next}
 \begin{enumerate}
-\item \textbf{Finish the generalisation test} (week 10): the unchanged model on 1,024-atom glasses and on 10$\times$ slower or faster cooled glasses.
-\item \textbf{Start 3D silica} (weeks 9--13): train our conditional NequIP~\citep{batzner2022nequip} on DM2's glasses, make 576-atom glasses with DM2's potential~\citep{bouhadja2013}, and target wrongly coordinated Si and non-bridging oxygens.
+\item \textbf{Finish generalisation} (week 10): 1,024-atom glasses and 10$\times$ slower or faster cooling.
+\item \textbf{Start 3D silica} (weeks 9--13): train our conditional NequIP~\citep{batzner2022nequip} on DM2's glasses and on 576-atom glasses made with DM2's potential~\citep{bouhadja2013}.
 \item \textbf{Fix the weaknesses}: per-model $w$, relaxing the region's edge, a wider label for \Dp{}.
 \end{enumerate}
 
@@ -214,7 +215,7 @@ Defects and evaluation & defect rules, metrics, natural floors, bootstrap statis
 Models and training & EGNN, MPNN and MLP; training runs on Colab and Kaggle & Abubakar Chilala \\
 Sampling and conditioning & sampler, guidance, requests, $w$ selection, region-size checks & Gentille Uwera \\
 Baselines and writing & hand insertion, figures, reports & Michel Sangwa \\
-\fillin{workstream} & \fillin{what it covers} & Boniface Godwin \\
+Supervision & course teaching assistant; supervised the project & Boniface Godwin \\
 \bottomrule
 \end{tabularx}
 \normalsize
