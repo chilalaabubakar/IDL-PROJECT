@@ -130,3 +130,11 @@ For publication, copy the validated combined folder into `results/` in your sepa
 ## Validation status
 
 The supervisor's condition routing, GPU assignment, duplicate-worker lock, failure cleanup, scoped legacy Kaggle restore and notebook syntax are tested locally. The collector has been exercised on the retained complete Kaggle control. The scripts have not been submitted to PSC from this development environment; allocation limits, module availability, CUDA compatibility and performance must be verified by the first allocated job.
+
+## Kaggle checkpoint push fails with GitHub 403
+
+A message `Permission to chilalaabubakar/IDL-PROJECT.git denied` at the initial `push()` check means the experiment has not started in that attempt. The debugger frozen-module warnings are unrelated.
+
+Update the Kaggle `GITHUB_TOKEN` secret with a valid token whose repository access includes `chilalaabubakar/IDL-PROJECT` and whose **Contents permission is Read and write**. For a fine-grained token, choose the correct resource owner and explicitly select this repository. Replace an expired or revoked token. Enable access to the secret in the notebook, then start a fresh session using the latest notebook with `TASK_ID="kaggle_remaining"`. Existing published checkpoints remain available for resume. Never paste the token into code, logs, chat or the repository.
+
+The publisher now resets Git's credential-helper list for authenticated fetch/push commands, so an older cached credential cannot override the selected Kaggle secret. It stops immediately on authentication/permission errors and shows the setup requirement with token values redacted. This cannot grant missing GitHub permissions; the token must actually have write access.

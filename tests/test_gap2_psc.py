@@ -208,3 +208,75 @@ def test_submitter_does_not_require_an_rm_allocation(tmp_path, cpu_account):
         assert "--dependency=afterok:1001" in gpu
     else:
         assert not any("--dependency" in arg for arg in gpu)
+
+
+@pytest.mark.parametrize("denied", [False, True])
+def test_kaggle_publisher_uses_selected_secret_and_explains_denied_write(tmp_path, denied):
+    import os
+    import tempfile
+    import zipfile
+    from types import SimpleNamespace
+
+    import numpy as np
+
+    source = next(s for s in notebook_sources() if "def push()" in s)
+    tree = ast.parse(source)
+    push = next(n for n in tree.body if isinstance(n, ast.FunctionDef) and n.name == "push")
+    work = tmp_path / "work"
+    work.mkdir()
+    publish = tmp_path / "publish"
+    publish.mkdir()
+    commands = []
+    token = "test-fixture-not-a-real-token"
+
+    def local_run(cmd, *args):
+        commands.append(cmd)
+        return "progress.json" if "--cached" in cmd else ""
+
+    def remote_run(cmd, **kwargs):
+        commands.append(cmd)
+        assert cmd[:3] == ["git", "-c", "credential.helper="]
+        assert token not in " ".join(cmd)
+        assert kwargs["env"]["GAP2_GIT_TOKEN"] == token
+        helper = Path(kwargs["env"]["GIT_ASKPASS"])
+        assert token not in helper.read_text()
+        return SimpleNamespace(
+            returncode=1 if denied else 0,
+            stderr="remote: permission to repository denied 403 " + token if denied else "",
+        )
+
+    scope = dict(
+        WORK=work,
+        PUBLISH=publish,
+        PUSHROOT=tmp_path,
+        TOKEN=token,
+        STATUS="running",
+        CODE_SHA="revision",
+        TASK_ID="kaggle_remaining",
+        CONDITIONS=["ka2d_1024_slow"],
+        run_name="test",
+        run=local_run,
+        subprocess=SimpleNamespace(run=remote_run),
+        torch=SimpleNamespace(__version__="test", version=SimpleNamespace(cuda="test")),
+        json=json,
+        np=np,
+        datetime=datetime,
+        timezone=timezone,
+        tempfile=tempfile,
+        os=os,
+        Path=Path,
+        shutil=shutil,
+        zipfile=zipfile,
+    )
+    exec(compile(ast.Module(body=[push], type_ignores=[]), "<publisher>", "exec"), scope)
+    if denied:
+        with pytest.raises(RuntimeError, match="Contents: Read and write") as error:
+            scope["push"]()
+        assert token not in str(error.value)
+        assert "[REDACTED]" in str(error.value)
+    else:
+        scope["push"]()
+    pushes = [cmd for cmd in commands if "push" in cmd]
+    fetches = [cmd for cmd in commands if "fetch" in cmd]
+    assert len(pushes) == len(fetches) == 1
+    assert fetches[0][:3] == ["git", "-c", "credential.helper="]
