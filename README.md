@@ -70,6 +70,10 @@ Full matched replication and longer stability checks: see the
 
 ## Generalization study (gap 2)
 
+For parallel Kaggle/PSC execution, use the [Bridges-2 guide](docs/GAP2_BRIDGES2.md).
+The updated notebook defaults to `kaggle_remaining`, reserving 1024-standard/fast for PSC.
+
+
 Run the dedicated [Kaggle generalization notebook](notebooks/kaggle_gap2_generalization.ipynb)
 for fresh 256/1024-atom hosts at three cooling rates, all three frozen training seeds,
 and matched controls. See the [protocol and resume instructions](docs/GAP2_GENERALIZATION.md).
@@ -132,7 +136,7 @@ notebooks/      Stage 0 notebook, figures, Kaggle training notebooks
 results/        small summary tables and figures that go in the report
 runs/           training / sampling / evaluation run directories (gitignored)
 scripts/        command-line entry points (one per pipeline step); scripts/silica/ for 3D
-slurm/          PSC Bridges-2 job scripts (3D silica)
+slurm/          PSC Bridges-2 jobs (2D generalization and 3D silica)
 src/glassdiff/
   types.py      Structures, Request, label conventions
   geometry.py   periodic minimum-image vectors, neighbour lists

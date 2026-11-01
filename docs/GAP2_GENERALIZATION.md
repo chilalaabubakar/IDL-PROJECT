@@ -80,3 +80,7 @@ Outputs under `study/` include per-condition host protocols and raw candidates, 
 
 The notebook reports convergence and time per request. Reported time includes generation and relaxation; cached-batch times are the original measured durations. This first notebook addresses primary placement generalization. Successful-only structural comparisons against same-condition natural references, shell displacement, independent-condition shift intervals, and finite-temperature retention are additional analyses and are not automatically completed by a `complete` placement-study status. Production results have not been measured merely because the notebook exists.
 
+
+## Parallel PSC execution
+
+Use [the Bridges-2 guide](GAP2_BRIDGES2.md) to reserve 1024-standard and 1024-fast for PSC. The updated notebook defaults to `TASK_ID="kaggle_remaining"`, restores only that scope, and imports compatible old Kaggle checkpoints for its four conditions. Stop the old all-condition kernel at a pushed checkpoint before switching; live loops do not change when a file is updated. Collect completed disjoint conditions with `scripts/collect_gap2.py`. Task completion and full-study completion are distinct.
