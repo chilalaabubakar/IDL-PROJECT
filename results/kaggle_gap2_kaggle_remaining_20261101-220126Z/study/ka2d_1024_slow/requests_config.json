@@ -1,0 +1,7 @@
+{
+  "host_sha256": "58673bbbd3bd5322fdba6bafb848c65e607e489abdb58b1761404cc22af44ed9",
+  "manifest_sha256": "ca39c637dd8fbc9d63c3e0781f5be0add662ba1c8fed9102da8b35f5f7691228",
+  "n_requests": 256,
+  "target_seed": 937,
+  "target_rule": "uniform spatial draws snapped to nearest B; saved once"
+}

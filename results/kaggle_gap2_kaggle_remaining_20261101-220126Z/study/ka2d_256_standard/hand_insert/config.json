@@ -1,0 +1,16 @@
+{
+  "requests_sha256": "26c189b0533e04cec3f9e407ec12fe1527f4afda88c1074f3f21a8fbb87a8183",
+  "manifest_sha256": "ca39c637dd8fbc9d63c3e0781f5be0add662ba1c8fed9102da8b35f5f7691228",
+  "model": "hand_insert",
+  "checkpoint": null,
+  "batch_size": 4,
+  "device": "cpu",
+  "noise_seed_rule": "1000+batch_start",
+  "patch_library_sha256": "8b26aad8acabb82af2234f34d004d0da2abcb6fca67fb89a08cba08b6dd2c55a",
+  "relaxation": {
+    "fmax": 1e-06,
+    "max_steps": 100000,
+    "all_atoms_free": true
+  },
+  "failure_policy": "nonfinite or unconverged outputs count as failed requests"
+}

@@ -1,0 +1,11 @@
+{
+  "task_id": "kaggle_remaining",
+  "assigned_conditions": [
+    "ka2d_256_standard",
+    "ka2d_1024_slow",
+    "ka2d_256_slow",
+    "ka2d_256_fast"
+  ],
+  "code_revision": "11648f033ff003e7a15345e0d27829dc27642115",
+  "run_name": "kaggle_gap2_kaggle_remaining_20261101-220126Z"
+}
