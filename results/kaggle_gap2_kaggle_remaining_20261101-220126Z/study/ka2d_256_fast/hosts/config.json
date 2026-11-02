@@ -1,0 +1,5 @@
+{
+  "config_sha256": "a61818fc21dd7a0bb9a28a02af3b55b7bb67dce3b7adbdc084b4657ae4a7e526",
+  "n_hosts": 100,
+  "seed_rule": "seed0+slot+1000*attempt; attempts0..9"
+}
