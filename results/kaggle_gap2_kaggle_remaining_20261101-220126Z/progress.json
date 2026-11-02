@@ -1,12 +1,12 @@
 {
-  "status": "incomplete",
+  "status": "running",
   "code_revision": "11648f033ff003e7a15345e0d27829dc27642115",
   "torch": "2.11.0+cu128",
   "cuda": "12.8",
   "batch_size": 4,
   "n_requests_per_model": 256,
   "n_hosts_per_condition": 100,
-  "updated_utc": "2026-11-02T09:01:35.826098+00:00",
+  "updated_utc": "2026-11-02T14:15:57.914403+00:00",
   "task_id": "kaggle_remaining",
   "assigned_conditions": [
     "ka2d_256_standard",
