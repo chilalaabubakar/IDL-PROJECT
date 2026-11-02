@@ -6,7 +6,7 @@
   "batch_size": 4,
   "n_requests_per_model": 256,
   "n_hosts_per_condition": 100,
-  "updated_utc": "2026-11-02T18:25:44.886931+00:00",
+  "updated_utc": "2026-11-02T18:30:50.546889+00:00",
   "task_id": "kaggle_remaining",
   "assigned_conditions": [
     "ka2d_256_standard",
