@@ -1,6 +1,7 @@
 {
   "complete": false,
   "completed_conditions": [
+    "ka2d_1024_slow",
     "ka2d_256_standard"
   ],
   "expected_conditions": [
