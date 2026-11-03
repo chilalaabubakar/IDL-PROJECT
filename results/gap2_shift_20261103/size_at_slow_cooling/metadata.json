@@ -1,0 +1,12 @@
+{
+  "conditions": {
+    "ka2d_1024_slow": "results/kaggle_gap2_kaggle_remaining_20261101-220126Z/study/ka2d_1024_slow",
+    "ka2d_256_fast": "results/kaggle_gap2_kaggle_remaining_20261101-220126Z/study/ka2d_256_fast",
+    "ka2d_256_slow": "results/kaggle_gap2_kaggle_remaining_20261101-220126Z/study/ka2d_256_slow",
+    "ka2d_256_standard": "results/kaggle_gap2_kaggle_remaining_20261101-220126Z/study/ka2d_256_standard"
+  },
+  "reference": "ka2d_256_slow",
+  "bootstrap": "1000 draws, seed 93; hosts resampled independently per condition",
+  "thresholds": "data/ka2d_256/meta.json",
+  "note": "interim unless all six conditions are listed"
+}
