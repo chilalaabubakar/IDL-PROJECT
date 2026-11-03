@@ -84,3 +84,7 @@ The notebook reports convergence and time per request. Reported time includes ge
 ## Parallel PSC execution
 
 Use [the Bridges-2 guide](GAP2_BRIDGES2.md) to reserve 1024-standard and 1024-fast for PSC. The updated notebook defaults to `TASK_ID="kaggle_remaining"`, restores only that scope, and imports compatible old Kaggle checkpoints for its four conditions. Stop the old all-condition kernel at a pushed checkpoint before switching; live loops do not change when a file is updated. Collect completed disjoint conditions with `scripts/collect_gap2.py`. Task completion and full-study completion are distinct.
+
+## Colab alternative for the two missing conditions
+
+Use the [dedicated Colab notebook](../notebooks/colab_gap2_1024.ipynb) and [phase-by-phase guide](GAP2_COLAB.md) to evaluate 1024-standard/fast instead of PSC. CPU host preparation and relaxation are separated from GPU sampling to conserve compute units; Drive and GitHub checkpoints persist across runtime changes. Do not run Colab and PSC simultaneously on the same assignment.

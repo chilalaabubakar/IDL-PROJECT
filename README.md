@@ -70,6 +70,11 @@ Full matched replication and longer stability checks: see the
 
 ## Generalization study (gap 2)
 
+For the two missing 1024-atom conditions on Colab, use the
+[Colab notebook](notebooks/colab_gap2_1024.ipynb) and
+[CPU/GPU phase guide](docs/GAP2_COLAB.md) to conserve compute units.
+
+
 For parallel Kaggle/PSC execution, use the [Bridges-2 guide](docs/GAP2_BRIDGES2.md).
 The updated notebook defaults to `kaggle_remaining`, reserving 1024-standard/fast for PSC.
 
