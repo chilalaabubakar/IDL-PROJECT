@@ -96,4 +96,17 @@ def test_script_writes_tables(tmp_path, make_random, monkeypatch):
     shift.main()
     assert (out / "hosts.csv").read_text().count("\n") == 3
     assert "seed_mean_minus_hand" in (out / "shift.csv").read_text()
+    within = (out / "within.csv").read_text()
+    assert within.count("ka2d_1024_slow,initially_nonD2,seed0,") == 1
     assert json.loads((out / "metadata.json").read_text())["reference"] == shift.REFERENCE
+
+
+def test_other_reference(tmp_path, make_random):
+    rates = dict(seed0=0.5, seed1=0.4, seed2=0.45, sham_seed0=0.1, hand_insert=0.3)
+    study = tmp_path / "study"
+    _condition(study, "ka2d_256_slow", rates, make_random)
+    _condition(study, "ka2d_1024_slow", rates, make_random)
+    data = {c: shift.load(f) for c, f in shift.complete_conditions([study]).items()}
+    rows = shift.shift_table(data, "initially_nonD2", reference="ka2d_256_slow")
+    assert {r["condition"] for r in rows} == {"ka2d_1024_slow"}
+    assert {r["reference"] for r in rows} == {"ka2d_256_slow"}

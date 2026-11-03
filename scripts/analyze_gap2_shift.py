@@ -15,10 +15,13 @@ across conditions that docs/GAP2_GENERALIZATION.md asks for:
    bootstrap interval over hosts.
 2. Transfer shift (shift.csv). For every method (seed0-2, their mean, sham, hand insertion)
    and for each seed's advantage over hand insertion, the change in request-weighted success
-   from the reference condition (fresh 256-atom standard cooling) to every other completed
+   from the reference condition (default: fresh 256-atom standard cooling; ``--reference``
+   picks another, e.g. ka2d_256_slow to isolate system size) to every other completed
    condition. Conditions have independent hosts, so each side is resampled over its own hosts
    (1,000 draws, seed 93 as in the reporter); within a condition, methods share hosts and
    requests, so paired quantities are resampled together.
+3. Within-condition values (within.csv): each method's success and each seed's advantage
+   over hand insertion inside every condition, with the same host bootstrap.
 
 Only conditions whose five methods all have complete.json are used. The script reads the
 study folders and writes only to --out.
@@ -87,21 +90,45 @@ def ratio_draws(groups: np.ndarray, rng: np.random.Generator) -> tuple[float, np
     return point, groups[idx, 0].sum(1) / groups[idx, 1].sum(1)
 
 
-def shift_table(data: dict[str, dict], definition: str) -> list[dict]:
+def eligible_mask(side: dict, definition: str) -> np.ndarray:
+    return side["eligible"] if definition == "initially_nonD2" else np.ones_like(side["eligible"])
+
+
+def within_table(data: dict[str, dict], definition: str) -> list[dict]:
     rows = []
-    ref = data[REFERENCE]
     for condition, d in sorted(data.items()):
-        if condition == REFERENCE:
+        for quantity, values in d["success"].items():
+            groups = host_groups(values, d["ids"], eligible_mask(d, definition))
+            point, draws = ratio_draws(groups, np.random.default_rng(BOOT_SEED))
+            lo, hi = np.quantile(draws, [0.025, 0.975])
+            rows.append(
+                dict(
+                    condition=condition,
+                    definition=definition,
+                    quantity=quantity,
+                    value=round(point, 4),
+                    lo=round(float(lo), 4),
+                    hi=round(float(hi), 4),
+                    n_hosts=len(groups),
+                )
+            )
+    return rows
+
+
+def shift_table(data: dict[str, dict], definition: str, reference: str = REFERENCE) -> list[dict]:
+    rows = []
+    ref = data[reference]
+    for condition, d in sorted(data.items()):
+        if condition == reference:
             continue
         for method in d["success"]:
             masks = []
             for side in (ref, d):
-                eligible = (
-                    side["eligible"]
-                    if definition == "initially_nonD2"
-                    else np.ones_like(side["eligible"])
+                masks.append(
+                    host_groups(
+                        side["success"][method], side["ids"], eligible_mask(side, definition)
+                    )
                 )
-                masks.append(host_groups(side["success"][method], side["ids"], eligible))
             rng = np.random.default_rng(BOOT_SEED)
             p_ref, d_ref = ratio_draws(masks[0], rng)
             p_new, d_new = ratio_draws(masks[1], rng)
@@ -110,7 +137,7 @@ def shift_table(data: dict[str, dict], definition: str) -> list[dict]:
             rows.append(
                 dict(
                     condition=condition,
-                    reference=REFERENCE,
+                    reference=reference,
                     definition=definition,
                     quantity=method,
                     reference_value=round(p_ref, 4),
@@ -164,11 +191,14 @@ def main() -> None:
     ap.add_argument("--study", nargs="+", type=Path, required=True)
     ap.add_argument("--out", type=Path, required=True)
     ap.add_argument("--thresholds", type=Path, default=Path("data/ka2d_256/meta.json"))
+    ap.add_argument("--reference", default=REFERENCE, help="condition the shifts are measured from")
     args = ap.parse_args()
 
     folders = complete_conditions(args.study)
-    if REFERENCE not in folders:
-        raise SystemExit(f"the reference condition {REFERENCE} is not complete in {args.study}")
+    if args.reference not in folders:
+        raise SystemExit(
+            f"the reference condition {args.reference} is not complete in {args.study}"
+        )
     args.out.mkdir(parents=True, exist_ok=True)
     th = DefectThresholds.from_dict(
         json.loads(args.thresholds.read_text())["defects"]["thresholds"]
@@ -187,8 +217,14 @@ def main() -> None:
     write_csv(args.out / "hosts.csv", host_rows)
 
     data = {c: load(f) for c, f in folders.items()}
-    shift_rows = shift_table(data, "initially_nonD2") + shift_table(data, "all_requests")
+    shift_rows = shift_table(data, "initially_nonD2", args.reference) + shift_table(
+        data, "all_requests", args.reference
+    )
     write_csv(args.out / "shift.csv", shift_rows)
+    write_csv(
+        args.out / "within.csv",
+        within_table(data, "initially_nonD2") + within_table(data, "all_requests"),
+    )
     for r in shift_rows:
         if r["definition"] == "initially_nonD2":
             print(
@@ -197,7 +233,7 @@ def main() -> None:
             )
     meta = dict(
         conditions={c: str(f) for c, f in folders.items()},
-        reference=REFERENCE,
+        reference=args.reference,
         bootstrap=f"{N_BOOT} draws, seed {BOOT_SEED}; hosts resampled independently per condition",
         thresholds=str(args.thresholds),
         note="interim unless all six conditions are listed",

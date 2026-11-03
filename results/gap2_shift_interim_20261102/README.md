@@ -1,5 +1,7 @@
 # Gap 2, interim: how much does placement change on new host glasses?
 
+> Superseded by [`../gap2_shift_20261103/`](../gap2_shift_20261103/README.md), which adds the 256-atom slow and fast conditions.
+
 Interim analysis of the two completed Gap 2 conditions (2 of 6), made with
 `scripts/analyze_gap2_shift.py` on 2026-11-02:
 
