@@ -52,10 +52,15 @@ def arrays(path):
         return {k: f[k] for k in f.files}
 
 
+def _temp(path):
+    """Per-process temporary name, so parallel workers never write the same temp file."""
+    return path.with_name(f"{path.name}.{os.getpid()}.tmp")
+
+
 def save_npz(path, **data):
     path = Path(path)
     path.parent.mkdir(parents=True, exist_ok=True)
-    temp = path.with_suffix(".tmp")
+    temp = _temp(path)
     with temp.open("wb") as f:
         np.savez_compressed(f, **data)
     temp.replace(path)
@@ -64,15 +69,31 @@ def save_npz(path, **data):
 def save_json(path, value):
     path = Path(path)
     path.parent.mkdir(parents=True, exist_ok=True)
-    temp = path.with_suffix(".tmp")
+    temp = _temp(path)
     temp.write_text(json.dumps(value, indent=2) + "\n")
     temp.replace(path)
 
 
 def guard(path, config):
-    if path.exists() and json.loads(path.read_text()) != config:
-        raise ValueError(f"Resume configuration mismatch: {path}")
+    if path.exists():
+        if json.loads(path.read_text()) != config:
+            raise ValueError(f"Resume configuration mismatch: {path}")
+        return  # unchanged: no rewrite, so parallel shards never race on this file
     save_json(path, config)
+
+
+def parse_shard(text):
+    """'i/k' -> (i, k): this worker handles batches whose index is i modulo k."""
+    if text is None:
+        return None
+    i, k = (int(x) for x in str(text).split("/"))
+    if not 0 <= i < k:
+        raise ValueError(f"shard must be i/k with 0 <= i < k, got {text}")
+    return i, k
+
+
+def in_shard(shard, batch_index):
+    return shard is None or batch_index % shard[1] == shard[0]
 
 
 def candidate(job):
@@ -285,7 +306,10 @@ def evaluate(args, manifest):
         patches = PatchLibrary.load(patchfile)
     th = DefectThresholds.from_dict(manifest["thresholds"])
     n = len(d["pin_pos"])
+    shard = parse_shard(getattr(args, "shard", None))
     for start in range(0, n, args.batch_size):
+        if not in_shard(shard, start // args.batch_size):
+            continue
         file = output / f"batch_{start:03d}.npz"
         if file.exists():
             arrays(file)  # CRC/decompression validation before reuse
@@ -369,6 +393,8 @@ def evaluate(args, manifest):
             f"{args.condition}/{model_name}: {sl.stop}/{n}; successes={int(ok.sum())}; batch seconds={time.monotonic() - clock:.1f}",
             flush=True,
         )
+    if shard is not None:
+        return  # a shard never aggregates; an unsharded call does once every batch exists
     batches = [arrays(output / f"batch_{start:03d}.npz") for start in range(0, n, args.batch_size)]
     save_npz(
         output / "samples.npz", **{k: np.concatenate([b[k] for b in batches]) for k in batches[0]}
@@ -497,6 +523,10 @@ def main():
     parser.add_argument("--device", default="cpu")
     parser.add_argument("--batch-size", type=int, default=4)
     parser.add_argument("--workers", type=int, default=4)
+    parser.add_argument(
+        "--shard",
+        help="i/k: evaluate only batches i, i+k, ... (no aggregation); for parallel CPU workers",
+    )
     args = parser.parse_args()
     manifest = json.loads(MANIFEST.read_text())
     choices = [Path(c).stem for c in manifest["dataset_configs"]]

@@ -242,3 +242,73 @@ def test_cpu_gpu_phase_guard_protects_compute_unit_budget(phase, gpu, allow, mes
             exec(code, scope)
     else:
         exec(code, scope)
+
+
+def test_sharded_relaxation_and_insertion_match_unsharded(tmp_path, monkeypatch):
+    """Parallel CPU shards produce exactly the unsharded result; only the unsharded call
+    aggregates."""
+    args, manifest = fixture_data(tmp_path, monkeypatch)
+    monkeypatch.setattr(colab.base, "load_denoiser", lambda *a: SimpleNamespace(eval=lambda: None))
+    monkeypatch.setattr(colab.base, "CFGDenoiser", lambda model, w: model)
+
+    def sampling(model, init, schedule, strategy, req, gen):
+        return init.with_pos(req.pin_pos.clone() + 0.01), None
+
+    def relaxing(s, **kw):
+        n = s.batch_size
+        return SimpleNamespace(
+            structures=s,
+            converged=torch.ones(n, dtype=torch.bool),
+            max_force=torch.zeros(n, dtype=torch.float64),
+        )
+
+    monkeypatch.setattr(colab.base, "sample", sampling)
+    monkeypatch.setattr(colab.base, "fire_minimize", relaxing)
+    colab.sample_phase(args, manifest)
+    output = args.out / args.condition / args.model
+    for shard in ("1/2", "0/2"):
+        args.shard = shard
+        colab.relax_phase(args, manifest)
+        assert not (output / "complete.json").exists()  # shards never aggregate
+    assert sorted(p.name for p in output.glob("batch_*.npz")) == ["batch_000.npz", "batch_004.npz"]
+    args.shard = None
+    colab.relax_phase(args, manifest)
+    sharded = colab.base.arrays(output / "samples.npz")
+
+    single = tmp_path / "single"
+    shutil.copytree(args.out / args.condition, single / args.condition)
+    for f in (single / args.condition / args.model).glob("*"):
+        if f.is_file():
+            f.unlink()
+    colab.relax_phase(SimpleNamespace(**{**vars(args), "out": single}), manifest)
+    unsharded = colab.base.arrays(single / args.condition / args.model / "samples.npz")
+    for key in ("pos", "success", "converged", "host_ids", "target"):
+        np.testing.assert_equal(sharded[key], unsharded[key])
+
+    # hand insertion through the original driver: shards, then the aggregating call
+    ins = SimpleNamespace(
+        out=args.out,
+        condition=args.condition,
+        mode="insertion",
+        model="seed0",
+        device="cpu",
+        batch_size=4,
+    )
+    for shard in ("0/2", "1/2"):
+        colab.base.evaluate(SimpleNamespace(**vars(ins), shard=shard), manifest)
+        assert not (args.out / args.condition / "hand_insert/complete.json").exists()
+    colab.base.evaluate(SimpleNamespace(**vars(ins), shard=None), manifest)
+    assert (
+        json.loads((args.out / args.condition / "hand_insert/complete.json").read_text())[
+            "n_requests"
+        ]
+        == 8
+    )
+
+
+def test_shard_argument_is_checked():
+    assert colab.base.parse_shard(None) is None
+    assert colab.base.parse_shard("2/8") == (2, 8)
+    with pytest.raises(ValueError):
+        colab.base.parse_shard("8/8")
+    assert [i for i in range(6) if colab.base.in_shard((1, 3), i)] == [1, 4]

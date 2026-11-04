@@ -12,6 +12,18 @@ The existing evaluation interleaves fast GPU sampling with long **CPU** FIRE rel
 
 The first saved GPU batch gives a measured sampling estimate. Optionally set `COMPUTE_UNITS_PER_GPU_HOUR` to the rate shown in your Colab Resources panel to convert the estimate to approximate units. The estimate excludes cloning, installation, backup and publishing time and is not a billing guarantee. A faster accelerator can have a higher unit rate; compare the measured rate and speed rather than assuming an A100 is the cheapest choice.
 
+## How long it takes and how the work is split
+
+Measured on Kaggle at 1024 atoms, one request costs about 2-3 CPU-minutes, almost all of it FIRE relaxation. The relax phase is therefore about **90 CPU-hours** (2 conditions x 5 methods x 256 requests), and its wall time is roughly 90 h divided by the number of CPU cores: about 45 h (five 10.5-hour sessions) on a 2-core runtime, about 12 h on an 8-core one. Pick the CPU runtime with the most cores you have; the notebook prints the core count it uses.
+
+| Setting | Default | Effect |
+|---|---|---|
+| `CPU_WORKERS` | `None` (all cores) | parallel processes for host preparation and relaxation |
+| `RELAX_SHARDS` | 8 | each method's 64 batches are split into 8 independent jobs (batches i, i+8, ...) so every core stays busy; a final unsharded pass only checks and aggregates |
+| `SAMPLE_PARALLEL` | 2 | sampling jobs sharing the one GPU, to overlap its idle time |
+
+Sharding and parallel sampling change only scheduling: every batch keeps its seed (`1000+batch_start`), and the tests check that sharded relaxation and insertion give the same outputs as the unsharded run. On Kaggle, sampling took up to about 40 s per request on a busy T4 (up to about 20 GPU-hours for the 2,048 sampled requests); the first batches of the sample phase print a measured estimate for your GPU.
+
 ## Three phases in the same notebook and Drive folder
 
 Add `GITHUB_TOKEN` in Colab's key/Secrets panel and enable notebook access. Its GitHub repository permission must be **Contents: Read and write** for `chilalaabubakar/IDL-PROJECT`. The Kaggle secret does not transfer automatically. Enter the token only through Colab Secrets.
@@ -59,7 +71,7 @@ The initial GitHub push checks write access before expensive work. Credentials a
 
 Generation and relaxation are separated without regenerating the random inputs between them. Each batch records its sampling or CPU environment. Hardware/library differences can change floating-point trajectories, so mixed environments are not claimed to be bitwise identical. Stored `seconds` adds sampling and CPU relaxation durations rather than measuring a single uninterrupted process; compare its definition when reporting cost.
 
-Local tests compare separated and combined data flow for fixed fixtures, including the sham, partial resume, nonfinite outputs and convergence failures. They also test input-change rejection, backups and the CPU/GPU cost guard. A retained 1024-atom host exercises actual CPU FIRE relaxation. Full Colab GPU execution, Drive authorization and compute-unit consumption have not been validated in this CPU-only development environment.
+Local tests compare separated and combined data flow for fixed fixtures, including the sham, partial resume, nonfinite outputs and convergence failures. They also test input-change rejection, backups and the CPU/GPU cost guard. A retained 1024-atom host exercises actual CPU FIRE relaxation. The three phases were also run end to end through the notebook's own cells at a reduced scale (2 hosts and 8 requests per condition, a shortened sampler, Colab's Drive and secrets stubbed, CPU in place of the GPU); the outputs passed the collector's validation. Full Colab GPU execution, Drive authorization and compute-unit consumption have not been validated in this CPU-only development environment.
 
 ## Read the final results
 

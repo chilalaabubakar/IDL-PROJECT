@@ -2,6 +2,7 @@
 
 python scripts/run_gap2_colab.py sample --out runs/colab_gap2 --condition ka2d_1024_standard --model seed0 --device cuda
 python scripts/run_gap2_colab.py relax --out runs/colab_gap2 --condition ka2d_1024_standard --model seed0
+python scripts/run_gap2_colab.py relax ... --shard 3/8   # one of 8 parallel CPU workers
 
 The separation changes scheduling, not the checkpoint, request, noise, sampler,
 precision, convergence threshold or failure denominator. Batch size remains four.
@@ -196,8 +197,11 @@ def relax_phase(args, manifest):
     base.guard(output / "config.json", config)
     n = len(d["pin_pos"])
     th = base.DefectThresholds.from_dict(manifest["thresholds"])
+    shard = base.parse_shard(getattr(args, "shard", None))
     computed = 0
     for start in range(0, n, BATCH):
+        if not base.in_shard(shard, start // BATCH):
+            continue
         raw = generated / f"batch_{start:03d}.npz"
         if not raw.exists():
             continue  # Partial GPU work may be relaxed, without claiming completion.
@@ -278,6 +282,8 @@ def relax_phase(args, manifest):
         )
         if args.max_batches and computed >= args.max_batches:
             break
+    if shard is not None:
+        return  # shards never aggregate; the unsharded call does once every batch exists
     files = [output / f"batch_{s:03d}.npz" for s in range(0, n, BATCH)]
     if all(f.exists() for f in files):
         data = [base.arrays(f) for f in files]
@@ -309,6 +315,7 @@ def main():
     p.add_argument("--model", choices=MODELS, required=True)
     p.add_argument("--device", default="cuda")
     p.add_argument("--max-batches", type=int)
+    p.add_argument("--shard", help="relax only: i/k handles batches i, i+k, ...; no aggregation")
     args = p.parse_args()
     if args.max_batches is not None and args.max_batches < 1:
         p.error("max-batches must be positive")
