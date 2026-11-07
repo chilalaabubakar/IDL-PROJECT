@@ -15,11 +15,19 @@ import signal
 import subprocess
 import sys
 import time
-from importlib.metadata import version
+from importlib.metadata import PackageNotFoundError, version
 from pathlib import Path
 
 CONDITIONS = ("ka2d_1024_standard", "ka2d_1024_fast")
 METHODS = ("seed0", "seed1", "seed2", "sham_seed0", "hand_insert")
+
+
+def _installed_version(package: str) -> str | None:
+    """Version of an installed package, or None when it is not installed."""
+    try:
+        return version(package)
+    except PackageNotFoundError:
+        return None
 
 
 def command(stage, root, condition, workers, method=None, device=None):
@@ -157,7 +165,7 @@ def main():
             torch=torch.__version__,
             cuda=torch.version.cuda,
             numpy=version("numpy"),
-            lammps=version("lammps"),
+            lammps=_installed_version("lammps"),  # None where absent; prepare checks it
             job_id=os.environ.get("SLURM_JOB_ID"),
             array_task=os.environ.get("SLURM_ARRAY_TASK_ID"),
             scope="PSC standard/fast conditions only; no overall study completion implied",
