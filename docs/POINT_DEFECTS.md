@@ -1,0 +1,158 @@
+# Point defects: finding and repairing standard defects with a denoising diffusion model
+
+## Why this study
+
+The first version of the project asked a diffusion model to *place* defects (D1−, D1+, D2)
+that we had defined ourselves by neighbour counts, chosen so that each covered 1-5% of the
+atoms. Those labels follow no established defect concept, and placing a defect needs no AI:
+removing an atom makes a vacancy. This study uses the **standard point defects of
+computational materials science** and asks the questions where a learned model can matter:
+
+1. **Find**: given a relaxed glass that contains a defect, which atoms are wrong?
+2. **Repair**: what is the defect-free glass it came from?
+
+The model is the one we already have: the periodic EGNN denoiser trained with DM2's loss.
+That loss teaches the network to remove a perturbation from a glass. Here the perturbation is
+a physical defect instead of only random noise.
+
+## The four defects
+
+Each defect is made by a known operation on a known defect-free glass (an inherent structure
+from `data/ka2d_256`), and the defected glass is then energy-minimised with all atoms free,
+so it sits in a minimum like a real defected sample. Because the operation is known, so is
+the original glass: the exact target for repair. No detection thresholds are needed.
+
+| Defect | Operation | Atoms |
+|---|---|---|
+| Vacancy | remove one atom (either species) | 255 |
+| Interstitial | add one small B atom at the largest gap within 2σ of a random point | 257 |
+| Frenkel pair | move one atom to the largest gap 1.2-3σ from its site (the radiation-damage defect: a vacancy plus an interstitial) | 256 |
+| Antisite | swap the species of an A atom and its nearest B atom (the chemical-disorder defect of compounds) | 256 |
+
+In a crystal these defects are defined against the lattice. In a glass there is no lattice,
+so the defect is defined by the operation, and after relaxation it spreads over a few
+neighbours; how well it can still be found is part of the question.
+
+For each example the dataset stores (`glassdiff.data.point_defects`):
+
+- the relaxed defected glass;
+- a per-atom **role** for detection: intact, next to an empty site (vacancy, or the empty
+  site of a Frenkel pair: the first-shell neighbours of the removed or moved atom, r < 1.4
+  σ_ab as the dataset's neighbour rule), extra atom, displaced atom, wrong species;
+- where the defect is;
+- the **repair input**: the relaxed defected glass with the atom count and species put right.
+  For a vacancy, an atom of the missing species is placed in the largest gap within 1σ of
+  the empty site. For an interstitial, the extra atom is removed. For an antisite, the
+  species are swapped back. A Frenkel pair is left unchanged. Atom i of the repair input is
+  atom i of the original glass.
+
+Finding decides *where* to add, remove or swap an atom; repair then has to move the atoms
+back to the original glass.
+
+## Data
+
+```bash
+pip install -e ".[md]"                     # LAMMPS (export LD_LIBRARY_PATH to MPICH's lib)
+python scripts/make_point_defects.py --config configs/data/ka2d_256_point_defects.yaml
+```
+
+Glasses keep their split: training defects come from the 800 training glasses (8 random
+sites each, 6,400 examples per defect), validation and test defects from the 100 validation
+and 100 test glasses (2 sites each, 200 per defect). Minimisation is LAMMPS FIRE, as for the
+dataset's inherent structures (`glassdiff.md.minimize`), about 0.1 s per example. A run is
+deterministic: every (split, defect) has its own random stream and every minimisation runs
+in one single-threaded LAMMPS instance. `meta.json` records the settings, counts, the
+largest residual force (below 1e-8) and the SHA256 of every file; each split also pins its
+source glasses by SHA256. The validation and test splits are in the repository (3 MB
+each); the training split (about 25,600 examples, 95 MB) is not, and takes about 30-45
+minutes to make on 4 cores (most of it the serial gap search; the minimisations are
+parallel).
+
+## Models and training
+
+Both models are the periodic EGNN of the main study (0.53 M parameters), started from the
+trained unconditional denoiser (`egnn_uncond_smax1`).
+
+**Repair** (`configs/train/heal_point_defects.yaml`). DM2 trains on a defect-free glass x0
+shaken by random noise, x = x0 + σε, and the network d_θ(x, σ) learns to predict the shift
+x − x0. The best possible prediction is d = −σ² ∇ log p_σ(x) (Tweedie's formula), so the
+correction −d points towards more probable glass structures: a learned restoring force. On
+test glasses its direction agrees with the physical force (cosine 0.81 at σ = 0.05, closer
+than the straight line back to the original, 0.68; `results/point_defects_20261107/`). We change only
+what is removed. The starting point is the repair input of a defected glass,
+
+    x = x_repair + σε,     target = x − x0   (minimum image, mean shift removed),
+
+so the network learns to remove the noise *and* undo the defect. A fifth of the batches are
+defect-free glasses (x_repair = x0), where the loss is exactly DM2's, so the model also
+learns to leave intact glass alone. It is then used like DM2's sampler, starting from the
+defected glass.
+
+**Detection** (`configs/train/detect_point_defects.yaml`). The same EGNN trunk with a
+per-atom head over the five roles (`EGNNAtomClassifier`), class-weighted cross-entropy;
+a fifth of the batches are defect-free glasses with every atom intact.
+
+```bash
+python scripts/train_point_defects.py --config configs/train/heal_point_defects.yaml
+python scripts/train_point_defects.py --config configs/train/detect_point_defects.yaml
+```
+
+20,000 updates each, about 1.5-2 h on a T4. On Kaggle, use
+[`notebooks/kaggle_point_defects.ipynb`](../notebooks/kaggle_point_defects.ipynb): it makes
+the training split, trains both models (one per GPU), evaluates them and pushes the results.
+
+## Evaluation
+
+`scripts/eval_point_defects.py`, on the 800 test defects:
+
+- **Find**: the top-scored atom must lie within 1.5σ of the defect. Score: the trained
+  detector's probability for the role the repair needs; without a detector, the size of
+  the denoiser's output at σ = 0.05 (no potential needed). Reference that needs the
+  potential: the atom whose energy is highest for its species. Chance: the fraction of
+  atoms within 1.5σ of the defect.
+- **Repair**, then FIRE minimisation (all atoms free, max force 1e-6, the minimiser of every
+  earlier evaluation) to see which energy minimum the glass settles in. **Restored** = it
+  is the original glass: every original atom has an atom of its species within 0.05σ, one
+  to one, so identical atoms may trade places.
+  - Vacancy: put an atom of the missing species in the largest gap within 1.5σ of the
+    flagged atom; minimise, or repair the region with the denoiser first.
+  - Interstitial: remove the flagged atom; minimise, or repair first.
+  - Frenkel pair: the region around both sites is given; shake it (0.35σ) and minimise, or
+    shake and repair first. Shaking alone is the physics baseline: it tests whether the
+    learned model adds anything beyond a random kick.
+  - Antisite: swap back the neighbouring A-B pair the model prefers (or, with the
+    potential, the one with the lowest energy) near the flagged atom; minimise.
+
+```bash
+# before training (the reference in results/point_defects_20261107/)
+python scripts/eval_point_defects.py --healer results/kaggle_20261006-0454Z/training/egnn_uncond_smax1/ema.pt \
+    --out results/point_defects_20261107/eval_untrained.json
+# after training
+python scripts/eval_point_defects.py --healer runs/<pd_heal>/ckpt.pt --detector runs/<pd_detect>/ckpt.pt \
+    --device cuda --out <json>
+```
+
+Generation uses LAMMPS FIRE and evaluation the PyTorch FIRE. They reach the same minimum
+from a defect placed in a gap (checked on test glasses), but LAMMPS FIRE cannot start from
+overlapping atoms (a shaken region), and from such a start the minimum reached depends on the
+minimiser; so one minimiser is used for every method in the evaluation.
+
+## Results so far and caveats
+
+Before any training (`results/point_defects_20261107/README.md`), the denoiser trained only
+on defect-free glasses finds vacancies more often than the per-atom energy (44% vs 29.5%),
+so it restores more vacancy glasses (41-43.5% vs 26%). It is weaker for the other three
+defects and rarely undoes one by itself (Frenkel pairs: 8% restored vs 0.5% by shaking
+alone). That is the motivation for the training above.
+
+Caveats: a two-dimensional model glass; one defect per glass; the Frenkel repair is given
+the region (it tests repair, not finding); "restored" asks for the exact original minimum,
+which is strict in a glass where many nearby minima are equally natural.
+
+## Next: amorphous silica
+
+The same study transfers to amorphous SiO₂ with its own standard defects: the oxygen
+vacancy (Si-Si bond, precursor of the E′ centre), 3- and 5-fold Si, non-bridging O and
+3-fold O. `glassdiff.silica.defects` already detects these, DM2's silica glasses are
+imported (`data/sio2_dm2`), and DM2's pretrained silica denoiser has been run
+(`results/stage0/`).

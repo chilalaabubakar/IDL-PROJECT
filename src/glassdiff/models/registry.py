@@ -18,6 +18,10 @@ def build_model(model_cfg: dict[str, Any]) -> Denoiser:
         from glassdiff.models.egnn_pbc import EGNNPBC
 
         return EGNNPBC(**cfg)
+    if name == "egnn_classifier":
+        from glassdiff.models.egnn_pbc import EGNNAtomClassifier
+
+        return EGNNAtomClassifier(**cfg)
     if name == "mpnn":
         from glassdiff.models.mpnn import MPNN
 

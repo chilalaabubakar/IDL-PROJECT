@@ -9,6 +9,7 @@ regenerating them:
 | `ka2d_64/` | 1600 / 200 / 200 glasses, N = 64 (MLP baseline, matched-N symmetry ladder); patches |
 | `ka2d_1024/` | 100 test glasses, N = 1024 (size transfer) |
 | `ka2d_256_slow/` | 200 test glasses, N = 256, quench 1e-3/τ (better annealed, out of distribution) |
+| `ka2d_256_point_defects/` | Vacancy, interstitial, Frenkel pair and antisite examples made in the `ka2d_256` glasses and relaxed (docs/POINT_DEFECTS.md): `val.npz` and `test.npz` (200 per defect each); `train.npz` (6,400 per defect, 95 MB) is not committed: `python scripts/make_point_defects.py --config configs/data/ka2d_256_point_defects.yaml splits=[train]` (~30-45 min on 4 cores; check it against the SHA256 in `meta.json`) |
 | `sio2_dm2/` | 3D silica: DM2's 24 published glasses (3,000 atoms; 0.1, 1, 10, 100 K/ps), split 16 / 4 / 4 and labelled (`scripts/silica/import_dm2.py`; DM2, MIT licence). Our 576-atom glasses will go in `sio2_576/` (`docs/SILICA_QUICKSTART.md`) |
 
 Every directory has `meta.json` with the protocol, LAMMPS version, rejection log and

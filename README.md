@@ -18,8 +18,26 @@ whether its surroundings look like naturally formed ones. The work builds on DM2
 - [3D silica extension plan](docs/SILICA_3D_PLAN.md): the next step toward a materials-journal paper (defects in amorphous SiO₂, physical validation)
 - [3D silica quickstart](docs/SILICA_QUICKSTART.md): data, defect labels, the conditional 3D model and how to start training it (Kaggle or PSC Bridges-2)
 - [Compute estimate](docs/compute/README.md): GPU-hours, CPU core-hours and ACCESS credits for the rest of the project, from measured timings
+- [Point defects](docs/POINT_DEFECTS.md): the revised study. Standard point defects (vacancy, interstitial, Frenkel pair, antisite), and whether a denoising diffusion model can find them and restore the defect-free glass
 
-## Status
+## Point defects (revised study)
+
+The study now uses the standard point defects of computational materials science: vacancy,
+interstitial, Frenkel pair and antisite. Each is made by a known operation on a known
+glass, so the defect-free original is the exact target. Two questions: can a model **find**
+the defect in the relaxed glass, and **repair** it, i.e. give back the original? See
+[docs/POINT_DEFECTS.md](docs/POINT_DEFECTS.md).
+
+- Data: `scripts/make_point_defects.py` (validation and test splits in
+  `data/ka2d_256_point_defects/`; the training split takes ~30-45 min to make).
+- Training: `scripts/train_point_defects.py` with `configs/train/heal_point_defects.yaml`
+  (repair: DM2's loss with a defect, not only noise, to remove) and
+  `configs/train/detect_point_defects.yaml` (per-atom roles); on Kaggle,
+  [`notebooks/kaggle_point_defects.ipynb`](notebooks/kaggle_point_defects.ipynb).
+- Evaluation: `scripts/eval_point_defects.py`. Before training:
+  [`results/point_defects_20261107/`](results/point_defects_20261107/README.md).
+
+## Status (first version: placing D1−, D1+ and D2)
 
 The MVP pipeline is implemented and tested (67 tests, including an end-to-end run of
 every script). It covers dataset generation, defect labelling, the periodic EGNN and
