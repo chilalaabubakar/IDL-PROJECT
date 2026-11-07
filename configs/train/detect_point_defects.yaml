@@ -1,0 +1,28 @@
+# Point-defect finder (docs/POINT_DEFECTS.md): scripts/train_point_defects.py
+name: pd_detect
+task: detect
+seed: 0
+data: data/ka2d_256_point_defects
+model:
+  name: egnn_classifier      # the EGNN with a per-atom head (5 AtomRole classes)
+  hidden: 128
+  n_layers: 4
+  cutoff: 2.5
+  k_max: 64
+  n_classes: 5
+# take the trunk of the trained unconditional denoiser; null to train from scratch
+init_from: results/kaggle_20261006-0454Z/training/egnn_uncond_smax1/ema.pt
+kind_probs: {vacancy: 0.25, interstitial: 0.25, frenkel: 0.25, antisite: 0.25}
+p_clean: 0.2                 # fraction of batches that are defect-free glasses
+class_weight_power: 0.5      # cross-entropy weights (class frequency)^-0.5
+optim:
+  lr: 2.0e-4
+  weight_decay: 0.0
+  batch_size: 16
+  n_updates: 20000
+  grad_clip: 1.0
+  ema: 0.999
+n_val: 200
+log_every: 100
+val_every: 1000
+ckpt_every: 2000

@@ -1,0 +1,75 @@
+{
+ "data": "data/ka2d_256_point_defects/test.npz",
+ "healer": "results/kaggle_20261006-0454Z/training/egnn_uncond_smax1/ema.pt",
+ "detector": null,
+ "seed": 0,
+ "kinds": {
+  "vacancy": {
+   "examples": 200,
+   "find": {
+    "model": 0.44,
+    "energy_needs_potential": 0.295,
+    "chance": 0.029,
+    "model_score": "healer_output"
+   },
+   "repair": {
+    "flag by model: insert, minimise": 0.41,
+    "flag by model: insert, heal, minimise": 0.435,
+    "flag by energy: insert, minimise": 0.26
+   }
+  },
+  "interstitial": {
+   "examples": 200,
+   "find": {
+    "model": 0.12,
+    "energy_needs_potential": 0.28,
+    "chance": 0.03,
+    "model_score": "healer_output"
+   },
+   "repair": {
+    "flag by model: removed the extra atom": 0.04,
+    "flag by model: remove, minimise": 0.06,
+    "flag by model: remove, heal, minimise": 0.06,
+    "flag by energy: removed the extra atom": 0.24,
+    "flag by energy: remove, minimise": 0.21
+   }
+  },
+  "frenkel": {
+   "examples": 200,
+   "find": {
+    "model": 0.19,
+    "energy_needs_potential": 0.285,
+    "chance": 0.052,
+    "model_score": "healer_output"
+   },
+   "repair": {
+    "shake, minimise": {
+     "restored": 0.005,
+     "atoms_within_0_1": 0.474,
+     "energy_above_original": 0.0288
+    },
+    "shake, heal, minimise": {
+     "restored": 0.08,
+     "atoms_within_0_1": 0.639,
+     "energy_above_original": 0.0091
+    }
+   }
+  },
+  "antisite": {
+   "examples": 200,
+   "find": {
+    "model": 0.15,
+    "energy_needs_potential": 0.29,
+    "chance": 0.04,
+    "model_score": "healer_output"
+   },
+   "repair": {
+    "search near model flag, pick by model: right pair swapped back": 0.0,
+    "search near model flag, pick by model: swap, minimise": 0.0,
+    "search near model flag, pick by energy: right pair swapped back": 0.04,
+    "search near model flag, pick by energy: swap, minimise": 0.04
+   }
+  }
+ },
+ "seconds": 5217
+}

@@ -119,3 +119,42 @@ def fire_minimize(
         n_steps=n_steps,
         converged=max_f <= fmax,
     )
+
+
+def _minimize_one(args) -> tuple:
+    pos, types, box, fmax, max_steps = args
+    torch.set_num_threads(1)
+    s = Structures(
+        torch.as_tensor(pos, dtype=torch.float64)[None],
+        torch.as_tensor(types, dtype=torch.long)[None],
+        torch.as_tensor(box, dtype=torch.float64)[None],
+    )
+    r = fire_minimize(s, fmax=fmax, max_steps=max_steps)
+    return r.structures.pos[0].numpy(), float(r.max_force[0])
+
+
+def fire_minimize_many(
+    jobs: list,  # (pos [N, 2], types [N], box [2]) numpy arrays; N may differ between jobs
+    workers: int | None = None,
+    fmax: float = 1e-6,
+    max_steps: int = 100_000,
+) -> list:
+    """Minimise many structures one per process, all atoms free; keeps the order.
+
+    Returns (positions in the input frame, final max force) per structure. One structure per
+    call gives the same result as fire_minimize on it alone. Faster than one big batch when
+    convergence times differ, since no structure waits for the slowest. Worker processes are
+    spawned, not forked: a forked child that runs torch after the parent has started torch's
+    thread pool can hang.
+    """
+    import multiprocessing
+    import os
+    from concurrent.futures import ProcessPoolExecutor
+
+    args = [(p, t, b, fmax, max_steps) for p, t, b in jobs]
+    workers = workers or os.cpu_count() or 1
+    if workers == 1 or len(args) <= 1:
+        return [_minimize_one(a) for a in args]
+    ctx = multiprocessing.get_context("spawn")
+    with ProcessPoolExecutor(workers, mp_context=ctx) as pool:
+        return list(pool.map(_minimize_one, args))
