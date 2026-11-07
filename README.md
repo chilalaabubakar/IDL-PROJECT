@@ -8,6 +8,14 @@ whether its surroundings look like naturally formed ones. The work builds on DM2
 ([Yang & Schwalbe-Koda, npj Comput. Mater. 2026](https://doi.org/10.1038/s41524-025-01901-1);
 [code](https://github.com/digital-synthesis-lab/DM2)).
 
+> **Branch `dabo-point-defects`: the new study.** After a review by Prof. Ismaila Dabo
+> (6 November 2026), the study moves from placing self-defined defects to **finding and
+> repairing standard point defects** (vacancy, interstitial, Frenkel pair, antisite) with
+> a denoising diffusion model. His ten points, our answers and the plan:
+> [docs/DABO_RECOMMENDATIONS.md](docs/DABO_RECOMMENDATIONS.md). Method:
+> [docs/POINT_DEFECTS.md](docs/POINT_DEFECTS.md). The rest of this README describes the
+> first version, which stays on `main`.
+
 ## Documents
 - [Project plan](docs/PROJECT_PLAN.md): research questions, method, evaluation, stages, timeline, risks
 - [Implementation plan](docs/IMPLEMENTATION_PLAN.md): conventions, tickets per workstream, dependencies, MVP definition
@@ -18,6 +26,7 @@ whether its surroundings look like naturally formed ones. The work builds on DM2
 - [3D silica extension plan](docs/SILICA_3D_PLAN.md): the next step toward a materials-journal paper (defects in amorphous SiO₂, physical validation)
 - [3D silica quickstart](docs/SILICA_QUICKSTART.md): data, defect labels, the conditional 3D model and how to start training it (Kaggle or PSC Bridges-2)
 - [Compute estimate](docs/compute/README.md): GPU-hours, CPU core-hours and ACCESS credits for the rest of the project, from measured timings
+- [Prof. Dabo's recommendations](docs/DABO_RECOMMENDATIONS.md): his ten points, our answers, the new study and its plan
 - [Point defects](docs/POINT_DEFECTS.md): the revised study. Standard point defects (vacancy, interstitial, Frenkel pair, antisite), and whether a denoising diffusion model can find them and restore the defect-free glass
 
 ## Point defects (revised study)
