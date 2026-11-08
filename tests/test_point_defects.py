@@ -18,6 +18,7 @@ from glassdiff.data.point_defects import (
     AtomRole,
     DefectConfig,
     PointDefect,
+    candidate_gaps,
     finish_defect,
     first_shell,
     generate,
@@ -25,6 +26,7 @@ from glassdiff.data.point_defects import (
     largest_gap,
     load_point_defects,
     make_defect,
+    return_displaced_atom,
     save_point_defects,
     wrap,
 )
@@ -124,6 +126,18 @@ def test_heal_target_wraps_and_removes_the_mean():
     assert torch.allclose(t, torch.tensor([[[-0.3, 0.0], [0.3, 0.0]]], dtype=torch.float64))
 
 
+def test_candidate_gaps_are_distinct_and_most_open_first(glass):
+    pos, _, box = glass
+    gaps = candidate_gaps(pos, box, pos[7], 1.0, 3.0, k=6, min_sep=0.6, exclude=7)
+    assert 1 <= len(gaps) <= 6
+    r = np.linalg.norm(wrap(gaps - pos[7], box), axis=1)
+    assert ((r >= 1.0 - 1e-9) & (r <= 3.0 + 1e-9)).all()
+    sep = np.linalg.norm(wrap(gaps[:, None] - gaps[None], box), axis=-1)
+    assert (sep[~np.eye(len(gaps), dtype=bool)] >= 0.6 - 1e-9).all()
+    clearance = [np.linalg.norm(wrap(np.delete(pos, 7, 0) - g, box), axis=1).min() for g in gaps]
+    assert clearance == sorted(clearance, reverse=True)
+
+
 def _write_dataset(root: Path, make_lattice, n_glasses=2, per_glass=2, relax=identity_relax):
     """Source splits and point-defect splits as scripts/make_point_defects.py writes them."""
     cfg = DefectConfig()
@@ -156,8 +170,17 @@ def test_generate_save_and_load_round_trip(tmp_path, make_lattice):
         n = {"vacancy": 63, "interstitial": 65}.get(name, 64)
         assert d.pos.shape == (4, n, 2) and d.heal_pos.shape == (4, 64, 2)
         assert d.role.shape == (4, n) and (d.role > 0).any(-1).all()
-        assert torch.equal(d.orig_types, d.orig_types[:1].expand_as(d.orig_types)) or True
         assert d.valid.all()
+    fr = data["frenkel"]
+    back = return_displaced_atom(fr)
+    i = torch.arange(len(fr))
+    near_site = wrap((back.heal_pos[i, fr.atom] - fr.sites[:, 0]).numpy(), fr.box.numpy())
+    assert (np.linalg.norm(near_site, axis=1) <= 1.0 + 1e-9).all()
+    others = torch.ones(fr.role.shape, dtype=torch.bool)
+    others[i, fr.atom] = False  # every atom but the displaced one stays put
+    assert torch.equal(back.heal_pos[others], fr.pos[others])
+    with pytest.raises(ValueError):
+        return_displaced_atom(data["vacancy"])
     # the stored source fingerprint is checked
     other = tmp_path / "source" / "val.npz"
     with pytest.raises(ValueError):
@@ -204,8 +227,9 @@ def test_same_structure_allows_identical_atoms_to_swap(glass):
     assert not ev.same_structure(pos, swapped, pos, types, box)
 
 
-def _train(tmp_path, monkeypatch, pd, task):
-    cfg = yaml.safe_load((ROOT / f"configs/train/{task}_point_defects.yaml").read_text())
+def _train(tmp_path, monkeypatch, pd, task, config=None):
+    config = config or f"{task}_point_defects"
+    cfg = yaml.safe_load((ROOT / f"configs/train/{config}.yaml").read_text())
     model_cfg = cfg["model"] if isinstance(cfg["model"], dict) else str(ROOT / cfg["model"])
     cfg.update(
         data=str(pd),
@@ -219,7 +243,7 @@ def _train(tmp_path, monkeypatch, pd, task):
         model_args=dict(hidden=16, n_layers=1, k_max=48),
     )
     cfg["optim"].update(n_updates=2, batch_size=2)
-    path = tmp_path / f"{task}.yaml"
+    path = tmp_path / f"{config}.yaml"
     path.write_text(yaml.safe_dump(cfg))
     monkeypatch.setattr(sys, "argv", ["train", "--config", str(path)])
     _script("train_point_defects").main()
@@ -234,6 +258,8 @@ def test_training_and_evaluation_smoke(tmp_path, monkeypatch, make_lattice):
     heal_run, rows = _train(tmp_path, monkeypatch, pd, "heal")
     assert rows[-1]["step"] == 2 and "frenkel_worst_s0.001" in rows[-1]
     assert "clean_rms_s0.001" in rows[-1]
+    heal2_run, rows = _train(tmp_path, monkeypatch, pd, "heal", "heal_point_defects_v2")
+    assert "frenkel_defect_rms_s0.001" in rows[-1] and "frenkel_none_defect_rms_s0.001" in rows[-1]
     detect_run, rows = _train(tmp_path, monkeypatch, pd, "detect")
     assert "vacancy_hit" in rows[-1] and "clean_false_alarm" in rows[-1]
     assert load_denoiser(detect_run / "ckpt.pt").n_classes == 5
@@ -248,6 +274,18 @@ def test_training_and_evaluation_smoke(tmp_path, monkeypatch, make_lattice):
     for name, r in res.items():
         assert 0 <= r["find"]["model"] <= 1 and r["find"]["model_score"] == "detector"
         assert r["repair"]
+    assert "flag by model, pick by model: move, heal, minimise" in res["frenkel"]["repair"]
+    assert (
+        "flag by energy, pick by energy: lowest of all minimised tries" in res["frenkel"]["repair"]
+    )
+    # without a finder the repair model's own output picks the gap
+    argv = ["eval", "--data", str(pd / "test.npz"), "--healer", str(heal2_run / "ckpt.pt")]
+    argv += ["--workers", "1", "--threads", "1", "--kinds", "frenkel", "--max-examples", "2"]
+    monkeypatch.setattr(sys, "argv", argv + ["--out", str(out)])
+    _script("eval_point_defects").main()
+    fr = json.loads(out.read_text())["kinds"]["frenkel"]
+    assert fr["find"]["model_score"] == "healer_output"
+    assert "flag by model, pick by model: the right gap" in fr["repair"]
 
 
 @pytest.mark.lammps

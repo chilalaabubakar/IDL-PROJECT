@@ -1,0 +1,33 @@
+# Repair model, version 2 (docs/POINT_DEFECTS.md): scripts/train_point_defects.py
+# Version 1 (heal_point_defects.yaml) learned to remove noise but not the defect; see
+# results/point_defects_trained_20261107/README.md. Changes: defect atoms weighted in the
+# loss, mostly small noise, and the Frenkel atom put back at its site before repair.
+name: pd_heal_v2
+task: heal
+seed: 0
+data: data/ka2d_256_point_defects
+model: configs/model/egnn.yaml
+# continue from the version-1 repair model (a good noise remover); null to start afresh
+init_from: results/kaggle_pd_20261107-2024Z/training/pd_heal/ema.pt
+kind_probs: {vacancy: 0.25, interstitial: 0.25, frenkel: 0.25, antisite: 0.25}
+p_clean: 0.2
+frenkel_input: return         # displaced atom back in the largest gap within 1 sigma of its site
+frenkel_return_search: 1.0
+defect_weight: 10.0           # atoms moved > defect_tol by the defect count 11 times
+defect_tol: 0.1               # sigma; 30-40 of 256 atoms per example
+noise:
+  sigma_min: 1.0e-3
+  sigma_max: 0.3
+  distribution: log_uniform   # most examples at small noise
+optim:
+  lr: 2.0e-4
+  weight_decay: 0.0
+  batch_size: 16
+  n_updates: 20000            # about 1.5 h on a T4
+  grad_clip: 1.0
+  ema: 0.999
+val_sigma: [0.001, 0.05, 0.2]
+n_val: 200
+log_every: 100
+val_every: 1000
+ckpt_every: 2000

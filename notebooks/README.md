@@ -22,6 +22,14 @@
   5 (~6 h on T4 x2).
 - `kaggle_silica_train.ipynb`: 3D silica training on DM2's glasses
   (`docs/SILICA_QUICKSTART.md`).
+- `kaggle_point_defects.ipynb`: the point-defect study (`docs/POINT_DEFECTS.md`): makes the
+  training split, trains the repair and finder models (one per GPU), evaluates them and
+  pushes the results (~4 h on T4 x2). First run: `results/point_defects_trained_20261107/`.
+- `kaggle_point_defects_v2.ipynb`: retrains the repair model with the fix for what the first
+  run showed (defect atoms weighted in the loss, mostly small noise, Frenkel atom put back
+  first), and evaluates it with the first run's finder, including Frenkel pairs found and
+  repaired without being told where they are (~5 h on one GPU). Pushes to the
+  `dabo-point-defects` branch.
 
 - `stage0_poc.ipynb`: the course proof-of-concept notebook, as provided (unchanged, with its
   Colab outputs): MLP denoisers on a 3×3 jittered grid, plus Frenkel-pair and antisite demos

@@ -17,6 +17,14 @@ task: heal. The repair model is DM2's denoiser with the corruption changed. DM2 
     defect-free glasses (heal_pos = x0); for those the loss is exactly DM2's. The trained
     model therefore removes noise and undoes the defect, and is used with the DM2 sampler
     from a defected glass (scripts/eval_point_defects.py --healer).
+    Version 2 (configs/train/heal_point_defects_v2.yaml) fixes what kept the first repair
+    model from learning the defect. A defect moves 30-40 of the 256 atoms by more than 0.1
+    sigma, so in a plain mean over atoms the random noise filled almost all of the loss.
+    Now atoms the defect moved by more than defect_tol get weight 1 + defect_weight;
+    noise.distribution log_uniform puts most examples at small noise, where the defect is
+    what is left to remove; and frenkel_input: return puts a Frenkel pair's displaced atom
+    back into the gap at its site first (which gap is a separate choice in the evaluation),
+    so the model cleans up the surroundings instead of learning a 1.2-3 sigma jump.
 task: detect. The EGNN classifier gives every atom of a relaxed defected glass an AtomRole
     (intact, next to an empty site, extra atom, displaced atom, wrong species);
     class-weighted cross-entropy, weights (class frequency)^-class_weight_power. A fraction
@@ -28,8 +36,8 @@ trained unconditional denoiser (the classifier takes its trunk). Run directory: 
 git.txt, log.jsonl (train loss and validation metrics of the EMA model on fixed val
 examples), ckpt.pt (load with glassdiff.models.registry.load_denoiser). Validation:
     heal:   per kind, one repair step at each val_sigma, x - model(x): RMS distance to the
-            original over all atoms and the mean worst-atom distance; "none_*" is the same
-            for leaving the input as it is.
+            original over all atoms, over the defect atoms (defect_rms) and the mean
+            worst-atom distance; "none_*" is the same for leaving the input as it is.
     detect: per kind, how often the atom most likely to be defective lies within 1.5 sigma
             of the defect (as eval_point_defects.py), the recall of each role, and on
             defect-free glasses the fraction with any atom above probability 0.5.
@@ -39,6 +47,7 @@ from __future__ import annotations
 
 import copy
 import json
+import math
 import os
 import time
 from pathlib import Path
@@ -52,6 +61,7 @@ from glassdiff.data.point_defects import (
     PointDefectSet,
     heal_target,
     load_point_defects,
+    return_displaced_atom,
 )
 from glassdiff.models.registry import build_model
 from glassdiff.types import Structures
@@ -100,6 +110,22 @@ def make_batch(task, d: PointDefectSet, idx, clean: bool, sigma, gen, device):
     return s.to(device), role.to(device)
 
 
+def defect_atoms(d: PointDefectSet, idx, clean: bool, tol: float) -> torch.Tensor:
+    """[B, N] atoms the defect moved by more than tol (none for a defect-free glass)."""
+    if clean:
+        return torch.zeros(d.orig_types[idx].shape, dtype=torch.bool)
+    return heal_target(d.heal_pos[idx], d.orig_pos[idx], d.box[idx]).norm(dim=-1) > tol
+
+
+def sample_sigma(n: int, noise: dict, gen: torch.Generator) -> torch.Tensor:
+    """[n] noise levels, uniform (DM2) or log-uniform (more weight on small noise)."""
+    lo, hi = float(noise.get("sigma_min", 1e-3)), float(noise.get("sigma_max", 0.5))
+    u = torch.rand(n, generator=gen, dtype=torch.float64)
+    if noise.get("distribution", "uniform") == "log_uniform":
+        return torch.exp(math.log(lo) + (math.log(hi) - math.log(lo)) * u)
+    return lo + (hi - lo) * u
+
+
 def to_float(s: Structures) -> Structures:
     return Structures(s.pos.float(), s.types, s.box.float())
 
@@ -114,18 +140,22 @@ def validate(task, model, val: dict[str, PointDefectSet], cfg, device) -> dict[s
         if task == "heal":
             for sig in cfg.get("val_sigma", [1e-3]):
                 gen = torch.Generator().manual_seed(1234)
-                rows = {"rms": [], "worst": [], "none_rms": [], "none_worst": []}
+                rows = {k: [] for k in ("rms", "worst", "defect_rms", "none_rms", "none_worst",
+                                        "none_defect_rms")}  # fmt: skip
+                tol = float(cfg.get("defect_tol", 0.1))
                 for i in range(0, len(d), bs):
                     idx = torch.arange(i, min(i + bs, len(d)))
                     sigma = torch.full((len(idx),), float(sig))
                     s, target = make_batch("heal", d, idx, False, sigma, gen, device)
                     pred = model(to_float(s), sigma.to(device).float())
+                    mask = defect_atoms(d, idx, False, tol).to(device)
                     for key, err in (("", pred - target), ("none_", -target)):
                         e = err.norm(dim=-1)
                         rows[key + "rms"].append(e.pow(2).mean(-1))
                         rows[key + "worst"].append(e.amax(-1))
+                        rows[key + "defect_rms"].append(e[mask].pow(2).cpu())
                 for key, v in rows.items():
-                    v = torch.cat(v)
+                    v = torch.cat([x.flatten().cpu() for x in v])
                     v = v.mean().sqrt() if key.endswith("rms") else v.mean()
                     out[f"{name}_{key}_s{sig:g}"] = round(float(v), 5)
         else:
@@ -213,6 +243,12 @@ def main() -> None:
     data = Path(cfg["data"])
     train = load_point_defects(data / "train.npz", cfg.get("source_train"))
     val = load_point_defects(data / "val.npz", cfg.get("source_val"))
+    if task == "heal" and cfg.get("frenkel_input", "relaxed") == "return":
+        search = float(cfg.get("frenkel_return_search", 1.0))
+        for split in (train, val):
+            if "frenkel" in split:
+                split["frenkel"] = return_displaced_atom(split["frenkel"], search)
+        print("Frenkel repair input: displaced atom put back at its site", flush=True)
     kinds = list(cfg.get("kind_probs", {k: 1.0 for k in train}))
     probs = torch.tensor([float(cfg.get("kind_probs", {}).get(k, 1.0)) for k in kinds])
     probs = probs / probs.sum()
@@ -243,6 +279,8 @@ def main() -> None:
     print("training examples: " + ", ".join(f"{k} {len(v)}" for k, v in train.items()), flush=True)
     weights = class_weights(train, float(cfg.get("class_weight_power", 0.5))).to(device)
     noise = cfg.get("noise", {})
+    defect_weight = float(cfg.get("defect_weight", 0.0))  # extra loss weight, defect atoms
+    defect_tol = float(cfg.get("defect_tol", 0.1))  # moved more than this by the defect
     bs, n_updates = int(opt_cfg["batch_size"]), int(opt_cfg["n_updates"])
     ema_decay = float(opt_cfg["ema"])
     max_seconds = float(cfg.get("max_minutes", 0)) * 60 or float("inf")
@@ -272,14 +310,13 @@ def main() -> None:
         d = train[kind]
         clean = bool(torch.rand(1, generator=gen) < p_clean)
         idx = torch.randint(len(d), (bs,), generator=gen)
-        sigma = None
-        if task == "heal":
-            lo, hi = float(noise.get("sigma_min", 1e-3)), float(noise.get("sigma_max", 0.5))
-            sigma = lo + (hi - lo) * torch.rand(bs, generator=gen, dtype=torch.float64)
+        sigma = sample_sigma(bs, noise, gen) if task == "heal" else None
         s, target = make_batch(task, d, idx, clean, sigma, gen, device)
         if task == "heal":
             pred = model(to_float(s), sigma.float().to(device))
-            loss = ((pred - target) ** 2).sum(-1).mean() / 2
+            sq = ((pred - target) ** 2).sum(-1)  # [B, N]
+            w = 1 + defect_weight * defect_atoms(d, idx, clean, defect_tol).to(sq)
+            loss = ((sq * w).sum(-1) / w.sum(-1)).mean() / 2
         else:
             logits = model(to_float(s))
             loss = F.cross_entropy(logits.reshape(-1, logits.shape[-1]), target.flatten(), weights)
