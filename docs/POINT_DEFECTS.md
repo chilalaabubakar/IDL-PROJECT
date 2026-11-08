@@ -88,6 +88,11 @@ defect-free glasses (x_repair = x0), where the loss is exactly DM2's, so the mod
 learns to leave intact glass alone. It is then used like DM2's sampler, starting from the
 defected glass.
 
+**Repair, version 2** (`configs/train/heal_point_defects_v2.yaml`). The same loss with each
+atom the defect moved by more than 0.1σ weighted 11 times, noise drawn log-uniformly
+between 0.001 and 0.3, and Frenkel pairs given with the displaced atom back in the gap at its
+site; see "Results so far" for why.
+
 **Detection** (`configs/train/detect_point_defects.yaml`). The same EGNN trunk with a
 per-atom head over the five roles (`EGNNAtomClassifier`), class-weighted cross-entropy;
 a fifth of the batches are defect-free glasses with every atom intact.
@@ -117,9 +122,12 @@ the training split, trains both models (one per GPU), evaluates them and pushes 
   - Vacancy: put an atom of the missing species in the largest gap within 1.5σ of the
     flagged atom; minimise, or repair the region with the denoiser first.
   - Interstitial: remove the flagged atom; minimise, or repair first.
-  - Frenkel pair: the region around both sites is given; shake it (0.35σ) and minimise, or
-    shake and repair first. Shaking alone is the physics baseline: it tests whether the
-    learned model adds anything beyond a random kick.
+  - Frenkel pair: (a) the region around both sites is given; shake it (0.35σ) and minimise,
+    or shake and repair first. Shaking alone is the physics baseline: it tests whether the
+    learned model adds anything beyond a random kick. (b) Nothing is given: flag the
+    displaced atom, list up to 8 gaps 1-3.2σ from it, move it to the gap the model prefers
+    (the finder's "next to an empty site" probability around the gap), then minimise or
+    repair and minimise; with the potential, try every gap and keep the lowest energy.
   - Antisite: swap back the neighbouring A-B pair the model prefers (or, with the
     potential, the one with the lowest energy) near the flagged atom; minimise.
 
@@ -144,6 +152,23 @@ on defect-free glasses finds vacancies more often than the per-atom energy (44% 
 so it restores more vacancy glasses (41-43.5% vs 26%). It is weaker for the other three
 defects and rarely undoes one by itself (Frenkel pairs: 8% restored vs 0.5% by shaking
 alone). That is the motivation for the training above.
+
+After the first training (`results/point_defects_trained_20261107/README.md`):
+
+| Defect | Found by the trained finder | Found by the energy | Restored, with the trained models | Restored, energy route |
+|---|---|---|---|---|
+| Vacancy | **66%** | 29.5% | **51-54%** | 26% |
+| Interstitial | **46.5%** | 28% | **34.5-35%** | 21% |
+| Antisite | **44.5%** | 29% | **27%** | 13.5% |
+| Frenkel pair | 26% | 28.5% | 10% (region given) | 0.5% (shake only) |
+
+The finder works and beats the potential's own energies for three defects. The repair
+model learned to remove noise but not the defect: a defect moves only 30-40 of the 256
+atoms, and the random noise filled almost all of the loss. Version 2
+(`configs/train/heal_point_defects_v2.yaml`, `notebooks/kaggle_point_defects_v2.ipynb`)
+gives the defect atoms 11 times the weight, trains mostly at small noise, and puts a
+Frenkel pair's atom back in the gap at its site before repair. Which gap is chosen
+separately, by the finder or by energy, with no region given.
 
 Caveats: a two-dimensional model glass; one defect per glass; the Frenkel repair is given
 the region (it tests repair, not finding); "restored" asks for the exact original minimum,

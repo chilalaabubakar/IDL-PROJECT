@@ -103,13 +103,28 @@ defects each):
 | Antisite | 15% | **29%** | 0% vs 4% with the energy |
 
 The untrained denoiser already finds vacancies better than the energy does. It does not know
-how to undo the other defects. That is why both models are now being trained on the defects.
+how to undo the other defects. That is why both models were then trained on the defects.
+
+**After the first training** (`results/point_defects_trained_20261107/`), the trained finder
+locates the defect more often than the potential's energies for three of the four types:
+
+| Defect | Found: trained finder | Found: energy | Restored with the trained models | Restored via energy |
+|---|---|---|---|---|
+| Vacancy | **66%** | 29.5% | **51-54%** | 26% |
+| Interstitial | **46.5%** | 28% | **34.5-35%** | 21% |
+| Antisite | **44.5%** | 29% | **27%** | 13.5% |
+| Frenkel pair | 26% | 28.5% | 10% (region given) | 0.5% |
+
+Almost all of the gain came from the finder. The repair model learned to remove noise but
+not the defect, because the defect atoms were a tiny part of its loss. Version 2 of the
+repair model fixes this (`notebooks/kaggle_point_defects_v2.ipynb`).
 
 ## Plan
 
 | Step | What | Where | Suggested owner |
 |---|---|---|---|
-| 1 | Train the repair and finding models; evaluate them against the baseline above | `notebooks/kaggle_point_defects.ipynb` (~3.5-4 h on Kaggle T4 x2) | Abubakar Chilala |
+| 1 | Train the repair and finding models; evaluate them against the baseline above. Done: the finder works, the repair model needed a fix | `notebooks/kaggle_point_defects.ipynb` | Abubakar Chilala |
+| 1b | Retrain the repair model (version 2) and evaluate it, including Frenkel pairs found and repaired with nothing given | `notebooks/kaggle_point_defects_v2.ipynb` (~5 h on one Kaggle GPU) | Abubakar Chilala |
 | 2 | Check the defect operations and the success tests; add error bars over glasses | `scripts/eval_point_defects.py` | Stacy Cheruto |
 | 3 | Repair procedure: number of denoising steps and starting noise | `scripts/eval_point_defects.py` | Gentille Uwera |
 | 4 | Physics checks: training-data generation, minimiser agreement, stability of repaired glasses in molecular dynamics | `scripts/make_point_defects.py`, `glassdiff.md` | Nicholaus Ladislaus |

@@ -29,7 +29,7 @@ from __future__ import annotations
 
 import hashlib
 import json
-from dataclasses import dataclass, field
+from dataclasses import dataclass, field, replace
 from enum import IntEnum
 from pathlib import Path
 
@@ -125,6 +125,34 @@ def first_shell(
     near = d < factor * sig
     near[i] = False
     return np.nonzero(near)[0]
+
+
+def candidate_gaps(
+    pos: np.ndarray,
+    box: np.ndarray,
+    centre: np.ndarray,
+    r_min: float,
+    r_max: float,
+    k: int = 8,
+    min_sep: float = 0.6,
+    exclude: int | None = None,
+    spacing: float = 0.05,
+) -> np.ndarray:
+    """Up to k distinct gaps r_min..r_max from ``centre``, the most open first: grid points
+    far from every atom (but ``exclude``), at least ``min_sep`` apart. [k', 2]."""
+    u = np.arange(-r_max, r_max + spacing / 2, spacing)
+    grid = np.stack(np.meshgrid(u, u, indexing="ij"), -1).reshape(-1, 2)
+    r = np.linalg.norm(grid, axis=1)
+    pts = centre + grid[(r >= r_min) & (r <= r_max)]
+    others = pos if exclude is None else np.delete(pos, exclude, axis=0)
+    clearance = np.linalg.norm(wrap(pts[:, None, :] - others[None], box), axis=-1).min(1)
+    chosen: list[np.ndarray] = []
+    for j in np.argsort(-clearance):
+        if all(np.linalg.norm(wrap(pts[j] - c, box)) >= min_sep for c in chosen):
+            chosen.append(pts[j])
+            if len(chosen) == k:
+                break
+    return np.stack(chosen)
 
 
 def min_pair_distance(pos: np.ndarray, box: np.ndarray) -> float:
@@ -370,6 +398,21 @@ def load_point_defects(
         )
         out[name] = d.subset(d.valid) if valid_only else d
     return out
+
+
+def return_displaced_atom(d: PointDefectSet, search: float = 1.0) -> PointDefectSet:
+    """Frenkel pairs with a different repair input: the displaced atom put back into the
+    largest gap within ``search`` of its empty site, instead of the relaxed defected glass.
+
+    Repair then means cleaning up the surroundings, not learning a jump of 1.2-3 sigma; which
+    gap the atom goes back to is a separate choice (scripts/eval_point_defects.py)."""
+    if d.kind != PointDefect.FRENKEL:
+        raise ValueError("only Frenkel pairs have a displaced atom")
+    heal = d.pos.numpy().copy()
+    sites, box = d.sites.numpy(), d.box.numpy()
+    for e, i in enumerate(d.atom.tolist()):
+        heal[e, i] = largest_gap(heal[e], box[e], sites[e, 0], 0.0, search, exclude=i)
+    return replace(d, heal_pos=torch.from_numpy(heal))
 
 
 def heal_target(heal_pos: Tensor, orig_pos: Tensor, box: Tensor) -> Tensor:

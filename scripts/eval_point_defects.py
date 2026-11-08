@@ -25,8 +25,14 @@ shift.
     vacancy       put an atom of the missing species in the largest gap within 1.5 sigma of
                   the flagged atom; minimise, or first heal the 3-sigma region from sigma 0.2
     interstitial  remove the flagged atom; minimise, or first heal the region from sigma 0.2
-    Frenkel pair  the region around both sites (3.5 sigma) is given; shake it by 0.35 and
-                  minimise, or shake and heal from sigma 0.35, then minimise
+    Frenkel pair  (a) the region around both sites (3.5 sigma) is given; shake it by 0.35 and
+                  minimise, or shake and heal from sigma 0.35, then minimise.
+                  (b) nothing is given: flag the displaced atom, list up to 8 gaps 1-3.2
+                  sigma from it, and move it to the gap the model prefers (the finder's
+                  "next to an empty site" probability of the atoms around the gap; without
+                  a finder, the smallest remaining repair-model output), then minimise or
+                  heal from sigma 0.1 and minimise; or, with the potential, try every gap
+                  and keep the lowest-energy minimum
     antisite      among A-B neighbour pairs (< 1.6 sigma) with an atom within 1.5 sigma of the
                   flagged atom, swap back the pair the model prefers (detector: the highest
                   summed wrong-species probability; else the smallest summed squared healer
@@ -50,6 +56,7 @@ from glassdiff.data.point_defects import (
     AtomRole,
     PointDefect,
     PointDefectSet,
+    candidate_gaps,
     largest_gap,
     load_point_defects,
     wrap,
@@ -182,6 +189,9 @@ def evaluate_kind(d: PointDefectSet, models: Models, mu, sd, rng, workers: int) 
         )
 
     def minimise(pos_list, types_list):
+        """One structure per example (paired with that example's box)."""
+        if not len(pos_list) == len(types_list) == len(box):
+            raise ValueError("minimise() takes exactly one structure per example")
         return fire_minimize_many(list(zip(pos_list, types_list, box)), workers=workers)
 
     rep: dict = {}
@@ -228,6 +238,69 @@ def evaluate_kind(d: PointDefectSet, models: Models, mu, sd, rng, workers: int) 
                 restored=frac(restored(out, types)),
                 atoms_within_0_1=frac((dd < 0.1).mean(-1)),
                 energy_above_original=round(float((e - e0).mean()), 4),
+            )
+        # Find and repair without being told where: flag the displaced atom, list the gaps
+        # 1-3.2 sigma from it, choose the one it came from, move it there.
+        near_prob = None
+        if models.detector is not None:
+            near_prob = models.role_prob(pos, types, box)[..., int(AtomRole.NEAR_VACANCY)]
+        for who, f in flagged.items():
+            rep[f"flag by {who}: the displaced atom"] = frac(f == d.atom.numpy())
+            moved = {"model": [], "energy": []}
+            right = {"model": [], "energy": []}
+            tries = []  # (example, candidate gap) for the energy choice
+            for b in range(m):
+                gaps = candidate_gaps(pos[b], box[b], pos[b, f[b]], 1.0, 3.2, k=8, exclude=f[b])
+                cand = np.repeat(pos[b][None], len(gaps), 0)
+                cand[np.arange(len(gaps)), f[b]] = gaps
+                if near_prob is not None:  # gaps next to atoms the finder sees as near a hole
+                    others = np.delete(np.arange(pos.shape[1]), f[b])
+                    crit = []
+                    for g in gaps:
+                        ring = np.linalg.norm(wrap(pos[b, others] - g, box[b]), axis=-1) < 1.3
+                        crit.append(-near_prob[b, others][ring].mean() if ring.any() else 0.0)
+                else:  # the repair model's own verdict: smallest remaining correction
+                    out = models.heal_out(cand, np.repeat(types[b][None], len(gaps), 0),
+                                          np.repeat(box[b][None], len(gaps), 0), 0.05)  # fmt: skip
+                    crit = (out**2).sum((1, 2))
+                g = int(np.argmin(crit))
+                moved["model"].append(cand[g])
+                right["model"].append(np.linalg.norm(wrap(gaps[g] - sites[b, 0], box[b])) < 0.75)
+                tries += [(b, j, cand[j], gaps[j]) for j in range(len(gaps))]
+            # each try with its own example's box (minimise() pairs one box per example)
+            out = fire_minimize_many(
+                [(t[2], types[t[0]], box[t[0]]) for t in tries], workers=workers
+            )
+            assert len(out) == len(tries)
+            best: dict[int, tuple] = {}
+            for (b, _, _, gap), (p_min, _) in zip(tries, out):
+                e = float(
+                    ka_energy(
+                        Structures(
+                            torch.as_tensor(p_min)[None], d.types[b : b + 1], d.box[b : b + 1]
+                        )
+                    )
+                )
+                if b not in best or e < best[b][0]:
+                    best[b] = (e, p_min, gap)
+            for b in range(m):
+                right["energy"].append(
+                    np.linalg.norm(wrap(best[b][2] - sites[b, 0], box[b])) < 0.75
+                )
+            label = f"flag by {who}"
+            mm = np.stack(moved["model"])
+            region = np.linalg.norm(wrap(mm - mm[ar, f][:, None], box[:, None]), axis=-1) < 3.0
+            rep[f"{label}, pick by model: the right gap"] = frac(right["model"])
+            rep[f"{label}, pick by model: move, minimise"] = frac(
+                restored(minimise(mm, types), types)
+            )
+            healed = models.heal(mm, types, box, region, 0.1)
+            rep[f"{label}, pick by model: move, heal, minimise"] = frac(
+                restored(minimise(healed, types), types)
+            )
+            rep[f"{label}, pick by energy: the right gap"] = frac(right["energy"])
+            rep[f"{label}, pick by energy: lowest of all minimised tries"] = frac(
+                restored([(best[b][1], 0.0) for b in range(m)], types)
             )
     else:  # antisite
         prob = None
