@@ -249,3 +249,82 @@ def passes_gates(stats: dict, gates: SilicaGates) -> bool:
         and stats["si_cn4"] >= gates.min_si_cn4
         and stats["min_dist"] >= gates.min_dist
     )
+
+
+def minimize_structure(
+    pos: np.ndarray,
+    types: np.ndarray,
+    box: np.ndarray,
+    p: SilicaProtocol | None = None,
+    fmax: float = 1e-3,
+    max_steps: int = 100_000,
+) -> tuple[np.ndarray, np.ndarray, float]:
+    """Energy-minimise one glass at fixed box (FIRE, all atoms free).
+
+    Stops when the largest force on any atom is below ``fmax`` (kcal/mol/A; LAMMPS
+    ``min_modify norm max``): the default norm over all 3N components is far stricter for a
+    3,000-atom glass and costs ~2x the steps for the same minimum. Returns (positions in the
+    frame of the input, per-atom energies in kcal/mol, final largest force).
+    """
+    p = p or SilicaProtocol()
+    pos = np.asarray(pos, dtype=np.float64)
+    box = np.asarray(box, dtype=np.float64)
+    wrapped = np.mod(pos, box)
+    lmp = _new_lammps()
+    try:
+        _setup(lmp, p)
+        lmp.commands_list(
+            [f"region cell block 0 {box[0]} 0 {box[1]} 0 {box[2]}", "create_box 2 cell"]
+        )
+        lmp.create_atoms(len(pos), None, [int(t) + 1 for t in types], wrapped.reshape(-1).tolist())
+        _force_field(lmp, p)
+        lmp.commands_list(
+            [
+                "compute pea all pe/atom",
+                "thermo_style custom step pe fmax",
+                "min_style fire",
+                "min_modify norm max",
+                f"minimize 0 {fmax} {max_steps} {10 * max_steps}",
+                "run 0",
+            ]
+        )
+        n = lmp.get_natoms()
+        new = np.array(lmp.gather_atoms("x", 1, 3), dtype=np.float64).reshape(n, 3)
+        ids = np.array(lmp.gather_atoms("id", 0, 1))
+        pe = np.array(lmp.gather("c_pea", 1, 1), dtype=np.float64)
+        final = float(lmp.get_thermo("fmax"))
+    finally:
+        lmp.close()
+    if not np.array_equal(ids, np.arange(1, len(pos) + 1)):
+        raise RuntimeError("LAMMPS reordered or lost atoms")
+    shift = new - wrapped
+    return pos + shift - box * np.round(shift / box), pe, final
+
+
+def _minimize_job(args):
+    try:
+        return minimize_structure(*args)
+    except Exception as exc:  # e.g. LAMMPS "lost atoms" when two atoms start too close
+        return None, None, float("inf"), str(exc).splitlines()[0]
+
+
+def minimize_many(
+    jobs: list, workers: int | None = None, fmax: float = 1e-3
+) -> list[tuple[np.ndarray, np.ndarray, float]]:
+    """minimize_structure for many (pos, types, box), in spawned processes; keeps the order.
+
+    A minimisation that fails (LAMMPS stops, e.g. with "lost atoms" when two atoms start too
+    close and the Si-O attraction runs away) gives (None, None, inf, message) instead of
+    stopping the whole batch.
+    """
+    import multiprocessing
+    import os
+    from concurrent.futures import ProcessPoolExecutor
+
+    args = [(pos, types, box, None, fmax) for pos, types, box in jobs]
+    workers = workers or os.cpu_count() or 1
+    if workers == 1 or len(args) <= 1:
+        return [_minimize_job(a) for a in args]
+    ctx = multiprocessing.get_context("spawn")
+    with ProcessPoolExecutor(workers, mp_context=ctx) as pool:
+        return list(pool.map(_minimize_job, args))

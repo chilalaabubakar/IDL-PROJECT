@@ -1,0 +1,18 @@
+# Silica point defects, stage 1 (docs/SILICA_POINT_DEFECTS.md): scripts/silica/point_defects_study.py
+data: data/sio2_dm2/test.npz   # DM2's four test glasses (3,000 atoms; 0.1, 1, 10, 100 K/ps)
+out_dir: results/silica_point_defects
+n_glasses: null                # null = every glass of the split
+n_per_glass: 20                # defects per glass and kind -> 80 per kind
+seed: 0
+workers: null                  # null = every CPU core
+kinds: [o_vacancy, o_interstitial, o_frenkel, si_vacancy]
+fmax: 1.0e-3                   # kcal/mol/A, largest force at the end of a minimisation
+hit_radius: 2.5                # A, finding counts if the top atom is this close to the defect
+restore_tol: 0.1               # A, restored if every atom is this close to the original
+insert_search: 2.2             # A, repair: gap search around the flagged atom
+si_o_cutoff: 2.2               # A, Si-O bond (as glassdiff.silica.defects)
+peroxy_cutoff: 1.7             # A, O-O bond of a peroxy linkage
+interstitial_search: 3.0       # A
+frenkel_hop: [4.0, 6.0]        # A (closer pairs recombine when relaxed)
+recombined_tol: 0.6            # A
+grid_spacing: 0.15             # A
