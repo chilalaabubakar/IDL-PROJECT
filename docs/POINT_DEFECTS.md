@@ -170,6 +170,23 @@ gives the defect atoms 11 times the weight, trains mostly at small noise, and pu
 Frenkel pair's atom back in the gap at its site before repair. Which gap is chosen
 separately, by the finder or by energy, with no region given.
 
+After repair version 2 (`results/point_defects_v2_20261109/README.md`):
+
+- **Version 2 learned the defect:** in one step it removes 12-26% of the defect-atom error,
+  against 6-9% for version 1.
+- **It adds nothing once minimisation follows:** restored rates stay at 51.5, 34 and 9%
+  for vacancies, interstitials and region-given Frenkel pairs.
+- **Without a potential:** it moves the defect atoms closer to the original, but leaves
+  overlapping atoms in up to half of the glasses.
+- **Headroom is in finding:** given the true defect location, minimisation restores
+  53-80% of glasses, against 19-51% with the finder.
+- **Frenkel pairs with nothing given:** 19% are restored; a pure physics search reaches
+  18.5%.
+
+The main result is therefore the learned finder (no potential), plus fixing the atom count
+or species, plus minimisation. The repair model is a secondary result with a clear failure
+mode. The no-potential test is `scripts/eval_point_defect_repair.py`.
+
 Caveats: a two-dimensional model glass; one defect per glass; the Frenkel repair is given
 the region (it tests repair, not finding); "restored" asks for the exact original minimum,
 which is strict in a glass where many nearby minima are equally natural.

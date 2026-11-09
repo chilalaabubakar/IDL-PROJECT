@@ -287,6 +287,19 @@ def test_training_and_evaluation_smoke(tmp_path, monkeypatch, make_lattice):
     assert fr["find"]["model_score"] == "healer_output"
     assert "flag by model, pick by model: the right gap" in fr["repair"]
 
+    # repair without a potential, the defect given
+    rep = tmp_path / "repair.json"
+    argv = ["repair", "--data", str(pd / "test.npz"), "--model", f"a={heal_run / 'ckpt.pt'}"]
+    argv += ["--model", f"b={heal2_run / 'ckpt.pt'}", "--max-examples", "2", "--workers", "1"]
+    monkeypatch.setattr(sys, "argv", argv + ["--threads", "1", "--out", str(rep)])
+    _script("eval_point_defect_repair").main()
+    res = json.loads(rep.read_text())["kinds"]
+    assert set(res) == set(NAMES.values())
+    for r in res.values():
+        assert {"nothing", "a, one step", "b, 10 steps", "minimise (needs the potential)"} <= set(r)
+        assert 0 <= r["minimise (needs the potential)"]["restored"] <= 1
+        assert r["nothing"]["overlap"] in (0.0, 0.5, 1.0)
+
 
 @pytest.mark.lammps
 def test_lammps_minimize_matches_fire(glass):

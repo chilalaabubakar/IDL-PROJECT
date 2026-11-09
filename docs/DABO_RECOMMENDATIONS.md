@@ -119,12 +119,23 @@ Almost all of the gain came from the finder. The repair model learned to remove 
 not the defect, because the defect atoms were a tiny part of its loss. Version 2 of the
 repair model fixes this (`notebooks/kaggle_point_defects_v2.ipynb`).
 
+**After repair version 2** (`results/point_defects_v2_20261109/`):
+
+- **Training:** the repair model now learns the defect.
+- **With minimisation:** it adds nothing, because once the finder fixes the atom count or
+  species, minimisation does the rest.
+- **Without a potential:** it often leaves overlapping atoms.
+- **Answers to points 6 and 7:** a learned finder that needs no potential (point 7), plus
+  fixing the count or species and minimising (point 6). Given the true location,
+  minimisation restores 53-80% of glasses, so better finding is the way forward.
+
 ## Plan
 
 | Step | What | Where | Suggested owner |
 |---|---|---|---|
 | 1 | Train the repair and finding models; evaluate them against the baseline above. Done: the finder works, the repair model needed a fix | `notebooks/kaggle_point_defects.ipynb` | Abubakar Chilala |
-| 1b | Retrain the repair model (version 2) and evaluate it, including Frenkel pairs found and repaired with nothing given | `notebooks/kaggle_point_defects_v2.ipynb` (~5 h on one Kaggle GPU) | Abubakar Chilala |
+| 1b | Retrain the repair model (version 2) and evaluate it, including Frenkel pairs found and repaired with nothing given. Done: the finder carries the result; the repair model adds nothing after minimisation and breaks structures without it | `notebooks/kaggle_point_defects_v2.ipynb` | Abubakar Chilala |
+| 1c | Improve finding, where the headroom is (Frenkel pairs; the finder's over-confidence on defect-free glasses); optionally constrain the repair model so it cannot push atoms together | `scripts/train_point_defects.py` | Abubakar Chilala, Stacy Cheruto |
 | 2 | Check the defect operations and the success tests; add error bars over glasses | `scripts/eval_point_defects.py` | Stacy Cheruto |
 | 3 | Repair procedure: number of denoising steps and starting noise | `scripts/eval_point_defects.py` | Gentille Uwera |
 | 4 | Physics checks: training-data generation, minimiser agreement, stability of repaired glasses in molecular dynamics | `scripts/make_point_defects.py`, `glassdiff.md` | Nicholaus Ladislaus |
