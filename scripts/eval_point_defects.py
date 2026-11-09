@@ -32,11 +32,19 @@ shift.
                   "next to an empty site" probability of the atoms around the gap; without
                   a finder, the smallest remaining repair-model output), then minimise or
                   heal from sigma 0.1 and minimise; or, with the potential, try every gap
-                  and keep the lowest-energy minimum
+                  and keep the lowest-energy minimum.
+                  (c) --empty-site-first (with a finder): find the empty site from the atoms
+                  around it, then move into it the atom (1-3.2 sigma away) after whose move
+                  the finder sees the least defect; minimise. Tried on the validation split
+                  and dropped: it finds the site as often as (b) but rarely moves the right
+                  atom (4.5% restored vs 24.6% for (b)).
     antisite      among A-B neighbour pairs (< 1.6 sigma) with an atom within 1.5 sigma of the
                   flagged atom, swap back the pair the model prefers (detector: the highest
                   summed wrong-species probability; else the smallest summed squared healer
                   output after the swap) or, with the potential, the lowest energy; minimise
+--calibrate undoes the finder's training class weights (logit adjustment), which otherwise
+inflate its defect probabilities; --no-heal and --no-energy-search skip the repair-model
+variants and the Frenkel energy search (slow; measured in results/point_defects_v2_20261109/).
 "Heal" runs x <- x - model(x, sigma_k) inside the region, sigma_k from the start value to
 0.001 in 30 steps (no added noise). Every random choice is seeded, so a run is repeatable.
 """
@@ -52,6 +60,7 @@ import numpy as np
 import torch
 
 from glassdiff.data.point_defects import (
+    N_ROLES,
     NAMES,
     AtomRole,
     PointDefect,
@@ -76,11 +85,26 @@ HIT_RADIUS, SAME_TOL, BATCH = 1.5, 0.05, 10
 
 
 class Models:
-    def __init__(self, healer: str, detector: str | None, threads: int, device: str = "cpu"):
+    def __init__(
+        self,
+        healer: str,
+        detector: str | None,
+        threads: int,
+        device: str = "cpu",
+        log_prior: torch.Tensor | None = None,
+        do_heal: bool = True,
+        energy_search: bool = True,
+        empty_site_first: bool = False,
+    ):
         torch.set_num_threads(threads)
         self.device = torch.device(device)
         self.healer = load_denoiser(healer, self.device)
         self.detector = load_denoiser(detector, self.device) if detector else None
+        # logit adjustment: undo the class weights of training (None = raw probabilities)
+        self.log_prior = None if log_prior is None else log_prior.to(self.device).float()
+        self.do_heal = do_heal  # run the repair-model variants
+        self.energy_search = energy_search  # Frenkel: also minimise every trial gap
+        self.empty_site_first = empty_site_first  # Frenkel: route (c), off by default
 
     def _batch(self, pos, types, box, i) -> Structures:
         to = dict(device=self.device)
@@ -105,7 +129,10 @@ class Models:
         res = []
         for i in range(0, len(pos), BATCH):
             s = self._batch(pos, types, box, i)
-            res.append(self.detector(s).softmax(-1).double().cpu().numpy())
+            logits = self.detector(s)
+            if self.log_prior is not None:
+                logits = logits - self.log_prior
+            res.append(logits.softmax(-1).double().cpu().numpy())
         return np.concatenate(res)
 
     def heal(self, pos, types, box, region, sigma0: float, n: int = 30) -> np.ndarray:
@@ -143,6 +170,46 @@ def same_structure(pos, types, orig, otypes, box, tol=SAME_TOL) -> bool:
 
 def frac(x) -> float:
     return round(float(np.mean(x)), 3)
+
+
+def frenkel_empty_site_first(d: PointDefectSet, models: Models, minimise, restored) -> dict:
+    """Frenkel pairs, nothing given, empty site first (needs a finder, no potential).
+
+    The finder sees the atoms around the empty site far better than the displaced atom, so:
+    take the atom most likely to be next to an empty site, choose among the gaps within
+    1.5 sigma of it the one whose neighbours look most like that, then try moving every
+    atom 1-3.2 sigma from that gap into it and keep the move after which the finder sees
+    the least defect in the whole glass (sum of the not-intact probabilities). Minimise.
+    """
+    pos, types, box, sites = d.pos.numpy(), d.types.numpy(), d.box.numpy(), d.sites.numpy()
+    m, intact, near = len(pos), int(AtomRole.INTACT), int(AtomRole.NEAR_VACANCY)
+    p_near = models.role_prob(pos, types, box)[..., near]
+    moved, right_site, right_atom = [], [], []
+    for b in range(m):
+        v = int(p_near[b].argmax())
+        gaps = candidate_gaps(pos[b], box[b], pos[b, v], 0.0, 1.5, k=4)
+        crit = []
+        for g in gaps:
+            ring = np.linalg.norm(wrap(pos[b] - g, box[b]), axis=-1) < 1.3
+            crit.append(p_near[b][ring].mean() if ring.any() else 0.0)
+        site = gaps[int(np.argmax(crit))]
+        r = np.linalg.norm(wrap(pos[b] - site, box[b]), axis=-1)
+        cand = np.nonzero((r >= 1.0) & (r <= 3.2))[0]
+        trial = np.repeat(pos[b][None], len(cand), 0)
+        trial[np.arange(len(cand)), cand] = site
+        prob = models.role_prob(
+            trial, np.repeat(types[b][None], len(cand), 0), np.repeat(box[b][None], len(cand), 0)
+        )
+        j = int(np.argmin((1 - prob[..., intact]).sum(-1)))
+        moved.append(trial[j])
+        right_site.append(np.linalg.norm(wrap(site - sites[b, 0], box[b])) < 0.75)
+        right_atom.append(cand[j] == int(d.atom[b]))
+    out = minimise(np.stack(moved), types)
+    return {
+        "empty site first: the right site": frac(right_site),
+        "empty site first: moved the displaced atom back": frac(right_atom),
+        "empty site first: move, minimise": frac(restored(out, types)),
+    }
 
 
 def evaluate_kind(d: PointDefectSet, models: Models, mu, sd, rng, workers: int) -> dict:
@@ -204,7 +271,7 @@ def evaluate_kind(d: PointDefectSet, models: Models, mu, sd, rng, workers: int) 
                 region.append(np.linalg.norm(wrap(full[-1] - gap, box[b]), axis=-1) < 3.0)
             full, region = np.stack(full), np.stack(region)
             rep[f"flag by {who}: insert, minimise"] = frac(restored(minimise(full, otypes), otypes))
-            if who == "model":
+            if who == "model" and models.do_heal:
                 healed = models.heal(full, otypes, box, region, 0.2)
                 rep["flag by model: insert, heal, minimise"] = frac(
                     restored(minimise(healed, otypes), otypes)
@@ -217,7 +284,7 @@ def evaluate_kind(d: PointDefectSet, models: Models, mu, sd, rng, workers: int) 
             ctypes = types[keep].reshape(m, -1)
             rep[f"flag by {who}: removed the extra atom"] = frac(f == pos.shape[1] - 1)
             rep[f"flag by {who}: remove, minimise"] = frac(restored(minimise(cut, ctypes), ctypes))
-            if who == "model":
+            if who == "model" and models.do_heal:
                 region = np.linalg.norm(wrap(cut - pos[ar, f][:, None], box[:, None]), axis=-1) < 3
                 healed = models.heal(cut, ctypes, box, region, 0.2)
                 rep["flag by model: remove, heal, minimise"] = frac(
@@ -227,10 +294,12 @@ def evaluate_kind(d: PointDefectSet, models: Models, mu, sd, rng, workers: int) 
         centre = sites[:, 0] + 0.5 * wrap(sites[:, 1] - sites[:, 0], box)
         region = np.linalg.norm(wrap(pos - centre[:, None], box[:, None]), axis=-1) < 3.5
         shaken = pos + rng.normal(0, 0.35, pos.shape) * region[..., None]
-        out_a = minimise(shaken, types)
-        out_b = minimise(models.heal(shaken, types, box, region, 0.35), types)
+        runs = [("shake, minimise", minimise(shaken, types))]
+        if models.do_heal:
+            healed = models.heal(shaken, types, box, region, 0.35)
+            runs.append(("shake, heal, minimise", minimise(healed, types)))
         e0 = ka_energy(Structures(d.orig_pos, d.orig_types, d.box)).numpy() / pos.shape[1]
-        for name, out in (("shake, minimise", out_a), ("shake, heal, minimise", out_b)):
+        for name, out in runs:
             p = np.stack([o[0] for o in out])
             e = ka_energy(Structures(torch.as_tensor(p), d.types, d.box)).numpy() / pos.shape[1]
             dd = np.linalg.norm(wrap(p - orig, box[:, None]), axis=-1)
@@ -267,6 +336,20 @@ def evaluate_kind(d: PointDefectSet, models: Models, mu, sd, rng, workers: int) 
                 moved["model"].append(cand[g])
                 right["model"].append(np.linalg.norm(wrap(gaps[g] - sites[b, 0], box[b])) < 0.75)
                 tries += [(b, j, cand[j], gaps[j]) for j in range(len(gaps))]
+            label = f"flag by {who}"
+            mm = np.stack(moved["model"])
+            rep[f"{label}, pick by model: the right gap"] = frac(right["model"])
+            rep[f"{label}, pick by model: move, minimise"] = frac(
+                restored(minimise(mm, types), types)
+            )
+            if models.do_heal:
+                region = np.linalg.norm(wrap(mm - mm[ar, f][:, None], box[:, None]), axis=-1) < 3
+                healed = models.heal(mm, types, box, region, 0.1)
+                rep[f"{label}, pick by model: move, heal, minimise"] = frac(
+                    restored(minimise(healed, types), types)
+                )
+            if not models.energy_search:
+                continue
             # each try with its own example's box (minimise() pairs one box per example)
             out = fire_minimize_many(
                 [(t[2], types[t[0]], box[t[0]]) for t in tries], workers=workers
@@ -287,21 +370,12 @@ def evaluate_kind(d: PointDefectSet, models: Models, mu, sd, rng, workers: int) 
                 right["energy"].append(
                     np.linalg.norm(wrap(best[b][2] - sites[b, 0], box[b])) < 0.75
                 )
-            label = f"flag by {who}"
-            mm = np.stack(moved["model"])
-            region = np.linalg.norm(wrap(mm - mm[ar, f][:, None], box[:, None]), axis=-1) < 3.0
-            rep[f"{label}, pick by model: the right gap"] = frac(right["model"])
-            rep[f"{label}, pick by model: move, minimise"] = frac(
-                restored(minimise(mm, types), types)
-            )
-            healed = models.heal(mm, types, box, region, 0.1)
-            rep[f"{label}, pick by model: move, heal, minimise"] = frac(
-                restored(minimise(healed, types), types)
-            )
             rep[f"{label}, pick by energy: the right gap"] = frac(right["energy"])
             rep[f"{label}, pick by energy: lowest of all minimised tries"] = frac(
                 restored([(best[b][1], 0.0) for b in range(m)], types)
             )
+        if models.detector is not None and models.empty_site_first:
+            rep.update(frenkel_empty_site_first(d, models, minimise, restored))
     else:  # antisite
         prob = None
         if models.detector is not None:
@@ -347,6 +421,66 @@ def evaluate_kind(d: PointDefectSet, models: Models, mu, sd, rng, workers: int) 
     return res
 
 
+def glass_level(models: Models, data: dict[str, PointDefectSet], n: int) -> dict:
+    """Is this glass defective at all? Score: the highest not-intact probability of any atom.
+
+    Defected glasses (each kind) against the defect-free originals of the same test glasses,
+    raw and with the logit adjustment: the fraction above 0.5 and the AUC.
+    """
+    clean = next(iter(data.values()))
+    _, first = np.unique(clean.glass.numpy(), return_index=True)
+    clean = clean.subset(torch.from_numpy(first))
+    out = {}
+    prior = models.log_prior
+    for label, lp in (("raw", None), ("calibrated", prior)):
+        if label == "calibrated" and lp is None:
+            continue
+        models.log_prior = lp
+
+        def top(pos, types, box):
+            p = models.role_prob(pos.numpy(), types.numpy(), box.numpy())
+            return (1 - p[..., int(AtomRole.INTACT)]).max(-1)
+
+        s_clean = top(clean.orig_pos, clean.orig_types, clean.box)
+        s_def = np.concatenate([top(d.pos[:n], d.types[:n], d.box[:n]) for d in data.values()])
+        s_all = np.concatenate([s_def, s_clean])
+        ranks = s_all.argsort().argsort() + 1.0
+        n1, n0 = len(s_def), len(s_clean)
+        auc = (ranks[:n1].sum() - n1 * (n1 + 1) / 2) / (n1 * n0)
+        out[label] = dict(
+            defect_free_glasses=n0,
+            defect_free_flagged=frac(s_clean > 0.5),
+            defected_flagged=frac(s_def > 0.5),
+            auc=round(float(auc), 3),
+        )
+    models.log_prior = prior
+    return out
+
+
+def finder_log_prior(detector: str, data_dir: Path) -> tuple[torch.Tensor, dict]:
+    """Log class weights the finder was trained with (logit adjustment, Menon et al. 2021).
+
+    Weighted cross-entropy with class weights w_c makes the network's softmax estimate
+    p(c | x) w_c up to normalisation, inflating the rare defect roles; subtracting log w_c
+    from the logits undoes it. The weights are stored in newer finder checkpoints; for older
+    ones they are recomputed from the role counts of the split they were trained on (or, if
+    that is not here, the validation split: same generator, same proportions).
+    """
+    ckpt = torch.load(detector, map_location="cpu", weights_only=False)
+    if "class_weights" in ckpt:
+        w = torch.tensor(ckpt["class_weights"], dtype=torch.float64)
+        return torch.log(w), dict(source="checkpoint", weights=[round(float(x), 2) for x in w])
+    power = float(ckpt.get("cfg", {}).get("class_weight_power", 0.5))
+    split = data_dir / "train.npz" if (data_dir / "train.npz").exists() else data_dir / "val.npz"
+    counts = torch.zeros(N_ROLES, dtype=torch.float64)
+    for ex in load_point_defects(split).values():
+        counts += torch.bincount(ex.role.flatten(), minlength=N_ROLES).double()
+    w = counts.clamp_min(1) ** -power
+    w = w / w[int(AtomRole.INTACT)]
+    info = dict(source=str(split), power=power, weights=[round(float(x), 2) for x in w])
+    return torch.log(w), info
+
+
 def main() -> None:
     ap = argparse.ArgumentParser(
         description=__doc__, formatter_class=argparse.RawDescriptionHelpFormatter
@@ -360,19 +494,54 @@ def main() -> None:
     ap.add_argument("--threads", type=int, default=4, help="torch threads")
     ap.add_argument("--device", default="cpu", help="for the models (minimisation is on CPU)")
     ap.add_argument("--seed", type=int, default=0)
+    ap.add_argument(
+        "--calibrate",
+        action="store_true",
+        help="logit adjustment: undo the finder's training class weights (false alarms)",
+    )
+    ap.add_argument("--no-heal", action="store_true", help="skip the repair-model variants")
+    ap.add_argument(
+        "--no-energy-search", action="store_true", help="Frenkel: skip minimising every gap"
+    )
+    ap.add_argument("--empty-site-first", action="store_true", help="Frenkel: also try route (c)")
     ap.add_argument("--out", type=Path, required=True)
     args = ap.parse_args()
 
     t0 = time.time()
     data = load_point_defects(args.data)
-    models = Models(args.healer, args.detector, args.threads, args.device)
+    log_prior, calibration = None, None
+    if args.calibrate:
+        if not args.detector:
+            raise SystemExit("--calibrate needs --detector")
+        log_prior, calibration = finder_log_prior(args.detector, Path(args.data).parent)
+    models = Models(
+        args.healer,
+        args.detector,
+        args.threads,
+        args.device,
+        log_prior=log_prior,
+        do_heal=not args.no_heal,
+        energy_search=not args.no_energy_search,
+        empty_site_first=args.empty_site_first,
+    )
     # per-species energy statistics of the defect-free originals (z-score reference)
     any_set = next(iter(data.values()))
     e = ka_energy(Structures(any_set.orig_pos, any_set.orig_types, any_set.box), per_atom=True)
     t = any_set.orig_types
     mu = np.array([float(e[t == s].mean()) for s in (0, 1)])
     sd = np.array([float(e[t == s].std()) for s in (0, 1)])
-    out = dict(data=args.data, healer=args.healer, detector=args.detector, seed=args.seed, kinds={})
+    out = dict(
+        data=args.data,
+        healer=args.healer,
+        detector=args.detector,
+        seed=args.seed,
+        calibration=calibration,
+        options=dict(heal=not args.no_heal, energy_search=not args.no_energy_search),
+        kinds={},
+    )
+    if models.detector is not None:
+        out["glass_level"] = glass_level(models, data, args.max_examples)
+        print("glass level", json.dumps(out["glass_level"]), flush=True)
     for i, name in enumerate(args.kinds):
         d = data[name].subset(slice(0, args.max_examples))
         rng = np.random.default_rng([args.seed, i])

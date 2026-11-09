@@ -110,7 +110,8 @@ the training split, trains both models (one per GPU), evaluates them and pushes 
 
 `scripts/eval_point_defects.py`, on the 800 test defects:
 
-- **Find**: the top-scored atom must lie within 1.5σ of the defect. Score: the trained
+- **Find**: the top-scored atom must lie within 1.5σ of the defect. With `--calibrate` the
+  finder's probabilities are corrected for its training class weights (logit adjustment). Score: the trained
   detector's probability for the role the repair needs; without a detector, the size of
   the denoiser's output at σ = 0.05 (no potential needed). Reference that needs the
   potential: the atom whose energy is highest for its species. Chance: the fraction of
@@ -186,6 +187,16 @@ After repair version 2 (`results/point_defects_v2_20261109/README.md`):
 The main result is therefore the learned finder (no potential), plus fixing the atom count
 or species, plus minimisation. The repair model is a secondary result with a clear failure
 mode. The no-potential test is `scripts/eval_point_defect_repair.py`.
+
+Improving the finder (`results/point_defects_finder_20261109/README.md`):
+
+- **Calibration.** The finder's probabilities were inflated by the class weights of
+  training. Subtracting the log weights (logit adjustment, `--calibrate`) cuts false alarms
+  on defect-free glasses from 59% to 1% and improves finding by 1-4 points for every defect.
+- **Calibrated results.** Found: 67, 47.5, 46.5 and 30% (vacancy, interstitial, antisite,
+  Frenkel pair). Restored: 51, 36, 27 and 19.5%.
+- **What stays hard.** Telling a defective glass from a clean one remains weak (AUC 0.72).
+  For Frenkel pairs, finding the empty site first did not help (validation only).
 
 Caveats: a two-dimensional model glass; one defect per glass; the Frenkel repair is given
 the region (it tests repair, not finding); "restored" asks for the exact original minimum,

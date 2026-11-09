@@ -267,6 +267,7 @@ def test_training_and_evaluation_smoke(tmp_path, monkeypatch, make_lattice):
     out = tmp_path / "eval.json"
     argv = ["eval", "--data", str(pd / "test.npz"), "--healer", str(heal_run / "ckpt.pt")]
     argv += ["--detector", str(detect_run / "ckpt.pt"), "--workers", "1", "--threads", "1"]
+    argv += ["--empty-site-first"]
     monkeypatch.setattr(sys, "argv", argv + ["--max-examples", "2", "--out", str(out)])
     _script("eval_point_defects").main()
     res = json.loads(out.read_text())["kinds"]
@@ -278,6 +279,20 @@ def test_training_and_evaluation_smoke(tmp_path, monkeypatch, make_lattice):
     assert (
         "flag by energy, pick by energy: lowest of all minimised tries" in res["frenkel"]["repair"]
     )
+    assert "empty site first: move, minimise" in res["frenkel"]["repair"]
+    # calibrated finder (class weights stored in the checkpoint), quick variants only
+    assert len(torch.load(detect_run / "ckpt.pt", weights_only=False)["class_weights"]) == 5
+    argv = ["eval", "--data", str(pd / "test.npz"), "--healer", str(heal_run / "ckpt.pt")]
+    argv += ["--detector", str(detect_run / "ckpt.pt"), "--workers", "1", "--threads", "1"]
+    argv += ["--calibrate", "--no-heal", "--no-energy-search", "--max-examples", "2"]
+    monkeypatch.setattr(sys, "argv", argv + ["--out", str(out)])
+    _script("eval_point_defects").main()
+    cal = json.loads(out.read_text())
+    assert cal["calibration"]["source"] == "checkpoint"
+    assert cal["options"] == {"heal": False, "energy_search": False}
+    fr = cal["kinds"]["frenkel"]["repair"]
+    assert "flag by model, pick by model: move, minimise" in fr
+    assert not any("heal" in k or "pick by energy" in k or "empty site" in k for k in fr)
     # without a finder the repair model's own output picks the gap
     argv = ["eval", "--data", str(pd / "test.npz"), "--healer", str(heal2_run / "ckpt.pt")]
     argv += ["--workers", "1", "--threads", "1", "--kinds", "frenkel", "--max-examples", "2"]
