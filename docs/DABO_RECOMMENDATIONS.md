@@ -136,12 +136,12 @@ repair model fixes this (`notebooks/kaggle_point_defects_v2.ipynb`).
 | 1 | Train the repair and finding models; evaluate them against the baseline above. Done: the finder works, the repair model needed a fix | `notebooks/kaggle_point_defects.ipynb` | Abubakar Chilala |
 | 1b | Retrain the repair model (version 2) and evaluate it, including Frenkel pairs found and repaired with nothing given. Done: the finder carries the result; the repair model adds nothing after minimisation and breaks structures without it | `notebooks/kaggle_point_defects_v2.ipynb` | Abubakar Chilala |
 | 1c | Improve finding. Done, no retraining: calibration cuts false alarms on defect-free glasses from 59% to 1% and adds 1-4 points of finding; Frenkel pairs stay hard (`results/point_defects_finder_20261109/`) | `scripts/eval_point_defects.py --calibrate` | Abubakar Chilala, Stacy Cheruto |
-| 1d | Optional: a longer finder run (interstitials and antisites were still improving); constrain the repair model so it cannot push atoms together | `scripts/train_point_defects.py` | Abubakar Chilala |
+| 1d | A longer finder run (interstitials and antisites were still improving) | `notebooks/kaggle_point_defects_finder.ipynb` (~4.5 h on one GPU) | Abubakar Chilala |
 | 2 | Check the defect operations and the success tests; add error bars over glasses | `scripts/eval_point_defects.py` | Stacy Cheruto |
 | 3 | Repair procedure: number of denoising steps and starting noise | `scripts/eval_point_defects.py` | Gentille Uwera |
 | 4 | Physics checks: training-data generation, minimiser agreement, stability of repaired glasses in molecular dynamics | `scripts/make_point_defects.py`, `glassdiff.md` | Nicholaus Ladislaus |
 | 5 | Baselines and the final report, written by the team around the one question | `paper/` | Michel Sangwa |
-| 6 | If time allows: the same study in amorphous silica with its standard defects | `docs/SILICA_3D_PLAN.md` | team |
+| 6 | The same study in amorphous silica with its standard defects. Stage 1: the standard coordination analysis and the energy as finders, minimisation as repair, in DM2's glasses; stage 2 (a learned 3D finder) only if stage 1 leaves headroom | `notebooks/kaggle_silica_point_defects.ipynb`, `docs/SILICA_POINT_DEFECTS.md` | team |
 
 The owners follow the roles in the midterm report; the team should confirm them.
 

@@ -30,6 +30,13 @@
   first), and evaluates it with the first run's finder, including Frenkel pairs found and
   repaired without being told where they are (~8-9 h on one GPU, mostly the evaluation). Pushes to the
   `dabo-point-defects` branch.
+- `kaggle_point_defects_finder.ipynb`: continues the finder for 40,000 updates at half the
+  learning rate (it was still improving for interstitials and antisites) and evaluates it with
+  calibrated probabilities (~4.5 h on one GPU). Pushes to `dabo-point-defects`.
+- `kaggle_silica_point_defects.ipynb`: the point-defect study in amorphous silica, stage 1
+  (`docs/SILICA_POINT_DEFECTS.md`): oxygen vacancy, oxygen interstitial, oxygen Frenkel pair
+  and silicon vacancy in DM2's test glasses, found by the standard coordination analysis or the
+  per-atom energy and repaired by minimisation (CPU only, ~5-7 h). Pushes to `dabo-point-defects`.
 
 - `stage0_poc.ipynb`: the course proof-of-concept notebook, as provided (unchanged, with its
   Colab outputs): MLP denoisers on a 3×3 jittered grid, plus Frenkel-pair and antisite demos

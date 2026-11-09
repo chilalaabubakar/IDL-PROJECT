@@ -204,7 +204,9 @@ which is strict in a glass where many nearby minima are equally natural.
 
 ## Next: amorphous silica
 
-The same study transfers to amorphous SiO₂ with its own standard defects: the oxygen
+Stage 1 is set up in [SILICA_POINT_DEFECTS.md](SILICA_POINT_DEFECTS.md)
+(`notebooks/kaggle_silica_point_defects.ipynb`). The same study transfers to amorphous SiO₂
+with its own standard defects: the oxygen
 vacancy (Si-Si bond, precursor of the E′ centre), 3- and 5-fold Si, non-bridging O and
 3-fold O. `glassdiff.silica.defects` already detects these, DM2's silica glasses are
 imported (`data/sio2_dm2`), and DM2's pretrained silica denoiser has been run
