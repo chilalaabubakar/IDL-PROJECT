@@ -28,7 +28,7 @@
 - `kaggle_point_defects_v2.ipynb`: retrains the repair model with the fix for what the first
   run showed (defect atoms weighted in the loss, mostly small noise, Frenkel atom put back
   first), and evaluates it with the first run's finder, including Frenkel pairs found and
-  repaired without being told where they are (~5 h on one GPU). Pushes to the
+  repaired without being told where they are (~8-9 h on one GPU, mostly the evaluation). Pushes to the
   `dabo-point-defects` branch.
 
 - `stage0_poc.ipynb`: the course proof-of-concept notebook, as provided (unchanged, with its
