@@ -1,0 +1,39 @@
+{
+ "data": "data/ka2d_256_point_defects/val.npz",
+ "healer": "results/kaggle_pd_20261108-2014Z/training/pd_heal_v2/ema.pt",
+ "detector": "results/kaggle_pd_20261107-2024Z/training/pd_detect/ema.pt",
+ "seed": 0,
+ "calibration": null,
+ "options": {
+  "heal": false,
+  "energy_search": false
+ },
+ "kinds": {
+  "frenkel": {
+   "examples": 199,
+   "find": {
+    "model": 0.291,
+    "energy_needs_potential": 0.281,
+    "chance": 0.053,
+    "model_score": "detector"
+   },
+   "repair": {
+    "shake, minimise": {
+     "restored": 0.005,
+     "atoms_within_0_1": 0.473,
+     "energy_above_original": 0.0309
+    },
+    "flag by model: the displaced atom": 0.141,
+    "flag by model, pick by model: the right gap": 0.211,
+    "flag by model, pick by model: move, minimise": 0.246,
+    "flag by energy: the displaced atom": 0.085,
+    "flag by energy, pick by model: the right gap": 0.121,
+    "flag by energy, pick by model: move, minimise": 0.191,
+    "empty site first: the right site": 0.241,
+    "empty site first: moved the displaced atom back": 0.035,
+    "empty site first: move, minimise": 0.045
+   }
+  }
+ },
+ "seconds": 1619
+}

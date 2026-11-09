@@ -135,7 +135,8 @@ repair model fixes this (`notebooks/kaggle_point_defects_v2.ipynb`).
 |---|---|---|---|
 | 1 | Train the repair and finding models; evaluate them against the baseline above. Done: the finder works, the repair model needed a fix | `notebooks/kaggle_point_defects.ipynb` | Abubakar Chilala |
 | 1b | Retrain the repair model (version 2) and evaluate it, including Frenkel pairs found and repaired with nothing given. Done: the finder carries the result; the repair model adds nothing after minimisation and breaks structures without it | `notebooks/kaggle_point_defects_v2.ipynb` | Abubakar Chilala |
-| 1c | Improve finding, where the headroom is (Frenkel pairs; the finder's over-confidence on defect-free glasses); optionally constrain the repair model so it cannot push atoms together | `scripts/train_point_defects.py` | Abubakar Chilala, Stacy Cheruto |
+| 1c | Improve finding. Done, no retraining: calibration cuts false alarms on defect-free glasses from 59% to 1% and adds 1-4 points of finding; Frenkel pairs stay hard (`results/point_defects_finder_20261109/`) | `scripts/eval_point_defects.py --calibrate` | Abubakar Chilala, Stacy Cheruto |
+| 1d | Optional: a longer finder run (interstitials and antisites were still improving); constrain the repair model so it cannot push atoms together | `scripts/train_point_defects.py` | Abubakar Chilala |
 | 2 | Check the defect operations and the success tests; add error bars over glasses | `scripts/eval_point_defects.py` | Stacy Cheruto |
 | 3 | Repair procedure: number of denoising steps and starting noise | `scripts/eval_point_defects.py` | Gentille Uwera |
 | 4 | Physics checks: training-data generation, minimiser agreement, stability of repaired glasses in molecular dynamics | `scripts/make_point_defects.py`, `glassdiff.md` | Nicholaus Ladislaus |

@@ -288,18 +288,18 @@ def main() -> None:
 
     def save(step: int, seconds: float) -> None:
         tmp = run_dir / "ckpt.pt.tmp"
-        torch.save(
-            dict(
-                model_cfg=model_cfg,
-                model=model.state_dict(),
-                ema=ema.state_dict(),
-                opt=opt.state_dict(),
-                step=step,
-                seconds=seconds,
-                cfg=cfg,
-            ),
-            tmp,
+        state = dict(
+            model_cfg=model_cfg,
+            model=model.state_dict(),
+            ema=ema.state_dict(),
+            opt=opt.state_dict(),
+            step=step,
+            seconds=seconds,
+            cfg=cfg,
         )
+        if task == "detect":  # for logit adjustment at evaluation (eval_point_defects.py)
+            state["class_weights"] = weights.cpu().tolist()
+        torch.save(state, tmp)
         os.replace(tmp, run_dir / "ckpt.pt")
 
     step, running, n_running, t0 = start_step, 0.0, 0, time.time()
