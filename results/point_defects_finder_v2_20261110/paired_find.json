@@ -1,0 +1,47 @@
+{
+ "a": "results/kaggle_pd_20261107-2024Z/training/pd_detect/ema.pt",
+ "b": "results/kaggle_pd_20261110-1042Z/training/pd_detect_v2/ema.pt",
+ "data": "data/ka2d_256_point_defects/test.npz",
+ "kinds": {
+  "vacancy": {
+   "examples": 200,
+   "a": 0.67,
+   "b": 0.695,
+   "only_a": 3,
+   "only_b": 8,
+   "mcnemar_p": 0.2266
+  },
+  "interstitial": {
+   "examples": 200,
+   "a": 0.475,
+   "b": 0.5,
+   "only_a": 5,
+   "only_b": 10,
+   "mcnemar_p": 0.3018
+  },
+  "frenkel": {
+   "examples": 200,
+   "a": 0.3,
+   "b": 0.37,
+   "only_a": 7,
+   "only_b": 21,
+   "mcnemar_p": 0.0125
+  },
+  "antisite": {
+   "examples": 200,
+   "a": 0.465,
+   "b": 0.49,
+   "only_a": 7,
+   "only_b": 12,
+   "mcnemar_p": 0.3593
+  }
+ },
+ "all": {
+  "examples": 800,
+  "a": 0.4775,
+  "b": 0.5138,
+  "only_a": 22,
+  "only_b": 51,
+  "mcnemar_p": 0.0009
+ }
+}

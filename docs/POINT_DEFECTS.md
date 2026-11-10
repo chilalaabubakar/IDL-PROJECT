@@ -198,6 +198,18 @@ Improving the finder (`results/point_defects_finder_20261109/README.md`):
 - **What stays hard.** Telling a defective glass from a clean one remains weak (AUC 0.72).
   For Frenkel pairs, finding the empty site first did not help (validation only).
 
+A longer finder run (`results/point_defects_finder_v2_20261110/README.md`):
+
+- **Training.** 40,000 more updates at a lower learning rate
+  (`configs/train/detect_point_defects_v2.yaml`).
+- **Small, real gain.** Found: 69.5, 50, 49 and 37% (vacancy, interstitial, antisite,
+  Frenkel pair), 3.6 points more over all 800 defects (paired McNemar p < 0.001; clear for
+  Frenkel pairs alone, p = 0.013). Restored: 53.5, 38, 30 and 18%, within the noise of the
+  first finder's.
+- **Levelled off.** Validation finding moved by 2 points or less over the last 20,000
+  updates, so further gains need a change of model or input, not more training. This finder
+  is the one reported from here on.
+
 Caveats: a two-dimensional model glass; one defect per glass; the Frenkel repair is given
 the region (it tests repair, not finding); "restored" asks for the exact original minimum,
 which is strict in a glass where many nearby minima are equally natural.
