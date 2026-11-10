@@ -1,0 +1,20 @@
+{
+ "kind": "o_vacancy",
+ "examples": 80,
+ "valid": 80,
+ "find": {
+  "coordination": 0.125,
+  "coordination, rare states first": 0.2875,
+  "energy": 0.2875,
+  "chance": 0.001
+ },
+ "repair": {
+  "flag by coordination": 0.1,
+  "flag by coordination, rare states first": 0.2,
+  "flag by energy": 0.2,
+  "defect given (ceiling)": 0.8375
+ },
+ "minimisations": 280,
+ "failed_minimisations": 0,
+ "seconds": 7736
+}
