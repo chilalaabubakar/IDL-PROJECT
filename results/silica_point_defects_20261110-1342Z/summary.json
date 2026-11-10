@@ -1,0 +1,68 @@
+{
+ "config": {
+  "data": "data/sio2_dm2/test.npz",
+  "out_dir": "/kaggle/working/silica_pd",
+  "n_glasses": null,
+  "n_per_glass": 20,
+  "seed": 0,
+  "workers": null,
+  "kinds": [
+   "o_vacancy",
+   "o_interstitial",
+   "o_frenkel",
+   "si_vacancy"
+  ],
+  "fmax": 0.001,
+  "hit_radius": 2.5,
+  "restore_tol": 0.1,
+  "insert_search": 2.2,
+  "si_o_cutoff": 2.2,
+  "peroxy_cutoff": 1.7,
+  "interstitial_search": 3.0,
+  "frenkel_hop": [
+   4.0,
+   6.0
+  ],
+  "recombined_tol": 0.6,
+  "grid_spacing": 0.15
+ },
+ "git": "1a8b5788105dd85fb32f296d069aee81c9952c7c",
+ "originals": {
+  "glasses": 4,
+  "cooling_rate": [
+   0.10000000149011612,
+   100.0,
+   10.0,
+   1.0
+  ],
+  "natural_coordination_defects_per_glass": [
+   4,
+   46,
+   22,
+   10
+  ],
+  "max_force": 0.0009482311811888078
+ },
+ "kinds": {
+  "o_vacancy": {
+   "kind": "o_vacancy",
+   "examples": 80,
+   "valid": 80,
+   "find": {
+    "coordination": 0.125,
+    "coordination, rare states first": 0.2875,
+    "energy": 0.2875,
+    "chance": 0.001
+   },
+   "repair": {
+    "flag by coordination": 0.1,
+    "flag by coordination, rare states first": 0.2,
+    "flag by energy": 0.2,
+    "defect given (ceiling)": 0.8375
+   },
+   "minimisations": 280,
+   "failed_minimisations": 0,
+   "seconds": 7736
+  }
+ }
+}
