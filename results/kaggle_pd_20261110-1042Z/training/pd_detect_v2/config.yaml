@@ -1,0 +1,40 @@
+name: pd_detect_v2
+task: detect
+seed: 1
+data: data/ka2d_256_point_defects
+model:
+  name: egnn_classifier
+  hidden: 128
+  n_layers: 4
+  cutoff: 2.5
+  k_max: 64
+  n_classes: 5
+init_from: results/kaggle_pd_20261107-2024Z/training/pd_detect/ema.pt
+kind_probs:
+  vacancy: 0.25
+  interstitial: 0.25
+  frenkel: 0.25
+  antisite: 0.25
+p_clean: 0.2
+class_weight_power: 0.5
+optim:
+  lr: 0.0001
+  weight_decay: 0.0
+  batch_size: 16
+  n_updates: 40000
+  grad_clip: 1.0
+  ema: 0.999
+n_val: 200
+log_every: 100
+val_every: 2000
+ckpt_every: 2000
+max_minutes: 510
+threads: 2
+runs_root: /kaggle/working/pdf/runs
+resolved_model:
+  name: egnn_classifier
+  hidden: 128
+  n_layers: 4
+  cutoff: 2.5
+  k_max: 64
+  n_classes: 5
