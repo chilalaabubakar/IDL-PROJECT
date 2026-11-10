@@ -1,0 +1,25 @@
+{
+ "kind": "o_frenkel",
+ "examples": 80,
+ "valid": 67,
+ "find": {
+  "coordination": 0.1493,
+  "coordination, rare states first": 0.1194,
+  "energy": 0.3433,
+  "chance": 0.0016
+ },
+ "repair": {
+  "flag by coordination": 0.0448,
+  "flag by coordination, rare states first": 0.0149,
+  "flag by energy": 0.0746,
+  "defect given (ceiling)": 0.7612
+ },
+ "minimisations": 225,
+ "failed_minimisations": 0,
+ "seconds": 7212,
+ "flagged the defect atom": {
+  "coordination": 0.0896,
+  "coordination, rare states first": 0.0299,
+  "energy": 0.3433
+ }
+}
