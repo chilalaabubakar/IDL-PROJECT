@@ -129,6 +129,13 @@ repair model fixes this (`notebooks/kaggle_point_defects_v2.ipynb`).
   fixing the count or species and minimising (point 6). Given the true location,
   minimisation restores 53-80% of glasses, so better finding is the way forward.
 
+**Improving the finder** (`results/point_defects_finder_20261109/`,
+`results/point_defects_finder_v2_20261110/`). Calibrating its probabilities cuts false alarms
+on defect-free glasses from 59% to 1%. A longer training run then adds 3.6 points of finding
+over all defects (paired p < 0.001), after which it levels off. The finder reported from here
+on finds 69.5, 50, 49 and 37% of vacancies, interstitials, antisites and Frenkel pairs (the
+energy: 28-29.5%) and restores 53.5, 38, 30 and 18% of the glasses.
+
 ## Plan
 
 | Step | What | Where | Suggested owner |
@@ -136,7 +143,7 @@ repair model fixes this (`notebooks/kaggle_point_defects_v2.ipynb`).
 | 1 | Train the repair and finding models; evaluate them against the baseline above. Done: the finder works, the repair model needed a fix | `notebooks/kaggle_point_defects.ipynb` | Abubakar Chilala |
 | 1b | Retrain the repair model (version 2) and evaluate it, including Frenkel pairs found and repaired with nothing given. Done: the finder carries the result; the repair model adds nothing after minimisation and breaks structures without it | `notebooks/kaggle_point_defects_v2.ipynb` | Abubakar Chilala |
 | 1c | Improve finding. Done, no retraining: calibration cuts false alarms on defect-free glasses from 59% to 1% and adds 1-4 points of finding; Frenkel pairs stay hard (`results/point_defects_finder_20261109/`) | `scripts/eval_point_defects.py --calibrate` | Abubakar Chilala, Stacy Cheruto |
-| 1d | A longer finder run (interstitials and antisites were still improving) | `notebooks/kaggle_point_defects_finder.ipynb` (~4.5 h on one GPU) | Abubakar Chilala |
+| 1d | A longer finder run. Done: finding up 3.6 points over all defects (69.5, 50, 49, 37%; paired p < 0.001), restored within noise; the finder has levelled off (`results/point_defects_finder_v2_20261110/`) | `notebooks/kaggle_point_defects_finder.ipynb` | Abubakar Chilala |
 | 2 | Check the defect operations and the success tests; add error bars over glasses | `scripts/eval_point_defects.py` | Stacy Cheruto |
 | 3 | Repair procedure: number of denoising steps and starting noise | `scripts/eval_point_defects.py` | Gentille Uwera |
 | 4 | Physics checks: training-data generation, minimiser agreement, stability of repaired glasses in molecular dynamics | `scripts/make_point_defects.py`, `glassdiff.md` | Nicholaus Ladislaus |

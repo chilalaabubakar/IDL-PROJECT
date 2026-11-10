@@ -32,7 +32,8 @@
   `dabo-point-defects` branch.
 - `kaggle_point_defects_finder.ipynb`: continues the finder for 40,000 updates at half the
   learning rate (it was still improving for interstitials and antisites) and evaluates it with
-  calibrated probabilities (~4.5 h on one GPU). Pushes to `dabo-point-defects`.
+  calibrated probabilities (~4.5 h on one GPU). Pushes to `dabo-point-defects`. Run on
+  10 November 2026: `results/point_defects_finder_v2_20261110/`.
 - `kaggle_silica_point_defects.ipynb`: the point-defect study in amorphous silica, stage 1
   (`docs/SILICA_POINT_DEFECTS.md`): oxygen vacancy, oxygen interstitial, oxygen Frenkel pair
   and silicon vacancy in DM2's test glasses, found by the standard coordination analysis or the
