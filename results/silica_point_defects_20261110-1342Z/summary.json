@@ -63,6 +63,31 @@
    "minimisations": 280,
    "failed_minimisations": 0,
    "seconds": 7736
+  },
+  "o_interstitial": {
+   "kind": "o_interstitial",
+   "examples": 80,
+   "valid": 80,
+   "find": {
+    "coordination": 0.175,
+    "coordination, rare states first": 0.1375,
+    "energy": 0.65,
+    "chance": 0.0007
+   },
+   "repair": {
+    "flag by coordination": 0.525,
+    "flag by coordination, rare states first": 0.35,
+    "flag by energy": 0.65,
+    "defect given (ceiling)": 0.9625
+   },
+   "minimisations": 259,
+   "failed_minimisations": 0,
+   "seconds": 6431,
+   "flagged the defect atom": {
+    "coordination": 0.1625,
+    "coordination, rare states first": 0.125,
+    "energy": 0.65
+   }
   }
  }
 }
