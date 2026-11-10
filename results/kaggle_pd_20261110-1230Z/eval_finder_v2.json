@@ -1,0 +1,102 @@
+{
+ "data": "data/ka2d_256_point_defects/test.npz",
+ "healer": "results/kaggle_pd_20261108-2014Z/training/pd_heal_v2/ema.pt",
+ "detector": "/kaggle/working/pdf/runs/20261110-081206Z_pd_detect_v2/ckpt.pt",
+ "seed": 0,
+ "calibration": {
+  "source": "checkpoint",
+  "weights": [
+   1.0,
+   9.23,
+   31.74,
+   31.79,
+   22.44
+  ]
+ },
+ "options": {
+  "heal": false,
+  "energy_search": false
+ },
+ "kinds": {
+  "vacancy": {
+   "examples": 200,
+   "find": {
+    "model": 0.695,
+    "energy_needs_potential": 0.295,
+    "chance": 0.029,
+    "model_score": "detector"
+   },
+   "repair": {
+    "flag by model: insert, minimise": 0.535,
+    "flag by energy: insert, minimise": 0.26
+   }
+  },
+  "interstitial": {
+   "examples": 200,
+   "find": {
+    "model": 0.5,
+    "energy_needs_potential": 0.28,
+    "chance": 0.03,
+    "model_score": "detector"
+   },
+   "repair": {
+    "flag by model: removed the extra atom": 0.435,
+    "flag by model: remove, minimise": 0.38,
+    "flag by energy: removed the extra atom": 0.24,
+    "flag by energy: remove, minimise": 0.21
+   }
+  },
+  "frenkel": {
+   "examples": 200,
+   "find": {
+    "model": 0.37,
+    "energy_needs_potential": 0.285,
+    "chance": 0.052,
+    "model_score": "detector"
+   },
+   "repair": {
+    "shake, minimise": {
+     "restored": 0.005,
+     "atoms_within_0_1": 0.474,
+     "energy_above_original": 0.0288
+    },
+    "flag by model: the displaced atom": 0.17,
+    "flag by model, pick by model: the right gap": 0.25,
+    "flag by model, pick by model: move, minimise": 0.18,
+    "flag by energy: the displaced atom": 0.06,
+    "flag by energy, pick by model: the right gap": 0.12,
+    "flag by energy, pick by model: move, minimise": 0.13
+   }
+  },
+  "antisite": {
+   "examples": 200,
+   "find": {
+    "model": 0.49,
+    "energy_needs_potential": 0.29,
+    "chance": 0.04,
+    "model_score": "detector"
+   },
+   "repair": {
+    "search near model flag, pick by model: right pair swapped back": 0.36,
+    "search near model flag, pick by model: swap, minimise": 0.3,
+    "search near model flag, pick by energy: right pair swapped back": 0.175,
+    "search near model flag, pick by energy: swap, minimise": 0.145
+   }
+  }
+ },
+ "glass_level": {
+  "raw": {
+   "defect_free_glasses": 100,
+   "defect_free_flagged": 0.68,
+   "defected_flagged": 0.877,
+   "auc": 0.733
+  },
+  "calibrated": {
+   "defect_free_glasses": 100,
+   "defect_free_flagged": 0.02,
+   "defected_flagged": 0.27,
+   "auc": 0.731
+  }
+ },
+ "seconds": 6445
+}
