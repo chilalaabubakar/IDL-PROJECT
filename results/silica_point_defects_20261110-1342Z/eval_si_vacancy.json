@@ -1,0 +1,20 @@
+{
+ "kind": "si_vacancy",
+ "examples": 80,
+ "valid": 80,
+ "find": {
+  "coordination": 0.1375,
+  "coordination, rare states first": 0.1125,
+  "energy": 0.7875,
+  "chance": 0.0009
+ },
+ "repair": {
+  "flag by coordination": 0.1375,
+  "flag by coordination, rare states first": 0.0625,
+  "flag by energy": 0.525,
+  "defect given (ceiling)": 0.7625
+ },
+ "minimisations": 276,
+ "failed_minimisations": 0,
+ "seconds": 5500
+}
