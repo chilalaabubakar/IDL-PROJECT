@@ -148,7 +148,7 @@ energy: 28-29.5%) and restores 53.5, 38, 30 and 18% of the glasses.
 | 3 | Repair procedure: number of denoising steps and starting noise | `scripts/eval_point_defects.py` | Gentille Uwera |
 | 4 | Physics checks: training-data generation, minimiser agreement, stability of repaired glasses in molecular dynamics | `scripts/make_point_defects.py`, `glassdiff.md` | Nicholaus Ladislaus |
 | 5 | Baselines and the final report, written by the team around the one question | `paper/` | Michel Sangwa |
-| 6 | The same study in amorphous silica with its standard defects. Stage 1: the standard coordination analysis and the energy as finders, minimisation as repair, in DM2's glasses; stage 2 (a learned 3D finder) only if stage 1 leaves headroom | `notebooks/kaggle_silica_point_defects.ipynb`, `docs/SILICA_POINT_DEFECTS.md` | team |
+| 6 | The same study in amorphous silica with its standard defects. Stage 1 done: given the site, minimisation restores 76-96% of glasses, but the standard coordination analysis finds only 11-29% of defects (restored 1.5-52.5%); the energy needs the potential and is strong for two defects only (`results/silica_point_defects_20261110-1342Z/`). Stage 2, a learned 3D finder, is justified and not started | `notebooks/kaggle_silica_point_defects.ipynb`, `notebooks/colab_silica_point_defects.ipynb`, `docs/SILICA_POINT_DEFECTS.md` | team |
 
 The owners follow the roles in the midterm report; the team should confirm them.
 
@@ -164,6 +164,10 @@ The owners follow the roles in the midterm report; the team should confirm them.
 4. Is a model that finds and repairs defects without an interatomic potential the right
    answer to "why AI"? Would structures from experiment (for example microscopy of 2D
    glasses) be the setting to aim for?
+5. Our silica potential (fixed charges, the one DM2's glasses were made with) cannot form the
+   Si-Si bond of the oxygen vacancy: the two Si push apart instead. Is that acceptable for a
+   structural study, or should the vacancies be relaxed with a reactive or machine-learned
+   potential, or with DFT for a subset?
 
 ## Where the first version lives
 

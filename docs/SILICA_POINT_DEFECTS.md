@@ -28,7 +28,7 @@ original and then relaxed, as in 2D:
 
 | Defect | Operation |
 |---|---|
-| Oxygen vacancy | remove a bridging O; its two Si become 3-fold and may form a Si-Si bond |
+| Oxygen vacancy | remove a bridging O; its two Si become 3-fold. First-principles calculations give a Si-Si bond (the E′ precursor); this potential cannot form one (see the results) |
 | Oxygen interstitial | add an O at the largest gap within 3 Å of a random point |
 | Oxygen Frenkel pair | move a bridging O to the largest gap 4-6 Å away (vacancy + interstitial, the radiation-damage pair) |
 | Silicon vacancy | remove a 4-fold Si; its four O become non-bridging |
@@ -70,9 +70,50 @@ defects compete or relaxed defects hide, stage 2 trains a 3D finder (the conditi
 of `glassdiff.silica.model` with a per-atom head, as `EGNNAtomClassifier` in 2D) on defects
 made in the 16 training glasses, and compares it with these baselines.
 
+## Stage 1 results
+
+Full write-up: [`results/silica_point_defects_20261110-1342Z/README.md`](../results/silica_point_defects_20261110-1342Z/README.md).
+80 defects per kind (67 Frenkel pairs; 13 recombined when relaxed); no minimisation failed.
+
+| Defect | Found: coordination / rare states first / energy | Restored: coordination / rare states first / energy | Restored: defect given |
+|---|---|---|---|
+| Oxygen vacancy | 12.5 / 29 / 29% | 10 / 20 / 20% | **84%** |
+| Oxygen interstitial | 17.5 / 14 / 65% | 52.5 / 35 / 65% | **96%** |
+| Oxygen Frenkel pair | 15 / 12 / 34% | 4.5 / 1.5 / 7.5% | **76%** |
+| Silicon vacancy | 14 / 11 / 79% | 14 / 6 / 52.5% | **76%** |
+
+- **Finding is the bottleneck.** Given the site, minimisation restores 76-96% of glasses.
+  From the coordination analysis (no potential), it restores 1.5-52.5%.
+- **Why the coordination analysis misses.** The relaxed defects look like the natural defects
+  the glasses already have (4 off-ideal atoms in the slowest-cooled glass, 46 in the fastest),
+  and its cluster ranking often flags an ideal atom near the defect.
+- **The energy** (needs the potential) is strong for silicon vacancies and oxygen
+  interstitials, but restores at most 20% of oxygen vacancies and Frenkel pairs.
+- **Oxygen vacancies do not form the Si-Si bond** of first-principles calculations: the two Si
+  push apart (3.2 → 4.1 Å on average) or re-bond to neighbouring O. The potential's fixed
+  charges only let them repel.
+- **Hit radius.** 2.5 Å is just below the 2.6 Å O-O edge of a SiO₄ tetrahedron. At 3.0 Å the
+  coordination analysis finds 57.5% of interstitials (its flag is usually an O on the same Si,
+  and removing that O also restores the glass) and the energy finds 94% of silicon vacancies.
+
+**Decision: stage 2 is justified.** The coordination analysis leaves 44-72 points between what
+it restores and the ceiling. Stage 2 is not started. It needs DM2's silica package and GPU
+training, and it is set up as follows, decided before any stage-2 result:
+
+- **Training data.** Defects made in DM2's 16 training glasses.
+- **Test.** These same 320 test defects (`defects_<kind>.npz`), so the stage-1 numbers are its
+  baselines.
+- **Measures.** Restored is the main measure. Found is counted at 3.0 Å (the defect atom or an
+  O on the same Si), with 2.5 Å reported alongside.
+- **Comparisons.** The coordination analysis (no potential, the baseline to beat) and the
+  energy (needs the potential).
+
 **Caveats.**
 
-- Four test glasses, one per cooling rate, so the 20 defects per glass and kind share a glass.
+- Four test glasses, one per cooling rate, so the 20 defects per glass and kind share a glass
+  and glass-to-glass differences are large.
+- One classical potential: no Si-Si bond for the oxygen vacancy, and no charged defects such as
+  the E′ centre itself.
 - Frenkel pairs are oxygen pairs only.
 - DM2's own pretrained silica denoiser is not yet included as a baseline. It needs DM2's
   package (`pip install -e ".[silica]"` with DM2's repository), and that was not tested here.
@@ -81,4 +122,5 @@ made in the 16 training glasses, and compares it with these baselines.
 pip install -e ".[md]"      # LAMMPS (put MPICH's lib directory on LD_LIBRARY_PATH)
 python scripts/silica/point_defects_study.py --config configs/silica/point_defects.yaml \
     out_dir=results/silica_point_defects_<date>
+python scripts/silica/analyse_point_defects.py results/silica_point_defects_<date>   # analysis.json
 ```
