@@ -187,6 +187,25 @@ def test_study_script_end_to_end(tmp_path, monkeypatch, net):
     module.main()
     assert json.loads((out / "summary.json").read_text())["kinds"] == summary["kinds"]
 
+    # the analysis recomputes the study's finding rates (it checks them itself) and more
+    spec = importlib.util.spec_from_file_location(
+        "silica_pd_analysis", ROOT / "scripts/silica/analyse_point_defects.py"
+    )
+    analysis = importlib.util.module_from_spec(spec)
+    spec.loader.exec_module(analysis)
+    monkeypatch.setattr(sys, "argv", ["x", str(out)])
+    analysis.main()
+    a = json.loads((out / "analysis.json").read_text())
+    assert set(a["kinds"]) == {"o_vacancy", "si_vacancy"} and len(a["natural"]) == 1
+    for kind, r in a["kinds"].items():
+        for f in ("coordination", "coordination, rare states first", "energy"):
+            assert r["find"][f]["2.5 A"] == pytest.approx(
+                summary["kinds"][kind]["find"][f], abs=1e-3
+            )
+            assert r["find"][f]["2.5 A"] <= r["find"][f]["3.0 A"] <= r["find"][f]["3.5 A"]
+    assert "Si coordination" in a["kinds"]["o_vacancy"]["relaxed"]
+    assert "non-bridging O left (of 4)" in a["kinds"]["si_vacancy"]["relaxed"]
+
 
 class _Stop(Exception):
     pass

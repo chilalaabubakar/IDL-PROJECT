@@ -216,10 +216,16 @@ which is strict in a glass where many nearby minima are equally natural.
 
 ## Next: amorphous silica
 
-Stage 1 is set up in [SILICA_POINT_DEFECTS.md](SILICA_POINT_DEFECTS.md)
-(`notebooks/kaggle_silica_point_defects.ipynb`). The same study transfers to amorphous SiO₂
-with its own standard defects: the oxygen
-vacancy (Si-Si bond, precursor of the E′ centre), 3- and 5-fold Si, non-bridging O and
-3-fold O. `glassdiff.silica.defects` already detects these, DM2's silica glasses are
-imported (`data/sio2_dm2`), and DM2's pretrained silica denoiser has been run
-(`results/stage0/`).
+The same study in amorphous SiO₂, with oxygen vacancies, oxygen interstitials, oxygen Frenkel
+pairs and silicon vacancies in DM2's glasses: [SILICA_POINT_DEFECTS.md](SILICA_POINT_DEFECTS.md).
+
+**Stage 1 is done** (`results/silica_point_defects_20261110-1342Z/README.md`), with no learned
+model:
+
+- Given the defect site, minimisation restores 76-96% of glasses.
+- The standard coordination analysis (no potential) finds only 11-29% of defects and restores
+  1.5-52.5%, because the relaxed defects look like the glasses' natural defects.
+- The per-atom energy (needs the potential) is strong for silicon vacancies and interstitials
+  only.
+
+As in 2D, the headroom is in finding, so a learned 3D finder (stage 2) is justified.
