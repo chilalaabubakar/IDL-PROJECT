@@ -5,6 +5,7 @@ from __future__ import annotations
 import importlib.util
 import json
 import sys
+from dataclasses import replace
 from pathlib import Path
 
 import numpy as np
@@ -18,6 +19,7 @@ from glassdiff.data.point_defects import (
     AtomRole,
     DefectConfig,
     PointDefect,
+    already_original,
     candidate_gaps,
     finish_defect,
     first_shell,
@@ -26,6 +28,7 @@ from glassdiff.data.point_defects import (
     largest_gap,
     load_point_defects,
     make_defect,
+    real_defects,
     return_displaced_atom,
     save_point_defects,
     wrap,
@@ -227,6 +230,28 @@ def test_same_structure_allows_identical_atoms_to_swap(glass):
     assert not ev.same_structure(pos, swapped, pos, types, box)
 
 
+def test_real_defects_leaves_out_exchanged_frenkel_pairs(tmp_path, make_lattice):
+    """A Frenkel pair whose moved atom took an identical neighbour's site, the neighbour
+    filling the empty site, is the original glass again: no defect to find or repair."""
+    pd = _write_dataset(tmp_path, make_lattice)  # not relaxed: every example is a real defect
+    data = load_point_defects(pd / "test.npz")
+    assert not any(already_original(d).any() for d in data.values())
+    fr = data["frenkel"]
+    pos, types = fr.pos.clone(), fr.types
+    i = int(fr.atom[0])
+    same = torch.nonzero(types[0] == types[0, i]).flatten()
+    j = int(same[same != i][0])
+    exchanged = fr.orig_pos[0].clone()  # the original with atoms i and j trading places
+    exchanged[i], exchanged[j] = fr.orig_pos[0, j], fr.orig_pos[0, i]
+    pos[0] = exchanged
+    fr = replace(fr, pos=pos)
+    assert fr.valid[0]  # the moved atom is far from its own site, so the old test passes it
+    assert already_original(fr).tolist() == [True] + [False] * (len(fr) - 1)
+    kept = real_defects({**data, "frenkel": fr})
+    assert len(kept["frenkel"]) == len(fr) - 1
+    assert all(len(kept[k]) == len(data[k]) for k in data if k != "frenkel")
+
+
 def _train(tmp_path, monkeypatch, pd, task, config=None):
     config = config or f"{task}_point_defects"
     cfg = yaml.safe_load((ROOT / f"configs/train/{config}.yaml").read_text())
@@ -289,7 +314,11 @@ def test_training_and_evaluation_smoke(tmp_path, monkeypatch, make_lattice):
     _script("eval_point_defects").main()
     cal = json.loads(out.read_text())
     assert cal["calibration"]["source"] == "checkpoint"
-    assert cal["options"] == {"heal": False, "energy_search": False}
+    assert cal["options"]["heal"] is False and cal["options"]["energy_search"] is False
+    assert cal["options"]["real_defects_only"] is False and cal["options"]["offset"] == 0
+    each = cal["kinds"]["vacancy"]["each"]  # the outcome of every example, with its glass
+    assert len(each["glass"]) == len(each["found"]["model"]) == 2
+    assert set(each["restored"]) == set(cal["kinds"]["vacancy"]["repair"])
     fr = cal["kinds"]["frenkel"]["repair"]
     assert "flag by model, pick by model: move, minimise" in fr
     assert not any("heal" in k or "pick by energy" in k or "empty site" in k for k in fr)

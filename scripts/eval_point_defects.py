@@ -68,6 +68,8 @@ from glassdiff.data.point_defects import (
     candidate_gaps,
     largest_gap,
     load_point_defects,
+    real_defects,
+    same_structure,
     wrap,
 )
 from glassdiff.models.registry import load_denoiser
@@ -105,6 +107,7 @@ class Models:
         self.do_heal = do_heal  # run the repair-model variants
         self.energy_search = energy_search  # Frenkel: also minimise every trial gap
         self.empty_site_first = empty_site_first  # Frenkel: route (c), off by default
+        self.energy_search_flags = {"model", "energy"}  # Frenkel: whose flags get the search
 
     def _batch(self, pos, types, box, i) -> Structures:
         to = dict(device=self.device)
@@ -146,26 +149,6 @@ def energy_z(pos, types, box, mu, sd) -> np.ndarray:
     s = Structures(torch.as_tensor(pos), torch.as_tensor(types).long(), torch.as_tensor(box))
     e = ka_energy(s, per_atom=True).numpy()
     return (e - mu[types]) / sd[types]
-
-
-def same_structure(pos, types, orig, otypes, box, tol=SAME_TOL) -> bool:
-    """Is pos the original glass, allowing identical atoms to trade places?"""
-    if len(pos) != len(orig) or not np.array_equal(np.bincount(types), np.bincount(otypes)):
-        return False
-    shift = np.zeros(2)
-    for _ in range(2):  # estimate and remove a global shift, then match
-        ok, match, vecs = True, [], []
-        for sp in (0, 1):
-            a, b = np.nonzero(otypes == sp)[0], np.nonzero(types == sp)[0]
-            d = wrap(pos[b][None] - shift - orig[a][:, None], box)
-            r = np.linalg.norm(d, axis=-1)
-            j = r.argmin(1)
-            match.append(b[j])
-            vecs.append(d[np.arange(len(a)), j])
-            ok &= bool((r.min(1) < tol).all())
-        shift = shift + np.concatenate(vecs).mean(0)
-    match = np.concatenate(match)
-    return ok and len(np.unique(match)) == len(match)
 
 
 def frac(x) -> float:
@@ -246,6 +229,16 @@ def evaluate_kind(d: PointDefectSet, models: Models, mu, sd, rng, workers: int) 
         ),
     )
     flagged = {"model": score.argmax(-1), "energy": ez.argmax(-1)}
+    each = dict(
+        glass=d.glass.tolist(),
+        found={"model": hits(score).astype(int).tolist(), "energy": hits(ez).astype(int).tolist()},
+        restored={},
+    )
+
+    def rate(route: str, ok) -> float:
+        """Fraction restored by a route; also keeps the per-example outcomes."""
+        each["restored"][route] = np.asarray(ok).astype(int).tolist()
+        return frac(ok)
 
     def restored(results, rtypes):
         return np.array(
@@ -270,11 +263,14 @@ def evaluate_kind(d: PointDefectSet, models: Models, mu, sd, rng, workers: int) 
                 full.append(np.insert(pos[b], d.atom[b].item(), gap, axis=0))
                 region.append(np.linalg.norm(wrap(full[-1] - gap, box[b]), axis=-1) < 3.0)
             full, region = np.stack(full), np.stack(region)
-            rep[f"flag by {who}: insert, minimise"] = frac(restored(minimise(full, otypes), otypes))
+            rep[f"flag by {who}: insert, minimise"] = rate(
+                f"flag by {who}: insert, minimise", restored(minimise(full, otypes), otypes)
+            )
             if who == "model" and models.do_heal:
                 healed = models.heal(full, otypes, box, region, 0.2)
-                rep["flag by model: insert, heal, minimise"] = frac(
-                    restored(minimise(healed, otypes), otypes)
+                rep["flag by model: insert, heal, minimise"] = rate(
+                    "flag by model: insert, heal, minimise",
+                    restored(minimise(healed, otypes), otypes),
                 )
     elif kind == PointDefect.INTERSTITIAL:
         for who, f in flagged.items():
@@ -283,12 +279,15 @@ def evaluate_kind(d: PointDefectSet, models: Models, mu, sd, rng, workers: int) 
             cut = pos[keep].reshape(m, -1, 2)
             ctypes = types[keep].reshape(m, -1)
             rep[f"flag by {who}: removed the extra atom"] = frac(f == pos.shape[1] - 1)
-            rep[f"flag by {who}: remove, minimise"] = frac(restored(minimise(cut, ctypes), ctypes))
+            rep[f"flag by {who}: remove, minimise"] = rate(
+                f"flag by {who}: remove, minimise", restored(minimise(cut, ctypes), ctypes)
+            )
             if who == "model" and models.do_heal:
                 region = np.linalg.norm(wrap(cut - pos[ar, f][:, None], box[:, None]), axis=-1) < 3
                 healed = models.heal(cut, ctypes, box, region, 0.2)
-                rep["flag by model: remove, heal, minimise"] = frac(
-                    restored(minimise(healed, ctypes), ctypes)
+                rep["flag by model: remove, heal, minimise"] = rate(
+                    "flag by model: remove, heal, minimise",
+                    restored(minimise(healed, ctypes), ctypes),
                 )
     elif kind == PointDefect.FRENKEL:
         centre = sites[:, 0] + 0.5 * wrap(sites[:, 1] - sites[:, 0], box)
@@ -339,16 +338,17 @@ def evaluate_kind(d: PointDefectSet, models: Models, mu, sd, rng, workers: int) 
             label = f"flag by {who}"
             mm = np.stack(moved["model"])
             rep[f"{label}, pick by model: the right gap"] = frac(right["model"])
-            rep[f"{label}, pick by model: move, minimise"] = frac(
-                restored(minimise(mm, types), types)
+            rep[f"{label}, pick by model: move, minimise"] = rate(
+                f"{label}, pick by model: move, minimise", restored(minimise(mm, types), types)
             )
             if models.do_heal:
                 region = np.linalg.norm(wrap(mm - mm[ar, f][:, None], box[:, None]), axis=-1) < 3
                 healed = models.heal(mm, types, box, region, 0.1)
-                rep[f"{label}, pick by model: move, heal, minimise"] = frac(
-                    restored(minimise(healed, types), types)
+                rep[f"{label}, pick by model: move, heal, minimise"] = rate(
+                    f"{label}, pick by model: move, heal, minimise",
+                    restored(minimise(healed, types), types),
                 )
-            if not models.energy_search:
+            if not models.energy_search or who not in models.energy_search_flags:
                 continue
             # each try with its own example's box (minimise() pairs one box per example)
             out = fire_minimize_many(
@@ -371,8 +371,9 @@ def evaluate_kind(d: PointDefectSet, models: Models, mu, sd, rng, workers: int) 
                     np.linalg.norm(wrap(best[b][2] - sites[b, 0], box[b])) < 0.75
                 )
             rep[f"{label}, pick by energy: the right gap"] = frac(right["energy"])
-            rep[f"{label}, pick by energy: lowest of all minimised tries"] = frac(
-                restored([(best[b][1], 0.0) for b in range(m)], types)
+            rep[f"{label}, pick by energy: lowest of all minimised tries"] = rate(
+                f"{label}, pick by energy: lowest of all minimised tries",
+                restored([(best[b][1], 0.0) for b in range(m)], types),
             )
         if models.detector is not None and models.empty_site_first:
             rep.update(frenkel_empty_site_first(d, models, minimise, restored))
@@ -414,10 +415,12 @@ def evaluate_kind(d: PointDefectSet, models: Models, mu, sd, rng, workers: int) 
             new_types = np.stack(choice[who])
             right = (new_types == otypes).all(-1)
             rep[f"search near model flag, pick by {who}: right pair swapped back"] = frac(right)
-            rep[f"search near model flag, pick by {who}: swap, minimise"] = frac(
-                restored(minimise(pos, new_types), new_types)
+            rep[f"search near model flag, pick by {who}: swap, minimise"] = rate(
+                f"search near model flag, pick by {who}: swap, minimise",
+                restored(minimise(pos, new_types), new_types),
             )
     res["repair"] = rep
+    res["each"] = each
     return res
 
 
@@ -489,6 +492,7 @@ def main() -> None:
     ap.add_argument("--healer", required=True, help="denoiser checkpoint (EGNN)")
     ap.add_argument("--detector", help="classifier checkpoint (optional)")
     ap.add_argument("--max-examples", type=int, default=200, help="per defect kind")
+    ap.add_argument("--offset", type=int, default=0, help="skip this many examples per kind")
     ap.add_argument("--kinds", nargs="*", default=list(NAMES.values()))
     ap.add_argument("--workers", type=int, default=None, help="minimisation processes")
     ap.add_argument("--threads", type=int, default=4, help="torch threads")
@@ -503,7 +507,19 @@ def main() -> None:
     ap.add_argument(
         "--no-energy-search", action="store_true", help="Frenkel: skip minimising every gap"
     )
+    ap.add_argument(
+        "--energy-search-flags",
+        nargs="*",
+        default=["model", "energy"],
+        help="Frenkel: minimise every gap only for atoms flagged by these",
+    )
     ap.add_argument("--empty-site-first", action="store_true", help="Frenkel: also try route (c)")
+    ap.add_argument(
+        "--real-defects-only",
+        action="store_true",
+        help="leave out examples that relaxed back to the original glass (Frenkel pairs that "
+        "recombined by exchange)",
+    )
     ap.add_argument("--out", type=Path, required=True)
     args = ap.parse_args()
 
@@ -524,6 +540,7 @@ def main() -> None:
         energy_search=not args.no_energy_search,
         empty_site_first=args.empty_site_first,
     )
+    models.energy_search_flags = set(args.energy_search_flags)
     # per-species energy statistics of the defect-free originals (z-score reference)
     any_set = next(iter(data.values()))
     e = ka_energy(Structures(any_set.orig_pos, any_set.orig_types, any_set.box), per_atom=True)
@@ -536,17 +553,31 @@ def main() -> None:
         detector=args.detector,
         seed=args.seed,
         calibration=calibration,
-        options=dict(heal=not args.no_heal, energy_search=not args.no_energy_search),
+        options=dict(
+            heal=not args.no_heal,
+            energy_search=not args.no_energy_search,
+            real_defects_only=args.real_defects_only,
+            offset=args.offset,
+            max_examples=args.max_examples,
+        ),
         kinds={},
     )
+    # the first max_examples of each kind; optionally without those that are no defect
+    window = slice(args.offset, args.offset + args.max_examples)
+    data = {name: d.subset(window) for name, d in data.items()}
+    if args.real_defects_only:
+        kept = real_defects(data)
+        out["left_out_already_original"] = {k: len(data[k]) - len(kept[k]) for k in data}
+        data = kept
     if models.detector is not None:
         out["glass_level"] = glass_level(models, data, args.max_examples)
         print("glass level", json.dumps(out["glass_level"]), flush=True)
     for i, name in enumerate(args.kinds):
-        d = data[name].subset(slice(0, args.max_examples))
+        d = data[name]
         rng = np.random.default_rng([args.seed, i])
         out["kinds"][name] = evaluate_kind(d, models, mu, sd, rng, args.workers)
-        print(name, json.dumps(out["kinds"][name]), f"{time.time() - t0:.0f}s", flush=True)
+        shown = {k: v for k, v in out["kinds"][name].items() if k != "each"}
+        print(name, json.dumps(shown), f"{time.time() - t0:.0f}s", flush=True)
     out["seconds"] = round(time.time() - t0)
     args.out.parent.mkdir(parents=True, exist_ok=True)
     args.out.write_text(json.dumps(out, indent=1) + "\n")

@@ -1,5 +1,13 @@
 # Improving the finder: calibration fixes the false alarms; Frenkel pairs stay hard
 
+> **Correction, 11 November 2026.** A quarter of the Frenkel pairs in this dataset are not
+> defects: the moved atom took the place of a neighbour of its own species, which filled the
+> empty site, so the relaxed glass is the original again (50 of the 200 test pairs, 65 of 199
+> validation pairs, 27% of the training pairs). The Frenkel numbers below include them.
+> Corrected numbers, on the 150 real test pairs, are in
+> [`../point_defects_recheck_20261111/`](../point_defects_recheck_20261111/README.md). The
+> other three defects are not affected.
+
 The next step after `../point_defects_v2_20261109/`, whose conclusion was that the finder
 carries the result and that the headroom is in finding. Everything here uses the trained
 finder of the first run (`../kaggle_pd_20261107-2024Z/training/pd_detect/`), so there is no

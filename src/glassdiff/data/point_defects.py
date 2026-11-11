@@ -415,6 +415,50 @@ def return_displaced_atom(d: PointDefectSet, search: float = 1.0) -> PointDefect
     return replace(d, heal_pos=torch.from_numpy(heal))
 
 
+def same_structure(pos, types, orig, otypes, box, tol: float = 0.05) -> bool:
+    """Is pos the original glass, allowing identical atoms to trade places? Every original
+    atom must have an atom of its species within ``tol``, one to one, after a global shift
+    is removed."""
+    if len(pos) != len(orig) or not np.array_equal(np.bincount(types), np.bincount(otypes)):
+        return False
+    shift = np.zeros(2)
+    for _ in range(2):  # estimate and remove a global shift, then match
+        ok, match, vecs = True, [], []
+        for sp in (0, 1):
+            a, b = np.nonzero(otypes == sp)[0], np.nonzero(types == sp)[0]
+            d = wrap(pos[b][None] - shift - orig[a][:, None], box)
+            r = np.linalg.norm(d, axis=-1)
+            j = r.argmin(1)
+            match.append(b[j])
+            vecs.append(d[np.arange(len(a)), j])
+            ok &= bool((r.min(1) < tol).all())
+        shift = shift + np.concatenate(vecs).mean(0)
+    match = np.concatenate(match)
+    return ok and len(np.unique(match)) == len(match)
+
+
+def already_original(d: PointDefectSet, tol: float = 0.05) -> Tensor:
+    """[E] bool: the relaxed "defected" glass is the original glass again.
+
+    This happens to Frenkel pairs: the moved atom takes the site of a neighbour of its own
+    species and that neighbour fills the empty site (recombination by exchange, as in a
+    replacement sequence). The moved atom is then far from its own site, so ``valid`` (which
+    only asks whether it went back there) is true, but no defect is left: the structure and
+    its energy are those of the original. Such examples must not be scored as defects.
+    """
+    pos, types, box = d.pos.numpy(), d.types.numpy(), d.box.numpy()
+    orig, otypes = d.orig_pos.numpy(), d.orig_types.numpy()
+    same = [
+        same_structure(pos[e], types[e], orig[e], otypes[e], box[e], tol) for e in range(len(d))
+    ]
+    return torch.tensor(same, dtype=torch.bool)
+
+
+def real_defects(data: dict[str, PointDefectSet], tol: float = 0.05) -> dict[str, PointDefectSet]:
+    """Every kind without the examples that are the original glass again (already_original)."""
+    return {name: d.subset(~already_original(d, tol)) for name, d in data.items()}
+
+
 def heal_target(heal_pos: Tensor, orig_pos: Tensor, box: Tensor) -> Tensor:
     """Per-atom shift heal_pos - original (minimum image), with the mean shift removed.
 

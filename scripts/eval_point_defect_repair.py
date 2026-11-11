@@ -29,7 +29,6 @@ the fraction restored to the original glass (identical atoms may trade places).
 from __future__ import annotations
 
 import argparse
-import importlib.util
 import json
 import time
 from pathlib import Path
@@ -41,7 +40,9 @@ from glassdiff.data.point_defects import (
     heal_target,
     load_point_defects,
     min_pair_distance,
+    real_defects,
     return_displaced_atom,
+    same_structure,
 )
 from glassdiff.models.registry import load_denoiser
 from glassdiff.physics.fire import fire_minimize_many
@@ -49,15 +50,6 @@ from glassdiff.physics.ka_potential import ka_energy
 from glassdiff.types import Structures
 
 BATCH, DEFECT_TOL, MIN_PAIR = 10, 0.1, 0.56
-
-
-def _same_structure():
-    spec = importlib.util.spec_from_file_location(
-        "eval_point_defects", Path(__file__).with_name("eval_point_defects.py")
-    )
-    module = importlib.util.module_from_spec(spec)
-    spec.loader.exec_module(module)
-    return module.same_structure
 
 
 @torch.no_grad()
@@ -87,8 +79,16 @@ def main() -> None:
         description=__doc__, formatter_class=argparse.RawDescriptionHelpFormatter
     )
     ap.add_argument("--data", default="data/ka2d_256_point_defects/test.npz")
-    ap.add_argument("--model", action="append", required=True, help="name=checkpoint")
+    ap.add_argument("--model", action="append", default=[], help="name=checkpoint")
+    ap.add_argument("--kinds", nargs="*", help="defect kinds (default: all)")
+    ap.add_argument(
+        "--real-defects-only",
+        action="store_true",
+        help="leave out examples that relaxed back to the original glass",
+    )
     ap.add_argument("--max-examples", type=int, default=200, help="per defect kind")
+    ap.add_argument("--offset", type=int, default=0, help="skip this many examples per kind")
+    ap.add_argument("--no-minimise", action="store_true", help="skip the minimisation reference")
     ap.add_argument("--workers", type=int, default=None, help="minimisation processes")
     ap.add_argument("--threads", type=int, default=4)
     ap.add_argument("--out", type=Path, required=True)
@@ -96,13 +96,21 @@ def main() -> None:
 
     torch.set_num_threads(args.threads)
     t0 = time.time()
-    same_structure = _same_structure()
     models = {name: load_denoiser(path) for name, path in (m.split("=", 1) for m in args.model)}
     data = load_point_defects(args.data)
-    data["frenkel"] = return_displaced_atom(data["frenkel"])
+    data = {
+        name: d.subset(slice(args.offset, args.offset + args.max_examples))
+        for name, d in data.items()
+        if not args.kinds or name in args.kinds
+    }
     out = dict(data=args.data, models=dict(m.split("=", 1) for m in args.model), kinds={})
+    if args.real_defects_only:
+        kept = real_defects(data)
+        out["left_out_already_original"] = {k: len(data[k]) - len(kept[k]) for k in data}
+        data = kept
+    if "frenkel" in data:
+        data["frenkel"] = return_displaced_atom(data["frenkel"])
     for name, d in data.items():
-        d = d.subset(slice(0, args.max_examples))
         x0, orig, types, box = d.heal_pos, d.orig_pos, d.orig_types, d.box
         mask = heal_target(x0, orig, box).norm(dim=-1) > DEFECT_TOL
         e0 = ka_energy(Structures(orig, types, box)) / x0.shape[1]
@@ -114,26 +122,23 @@ def main() -> None:
                 x = apply(model, x, types, box, float(sig))
             res[f"{label}, one step"] = score(one, orig, types, box, mask, e0)
             res[f"{label}, 10 steps"] = score(x, orig, types, box, mask, e0)
-        jobs = list(zip(x0.numpy(), types.numpy(), box.numpy()))
-        mins = fire_minimize_many(jobs, workers=args.workers)
-        xm = torch.from_numpy(np.stack([p for p, _ in mins]))
-        ref = score(xm, orig, types, box, mask, e0)
-        ref["restored"] = round(
-            float(
-                np.mean(
-                    [
-                        same_structure(p, t, o, ot, b)
-                        for (p, _), t, o, ot, b in zip(
-                            mins, types.numpy(), orig.numpy(), types.numpy(), box.numpy()
-                        )
-                    ]
+        if not args.no_minimise:
+            jobs = list(zip(x0.numpy(), types.numpy(), box.numpy()))
+            mins = fire_minimize_many(jobs, workers=args.workers)
+            xm = torch.from_numpy(np.stack([p for p, _ in mins]))
+            ref = score(xm, orig, types, box, mask, e0)
+            ok = [
+                same_structure(p, t, o, ot, b)
+                for (p, _), t, o, ot, b in zip(
+                    mins, types.numpy(), orig.numpy(), types.numpy(), box.numpy()
                 )
-            ),
-            4,
-        )
-        res["minimise (needs the potential)"] = ref
+            ]
+            ref["restored"] = round(float(np.mean(ok)), 4)
+            res["each"] = dict(glass=d.glass.tolist(), restored=[int(v) for v in ok])
+            res["minimise (needs the potential)"] = ref
         out["kinds"][name] = res
-        print(name, json.dumps(res), f"{time.time() - t0:.0f}s", flush=True)
+        shown = {k: v for k, v in res.items() if k != "each"}
+        print(name, json.dumps(shown), f"{time.time() - t0:.0f}s", flush=True)
     out["seconds"] = round(time.time() - t0)
     args.out.parent.mkdir(parents=True, exist_ok=True)
     args.out.write_text(json.dumps(out, indent=1) + "\n")
