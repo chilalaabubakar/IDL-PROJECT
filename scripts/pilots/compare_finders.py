@@ -64,10 +64,18 @@ def main() -> None:
     ap.add_argument("--data", default="data/ka2d_256_point_defects/test.npz")
     ap.add_argument("--max-examples", type=int, default=200, help="per defect kind")
     ap.add_argument("--device", default="cpu")
+    ap.add_argument(
+        "--real-defects-only",
+        action="store_true",
+        help="leave out examples that relaxed back to the original glass",
+    )
     ap.add_argument("--out", type=Path, required=True)
     args = ap.parse_args()
 
     data = ev.load_point_defects(args.data)
+    data = {name: d.subset(slice(0, args.max_examples)) for name, d in data.items()}
+    if args.real_defects_only:
+        data = ev.real_defects(data)
     data_dir = Path(args.data).parent
     hits_a = found(args.a, data, data_dir, args.max_examples, args.device)
     hits_b = found(args.b, data, data_dir, args.max_examples, args.device)

@@ -1,5 +1,13 @@
 # A longer finder run: a small, real gain; the finder has now levelled off
 
+> **Correction, 11 November 2026.** A quarter of the Frenkel pairs in this dataset are not
+> defects: the moved atom took the place of a neighbour of its own species, which filled the
+> empty site, so the relaxed glass is the original again (50 of the 200 test pairs, 65 of 199
+> validation pairs, 27% of the training pairs). The Frenkel numbers below include them.
+> Corrected numbers, on the 150 real test pairs, are in
+> [`../point_defects_recheck_20261111/`](../point_defects_recheck_20261111/README.md). The
+> other three defects are not affected.
+
 The first finder (`../kaggle_pd_20261107-2024Z/training/pd_detect/`, 20,000 updates) was
 continued for 40,000 more updates at a lower learning rate
 (`configs/train/detect_point_defects_v2.yaml`, `notebooks/kaggle_point_defects_finder.ipynb`).

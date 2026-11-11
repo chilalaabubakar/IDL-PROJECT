@@ -61,6 +61,7 @@ from glassdiff.data.point_defects import (
     PointDefectSet,
     heal_target,
     load_point_defects,
+    real_defects,
     return_displaced_atom,
 )
 from glassdiff.models.registry import build_model
@@ -243,6 +244,13 @@ def main() -> None:
     data = Path(cfg["data"])
     train = load_point_defects(data / "train.npz", cfg.get("source_train"))
     val = load_point_defects(data / "val.npz", cfg.get("source_val"))
+    if cfg.get("real_defects_only", False):
+        # leave out examples that relaxed back to the original glass (Frenkel pairs that
+        # recombined by exchange): they carry defect labels but hold no defect
+        n_before = {k: (len(train[k]), len(val[k])) for k in train}
+        train, val = real_defects(train), real_defects(val)
+        left = {k: (n_before[k][0] - len(train[k]), n_before[k][1] - len(val[k])) for k in train}
+        print("left out, already the original (train, val):", left, flush=True)
     if task == "heal" and cfg.get("frenkel_input", "relaxed") == "return":
         search = float(cfg.get("frenkel_return_search", 1.0))
         for split in (train, val):

@@ -1,5 +1,13 @@
 # Point defects after training (version 1): the finder works, the repair model does not yet
 
+> **Correction, 11 November 2026.** A quarter of the Frenkel pairs in this dataset are not
+> defects: the moved atom took the place of a neighbour of its own species, which filled the
+> empty site, so the relaxed glass is the original again (50 of the 200 test pairs, 65 of 199
+> validation pairs, 27% of the training pairs). The Frenkel numbers below include them.
+> Corrected numbers, on the 150 real test pairs, are in
+> [`../point_defects_recheck_20261111/`](../point_defects_recheck_20261111/README.md). The
+> other three defects are not affected.
+
 The first trained models of the point-defect study (`docs/POINT_DEFECTS.md`), run with
 `notebooks/kaggle_point_defects.ipynb` on Kaggle (T4 x2) on 7 November 2026.
 

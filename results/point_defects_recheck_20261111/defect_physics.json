@@ -1,0 +1,172 @@
+{
+ "data": "data/ka2d_256_point_defects",
+ "already_original": {
+  "train": {
+   "vacancy": {
+    "examples": 6400,
+    "already_original": 0
+   },
+   "interstitial": {
+    "examples": 6400,
+    "already_original": 0
+   },
+   "frenkel": {
+    "examples": 6377,
+    "already_original": 1735
+   },
+   "antisite": {
+    "examples": 6400,
+    "already_original": 0
+   }
+  },
+  "val": {
+   "vacancy": {
+    "examples": 200,
+    "already_original": 0
+   },
+   "interstitial": {
+    "examples": 200,
+    "already_original": 0
+   },
+   "frenkel": {
+    "examples": 199,
+    "already_original": 65
+   },
+   "antisite": {
+    "examples": 200,
+    "already_original": 0
+   }
+  },
+  "test": {
+   "vacancy": {
+    "examples": 200,
+    "already_original": 0
+   },
+   "interstitial": {
+    "examples": 200,
+    "already_original": 0
+   },
+   "frenkel": {
+    "examples": 200,
+    "already_original": 50
+   },
+   "antisite": {
+    "examples": 200,
+    "already_original": 0
+   }
+  }
+ },
+ "split": "test",
+ "kinds": {
+  "vacancy": {
+   "real_defects": 200,
+   "other_atoms_moved_over_0.1": {
+    "median": 14.0,
+    "q25": 3.0,
+    "q75": 43.25
+   },
+   "largest_move_of_another_atom": {
+    "median": 0.328,
+    "q25": 0.147,
+    "q75": 0.651
+   },
+   "open_space_right_after_removal": {
+    "median": 0.869,
+    "q25": 0.861,
+    "q75": 0.882
+   },
+   "open_space_after_relaxation": {
+    "median": 0.74,
+    "q25": 0.66,
+    "q75": 0.827
+   },
+   "fraction_more_open_than_95pct_of_defect_free": 0.605,
+   "removed_atom_is_A": 0.635
+  },
+  "interstitial": {
+   "real_defects": 200,
+   "other_atoms_moved_over_0.1": {
+    "median": 21.5,
+    "q25": 11.5,
+    "q75": 40.0
+   },
+   "largest_move_of_another_atom": {
+    "median": 0.32,
+    "q25": 0.23,
+    "q75": 0.418
+   },
+   "extra_atom_nearest_neighbour": {
+    "median": 0.848,
+    "q25": 0.841,
+    "q75": 0.854
+   },
+   "B_atom_nearest_neighbour_defect_free": {
+    "median": 0.868,
+    "q25": 0.86,
+    "q75": 0.876
+   },
+   "extra_atom_energy": {
+    "median": -3.017,
+    "q25": -3.164,
+    "q75": -2.684
+   },
+   "B_atom_energy_defect_free": {
+    "median": -3.378,
+    "q25": -3.653,
+    "q75": -3.243
+   }
+  },
+  "frenkel": {
+   "real_defects": 150,
+   "other_atoms_moved_over_0.1": {
+    "median": 44.0,
+    "q25": 21.0,
+    "q75": 69.25
+   },
+   "largest_move_of_another_atom": {
+    "median": 0.644,
+    "q25": 0.417,
+    "q75": 0.9
+   },
+   "energy_above_original": {
+    "median": 3.24,
+    "q25": 1.548,
+    "q75": 5.032,
+    "fraction_above": 0.913,
+    "fraction_below": 0.08
+   },
+   "distance_site_to_moved_atom": {
+    "median": 2.122,
+    "q25": 1.497,
+    "q75": 2.655
+   }
+  },
+  "antisite": {
+   "real_defects": 200,
+   "other_atoms_moved_over_0.1": {
+    "median": 28.5,
+    "q25": 15.0,
+    "q75": 55.0
+   },
+   "largest_move_of_another_atom": {
+    "median": 0.416,
+    "q25": 0.341,
+    "q75": 0.546
+   },
+   "energy_above_original": {
+    "median": 2.769,
+    "q25": 1.404,
+    "q75": 4.299,
+    "fraction_above": 0.89,
+    "fraction_below": 0.11
+   }
+  }
+ },
+ "open_space_in_defect_free_glass": {
+  "samples": 400,
+  "median": 0.632,
+  "q25": 0.609,
+  "q75": 0.658,
+  "p95": 0.701
+ }
+}
