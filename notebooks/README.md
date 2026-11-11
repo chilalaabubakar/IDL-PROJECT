@@ -37,7 +37,11 @@
 - `kaggle_silica_point_defects.ipynb`: the point-defect study in amorphous silica, stage 1
   (`docs/SILICA_POINT_DEFECTS.md`): oxygen vacancy, oxygen interstitial, oxygen Frenkel pair
   and silicon vacancy in DM2's test glasses, found by the standard coordination analysis or the
-  per-atom energy and repaired by minimisation (CPU only, ~5-7 h). Pushes to `dabo-point-defects`.
+  per-atom energy and repaired by minimisation (CPU only, ~11-12 h, so it may need a second
+  session). Pushes to `dabo-point-defects`.
+- `colab_silica_point_defects.ipynb`: continues the same silica run on Colab (CPU runtime,
+  `GITHUB_TOKEN` in Colab's secrets) when the Kaggle hours are used up. It keeps every saved
+  step, does only what is left, pushes every 20 minutes and continues after a disconnect.
 
 - `stage0_poc.ipynb`: the course proof-of-concept notebook, as provided (unchanged, with its
   Colab outputs): MLP denoisers on a 3×3 jittered grid, plus Frenkel-pair and antisite demos

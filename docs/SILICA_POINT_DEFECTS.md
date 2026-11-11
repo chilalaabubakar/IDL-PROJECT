@@ -12,7 +12,10 @@ material.
 
 `scripts/silica/point_defects_study.py`, on Kaggle with
 [`notebooks/kaggle_silica_point_defects.ipynb`](../notebooks/kaggle_silica_point_defects.ipynb)
-(CPU only, about 5-7 h).
+(CPU only, about 11-12 h on Kaggle's 4 cores, so it may need a second session).
+[`notebooks/colab_silica_point_defects.ipynb`](../notebooks/colab_silica_point_defects.ipynb)
+continues the same run on Colab. Every step is saved, including each finished repair
+minimisation, so a stopped run continues where it stopped.
 
 **Glasses.** DM2's four test glasses (`data/sio2_dm2/test.npz`: 3,000 atoms, cooled at 0.1, 1,
 10 and 100 K/ps; made with the Bouhadja-Jakse-Pasturel potential). They are 300 K snapshots,

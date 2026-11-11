@@ -140,8 +140,8 @@ def test_same_glass(net):
     assert not same_glass(pos[1:], types[1:], pos, types, box)
 
 
-@pytest.mark.lammps
-def test_study_script_end_to_end(tmp_path, monkeypatch, net):
+def _study(tmp_path, net, out, kinds):
+    """The study script as a module, with argv for a one-glass run into ``out``."""
     pytest.importorskip("lammps")
     from glassdiff.silica.data import SilicaSplit, save_split
 
@@ -158,15 +158,25 @@ def test_study_script_end_to_end(tmp_path, monkeypatch, net):
     )
     module = importlib.util.module_from_spec(spec)
     spec.loader.exec_module(module)
-    out = tmp_path / "out"
     args = ["x", "--config", str(ROOT / "configs/silica/point_defects.yaml"),
             f"data={tmp_path / 'glass.npz'}", f"out_dir={out}", "n_per_glass=1", "workers=1",
-            "kinds=[o_vacancy,si_vacancy]"]  # fmt: skip
-    monkeypatch.setattr(sys, "argv", args)
+            f"kinds=[{','.join(kinds)}]"]  # fmt: skip
+    return module, args
+
+
+def _run(module):
     try:
         module.main()
     except OSError as exc:  # the LAMMPS library cannot be loaded here
         pytest.skip(str(exc))
+
+
+@pytest.mark.lammps
+def test_study_script_end_to_end(tmp_path, monkeypatch, net):
+    out = tmp_path / "out"
+    module, args = _study(tmp_path, net, out, ["o_vacancy", "si_vacancy"])
+    monkeypatch.setattr(sys, "argv", args)
+    _run(module)
     summary = json.loads((out / "summary.json").read_text())
     assert set(summary["kinds"]) == {"o_vacancy", "si_vacancy"}
     for r in summary["kinds"].values():
@@ -176,3 +186,59 @@ def test_study_script_end_to_end(tmp_path, monkeypatch, net):
     # a rerun continues from the saved steps instead of redoing them
     module.main()
     assert json.loads((out / "summary.json").read_text())["kinds"] == summary["kinds"]
+
+
+class _Stop(Exception):
+    pass
+
+
+@pytest.mark.lammps
+def test_study_evaluation_continues_after_a_stop(tmp_path, monkeypatch, net):
+    """A run stopped during the repair minimisations keeps the finished ones."""
+    out = tmp_path / "out"
+    module, args = _study(tmp_path, net, out, ["o_vacancy"])
+    monkeypatch.setattr(sys, "argv", args)
+    monkeypatch.setattr(module, "SAVE_EVERY", 0)  # save after every minimisation
+    real = module.minimize_many
+    calls = []  # number of evaluation jobs per call
+
+    def stop_after_two(jobs, workers=None, fmax=1e-3, on_result=None):
+        if on_result is None:  # originals and defects: run normally
+            return real(jobs, workers=workers, fmax=fmax)
+        calls.append(len(jobs))
+        finished = []
+
+        def record(i, result):
+            on_result(i, result)
+            finished.append(i)
+            if len(finished) == 2:
+                raise _Stop
+
+        return real(jobs, workers=workers, fmax=fmax, on_result=record)
+
+    monkeypatch.setattr(module, "minimize_many", stop_after_two)
+    with pytest.raises((_Stop, OSError)) as stopped:
+        module.main()
+    if stopped.type is OSError:  # the LAMMPS library cannot be loaded here
+        pytest.skip(str(stopped.value))
+    partial = out / "eval_o_vacancy.partial.json"
+    (n_jobs,) = calls
+    assert len(json.loads(partial.read_text())["done"]) == 2 and n_jobs > 2
+
+    def count(jobs, workers=None, fmax=1e-3, on_result=None):
+        calls.append(len(jobs))
+        return real(jobs, workers=workers, fmax=fmax, on_result=on_result)
+
+    monkeypatch.setattr(module, "minimize_many", count)
+    module.main()  # continues: only the jobs not saved are minimised
+    assert calls[1:] == [n_jobs - 2] and not partial.exists()
+    resumed = json.loads((out / "eval_o_vacancy.json").read_text())
+
+    # the same as a run that was never stopped
+    fresh_out = tmp_path / "fresh"
+    fresh, fresh_args = _study(tmp_path, net, fresh_out, ["o_vacancy"])
+    monkeypatch.setattr(sys, "argv", fresh_args)
+    fresh.main()
+    expected = json.loads((fresh_out / "eval_o_vacancy.json").read_text())
+    resumed.pop("seconds"), expected.pop("seconds")
+    assert resumed == expected
