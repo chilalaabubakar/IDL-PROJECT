@@ -1,7 +1,7 @@
 {
  "config": {
   "data": "data/sio2_dm2/test.npz",
-  "out_dir": "/kaggle/working/silica_pd",
+  "out_dir": "/content/silica_pd",
   "n_glasses": null,
   "n_per_glass": 20,
   "seed": 0,
@@ -26,7 +26,7 @@
   "recombined_tol": 0.6,
   "grid_spacing": 0.15
  },
- "git": "1a8b5788105dd85fb32f296d069aee81c9952c7c",
+ "git": "b97ec099642fcb215983a48f741ff542ae5f5419",
  "originals": {
   "glasses": 4,
   "cooling_rate": [
