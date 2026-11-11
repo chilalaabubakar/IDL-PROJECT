@@ -33,12 +33,16 @@ trade places).
 of it): the ceiling that a perfect finder would reach. A minimisation that blows up (two atoms
 too close) counts as not restored and is reported.
 Minimisation: LAMMPS FIRE with the potential DM2's glasses were made with, until the largest
-force is below fmax (glassdiff.silica.md.minimize_structure), in parallel processes.
+force is below fmax (glassdiff.silica.md.minimize_structure), in parallel processes. While a
+kind is evaluated, finished minimisations are saved to eval_<kind>.partial.json about once a
+minute, so a run stopped there loses at most a minute of work.
 """
 
 from __future__ import annotations
 
+import hashlib
 import json
+import os
 import time
 from pathlib import Path
 
@@ -64,6 +68,17 @@ from glassdiff.silica.point_defects import (
 )
 from glassdiff.utils.config import cli_config
 from glassdiff.utils.runs import git_state
+
+SAVE_EVERY = 60  # seconds between saves of evaluation progress
+
+
+def jobs_fingerprint(jobs) -> str:
+    """Identifies a list of repair jobs, so saved progress is only reused for the same jobs."""
+    h = hashlib.sha256()
+    for pos, types, box in jobs:
+        for a in (np.round(pos, 6), np.asarray(types, dtype=np.int64), np.round(box, 6)):
+            h.update(np.ascontiguousarray(a).tobytes())
+    return h.hexdigest()
 
 
 def frac(x) -> float:
@@ -240,14 +255,47 @@ def evaluate_kind(kind, orig, d, cfg, dcfg, rarity, out: Path, workers) -> dict:
                 index[key] = len(jobs)
                 jobs.append((p, t, orig["box"][g]))
             labels.append((f, e, index[key]))
-    res = minimize_many(jobs, workers=workers, fmax=float(cfg["fmax"]))
+    # minimise every repaired glass, saving [restored, failed] per job as jobs finish; the
+    # jobs are deterministic, so a stopped run continues from the saved ones
     tol = float(cfg["restore_tol"])
-    ok, failed = [], 0
-    for (p, *_), (_, t, _), e in zip(res, jobs, (k[0] for k in index)):
-        g = d["glass"][e]
-        failed += p is None  # a minimisation that blew up counts as not restored
-        ok.append(p is not None and same_glass(p, t, orig["pos"][g], orig["types"][g],
-                                               orig["box"][g], tol))  # fmt: skip
+    job_example = [k[0] for k in index]
+    partial = out / f"eval_{NAMES[kind]}.partial.json"
+    state = dict(jobs=jobs_fingerprint(jobs), total=len(jobs), seconds=0.0, done={})
+    if partial.exists():
+        saved = json.loads(partial.read_text())
+        if saved.get("jobs") == state["jobs"]:
+            state = saved
+    prior_seconds = float(state["seconds"])
+    done = {int(j): v for j, v in state["done"].items()}
+    todo = [j for j in range(len(jobs)) if j not in done]
+    if done:
+        print(f"{NAMES[kind]}: continuing, {len(done)} of {len(jobs)} minimisations saved",
+              flush=True)  # fmt: skip
+    last_save = time.time()
+
+    def save():
+        state["done"] = {str(j): v for j, v in sorted(done.items())}
+        state["seconds"] = prior_seconds + time.time() - t0
+        tmp = partial.with_name(partial.name + ".tmp")
+        tmp.write_text(json.dumps(state) + "\n")
+        os.replace(tmp, partial)
+
+    def record(i, result):
+        nonlocal last_save
+        j = todo[i]
+        p, g = result[0], d["glass"][job_example[j]]
+        restored_ok = p is not None and same_glass(p, jobs[j][1], orig["pos"][g],
+                                                   orig["types"][g], orig["box"][g], tol)  # fmt: skip
+        done[j] = [bool(restored_ok), p is None]  # a run that blew up counts as not restored
+        if time.time() - last_save > SAVE_EVERY:
+            save()
+            last_save = time.time()
+
+    if todo:
+        minimize_many([jobs[j] for j in todo], workers=workers, fmax=float(cfg["fmax"]),
+                      on_result=record)  # fmt: skip
+    ok = [done[j][0] for j in range(len(jobs))]
+    failed = sum(done[j][1] for j in range(len(jobs)))
     restored = {f: [] for f in (*finders, "defect given")}
     for f, _, j in labels:
         restored[f].append(ok[j])
@@ -260,11 +308,12 @@ def evaluate_kind(kind, orig, d, cfg, dcfg, rarity, out: Path, workers) -> dict:
         | {"defect given (ceiling)": frac(restored["defect given"])},
         minimisations=len(jobs),
         failed_minimisations=int(failed),
-        seconds=round(time.time() - t0),
+        seconds=round(prior_seconds + time.time() - t0),
     )
     if kind in (SilicaPointDefect.O_INTERSTITIAL, SilicaPointDefect.O_FRENKEL):
         result["flagged the defect atom"] = {f: frac(right_atom[f]) for f in finders}
     path.write_text(json.dumps(result, indent=1) + "\n")
+    partial.unlink(missing_ok=True)
     print(NAMES[kind], json.dumps(result), flush=True)
     return result
 

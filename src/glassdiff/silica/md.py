@@ -309,22 +309,34 @@ def _minimize_job(args):
 
 
 def minimize_many(
-    jobs: list, workers: int | None = None, fmax: float = 1e-3
+    jobs: list, workers: int | None = None, fmax: float = 1e-3, on_result=None
 ) -> list[tuple[np.ndarray, np.ndarray, float]]:
     """minimize_structure for many (pos, types, box), in spawned processes; keeps the order.
 
     A minimisation that fails (LAMMPS stops, e.g. with "lost atoms" when two atoms start too
     close and the Si-O attraction runs away) gives (None, None, inf, message) instead of
-    stopping the whole batch.
+    stopping the whole batch. ``on_result(i, result)``, if given, is called as each job
+    finishes (in any order), so a caller can save progress.
     """
     import multiprocessing
     import os
-    from concurrent.futures import ProcessPoolExecutor
+    from concurrent.futures import ProcessPoolExecutor, as_completed
 
     args = [(pos, types, box, None, fmax) for pos, types, box in jobs]
     workers = workers or os.cpu_count() or 1
+    results = [None] * len(args)
     if workers == 1 or len(args) <= 1:
-        return [_minimize_job(a) for a in args]
+        for i, a in enumerate(args):
+            results[i] = _minimize_job(a)
+            if on_result is not None:
+                on_result(i, results[i])
+        return results
     ctx = multiprocessing.get_context("spawn")
     with ProcessPoolExecutor(workers, mp_context=ctx) as pool:
-        return list(pool.map(_minimize_job, args))
+        futures = {pool.submit(_minimize_job, a): i for i, a in enumerate(args)}
+        for future in as_completed(futures):
+            i = futures[future]
+            results[i] = future.result()
+            if on_result is not None:
+                on_result(i, results[i])
+    return results
