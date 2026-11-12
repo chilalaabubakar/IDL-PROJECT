@@ -1,0 +1,151 @@
+{
+ "data": "/home/user/idl-project/data/ka2d_256_point_defects/test.npz",
+ "n": {
+  "vacancy": 200,
+  "interstitial": 200,
+  "frenkel": 150,
+  "antisite": 200
+ },
+ "trained": {
+  "20,000 updates": {
+   "vacancy": {
+    "rate": 0.67,
+    "lo": 0.6,
+    "hi": 0.74
+   },
+   "interstitial": {
+    "rate": 0.475,
+    "lo": 0.4,
+    "hi": 0.55
+   },
+   "frenkel": {
+    "rate": 0.36666666666666664,
+    "lo": 0.2876689945384546,
+    "hi": 0.4459608193098757
+   },
+   "antisite": {
+    "rate": 0.465,
+    "lo": 0.395,
+    "hi": 0.535
+   },
+   "all": {
+    "rate": 0.5026666666666667,
+    "lo": 0.4633797126750448,
+    "hi": 0.5408299866131191
+   }
+  },
+  "60,000 updates": {
+   "vacancy": {
+    "rate": 0.695,
+    "lo": 0.625,
+    "hi": 0.7601249999999982
+   },
+   "interstitial": {
+    "rate": 0.5,
+    "lo": 0.425,
+    "hi": 0.575
+   },
+   "frenkel": {
+    "rate": 0.4533333333333333,
+    "lo": 0.3783783783783784,
+    "hi": 0.5290322580645161
+   },
+   "antisite": {
+    "rate": 0.49,
+    "lo": 0.42,
+    "hi": 0.56
+   },
+   "all": {
+    "rate": 0.54,
+    "lo": 0.5006675567423231,
+    "hi": 0.5783783783783784
+   }
+  },
+  "60,000 updates, not calibrated": {
+   "vacancy": {
+    "rate": 0.685,
+    "lo": 0.62,
+    "hi": 0.75
+   },
+   "interstitial": {
+    "rate": 0.475,
+    "lo": 0.4,
+    "hi": 0.55
+   },
+   "frenkel": {
+    "rate": 0.3466666666666667,
+    "lo": 0.27586206896551724,
+    "hi": 0.4161073825503356
+   },
+   "antisite": {
+    "rate": 0.48,
+    "lo": 0.41,
+    "hi": 0.555
+   },
+   "all": {
+    "rate": 0.5066666666666667,
+    "lo": 0.4691676677716987,
+    "hi": 0.5433919348605157
+   }
+  }
+ },
+ "trained_tests": {
+  "60,000 against 20,000 updates": {
+   "vacancy": {
+    "only_new": 8,
+    "only_base": 3,
+    "p": 0.2265625
+   },
+   "interstitial": {
+    "only_new": 10,
+    "only_base": 5,
+    "p": 0.30175781249999994
+   },
+   "frenkel": {
+    "only_new": 19,
+    "only_base": 6,
+    "p": 0.01463329792022705
+   },
+   "antisite": {
+    "only_new": 12,
+    "only_base": 7,
+    "p": 0.359283447265625
+   },
+   "all": {
+    "only_new": 49,
+    "only_base": 21,
+    "p": 0.001093244972968613
+   }
+  },
+  "calibrated against not calibrated": {
+   "vacancy": {
+    "only_new": 5,
+    "only_base": 3,
+    "p": 0.7265625
+   },
+   "interstitial": {
+    "only_new": 7,
+    "only_base": 2,
+    "p": 0.1796875
+   },
+   "frenkel": {
+    "only_new": 20,
+    "only_base": 4,
+    "p": 0.001543879508972168
+   },
+   "antisite": {
+    "only_new": 6,
+    "only_base": 4,
+    "p": 0.75390625
+   },
+   "all": {
+    "only_new": 38,
+    "only_base": 13,
+    "p": 0.0006210434562277101
+   }
+  }
+ },
+ "ablations": {},
+ "ablation_tests": {},
+ "moving_average": {}
+}

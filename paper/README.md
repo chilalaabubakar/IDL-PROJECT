@@ -8,14 +8,18 @@ Every number in it is read from `results/point_defects_recheck_20261111/`:
 ```bash
 # from the repository root
 bash scripts/pilots/recheck_real_defects.sh   # the test evaluation, ~2 h on 4 CPU cores, resumable
+python scripts/pilots/finder_ablations.py     # experiments on the finder (after finder_ablations.sh)
 python paper/make_report_numbers.py           # pd_numbers.tex, pd_table_*.tex, summary.md
-python paper/make_report_figures.py           # figures/pd_fig1..3 (or e.g. `make_report_figures.py 3`)
+python paper/make_report_figures.py           # figures/pd_fig1..4 (or e.g. `make_report_figures.py 3`)
 cd paper && latexmk -pdf -outdir=build point_defects_report.tex && cp build/point_defects_report.pdf .
 ```
 
 A number in the text is a macro (`\pd{found-finder-vacancy}`) defined in `pd_numbers.tex`, so
-the text cannot drift from the results; an undefined one prints in red. Figure 2 uses one test
-vacancy stored in `data/pd_report_example.npz` (remade if the file is deleted).
+the text cannot drift from the results; an undefined one prints in red. The pipeline figure
+uses one test vacancy stored in `data/pd_report_example.npz` (remade if the file is deleted).
+`figures/pd_fig4_network` is the deep learning model (network, one layer, training order).
+The ablation table and its text appear once `pd_table_ablations.tex` exists, which
+`make_report_numbers.py` writes when all six ablation runs are finished.
 
 `midterm_report.tex` / `midterm_report.pdf`: the 11-785 midterm report (5 pages plus team
 contributions and references), organised by the midterm rubric and including the follow-up
