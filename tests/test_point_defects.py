@@ -230,6 +230,26 @@ def test_same_structure_allows_identical_atoms_to_swap(glass):
     assert not ev.same_structure(pos, swapped, pos, types, box)
 
 
+def test_structural_measures_on_a_checkerboard():
+    """The two baselines without a potential (scripts/pilots/baseline_routes.py): on a
+    checkerboard of A and B every cell has the same area and every atom four unlike
+    neighbours; exchanging two neighbours leaves each of them with one."""
+    br = _script("pilots/baseline_routes")
+    n = 6
+    ij = np.stack(np.meshgrid(np.arange(n), np.arange(n), indexing="ij"), -1).reshape(-1, 2)
+    pos, types, box = ij + 0.5, ij.sum(1) % 2, np.array([float(n), float(n)])
+    assert np.allclose(br.voronoi_area(pos, box), 1.0)
+    assert (br.unlike_neighbours(pos, types, box) == 4).all()
+    a, b = 0, 1  # neighbours of different species, across no boundary
+    assert types[a] != types[b] and np.allclose(np.abs(pos[a] - pos[b]).sum(), 1.0)
+    swapped = types.copy()
+    swapped[a], swapped[b] = types[b], types[a]
+    bonds = br.unlike_neighbours(pos, swapped, box)
+    assert bonds[a] == bonds[b] == 1 and bonds.sum() == 4 * n * n - 12
+    z = br.bonds_z(pos[None], swapped[None], box[None], np.array([4.0, 4.0]), np.ones(2))
+    assert int((-z[0]).argmax()) in (a, b)  # the atom with the fewest is one of the two
+
+
 def test_real_defects_leaves_out_exchanged_frenkel_pairs(tmp_path, make_lattice):
     """A Frenkel pair whose moved atom took an identical neighbour's site, the neighbour
     filling the empty site, is the original glass again: no defect to find or repair."""
