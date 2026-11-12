@@ -16,6 +16,10 @@ and writes
     paper/pd_table_found.tex        Table "found"
     paper/pd_table_restored.tex     Table "restored"
     paper/data/pd_report_results.json   the same rates with intervals and tests, for the figure
+and, from results/point_defects_ablations_20261112/ablations.json
+(scripts/pilots/finder_ablations.py) when it is there,
+    paper/pd_table_experiments.tex  Table "experiments": the comparisons made on the way
+    paper/pd_table_ablations.tex    Table "ablations", once all six ablation runs are finished
 
 Intervals are 95% and resample whole test glasses (10,000 bootstrap samples), because the two
 defects made in one glass are not independent. Where a rate is 0 or 100%, resampling gives no
@@ -33,6 +37,15 @@ from scipy.stats import binomtest
 
 ROOT = Path(__file__).resolve().parents[1]
 RES = ROOT / "results/point_defects_recheck_20261111"
+ABL = ROOT / "results/point_defects_ablations_20261112/ablations.json"
+ABLATION_ROWS = (  # run, what changed, compared with
+    ("reference", "Reference: starts from the denoiser, 4 layers, class weights", None),
+    ("scratch", "Random starting weights", "reference"),
+    ("layers2", "Random starting weights, 2 layers (reach $5\\sigma$)", "scratch"),
+    ("layers1", "Random starting weights, 1 layer (reach $2.5\\sigma$)", "scratch"),
+    ("no_weights", "No class weights", "reference"),
+    ("real_only", "Trained without the annihilated Frenkel pairs", "reference"),
+)
 KINDS = ("vacancy", "interstitial", "antisite", "frenkel")  # the order of the tables
 LABEL = {
     "vacancy": "Vacancy",
@@ -105,6 +118,125 @@ def join(parts: list[dict], *keys: str) -> list:
             part = part[key]
         out += part
     return out
+
+
+def p_text(p: float) -> str:
+    return "$p<0.001$" if p < 0.001 else f"$p={p:.3f}$" if p < 0.1 else f"$p={p:.2f}$"
+
+
+def experiments(K: dict) -> dict[str, str]:
+    """Tables "experiments" and "ablations" and their numbers, from the finder experiments."""
+    num: dict[str, str] = {}
+    rn = json.loads((RES / "repair_networks.json").read_text())["kinds"]
+    removed = {
+        v: [1 - rn[k][f"{v}, one step"]["defect_rms"] / rn[k]["nothing"]["defect_rms"] for k in rn]
+        for v in ("v1", "v2")
+    }
+    overlap = {n: [rn[k][f"v2, {n}"]["overlap"] for k in rn] for n in ("one step", "10 steps")}
+
+    def span(values) -> str:
+        return f"{100 * min(values):.0f}--{100 * max(values):.0f}"
+
+    num["repair-removed-v1"], num["repair-removed-v2"] = span(removed["v1"]), span(removed["v2"])
+    num["repair-overlap-1"], num["repair-overlap-10"] = (
+        span(overlap["one step"]),
+        span(overlap["10 steps"]),
+    )
+    level = json.loads((RES / "glass_level.json").read_text())["glass_level"]
+    rows = [
+        "1 & Training on defects & denoiser alone $\\to$ trained finder & found: vacancy / "
+        "interstitial / antisite & 44 / 12 / 15 $\\to$ "
+        + " / ".join(pct(K[k]["found"]["finder"]["rate"]) for k in KINDS[:3])
+        + " \\\\"
+    ]
+    abl = json.loads(ABL.read_text()) if ABL.exists() else None
+    if abl:
+        t, tests = abl["trained"], abl["trained_tests"]
+        a, b = t["20,000 updates"]["all"]["rate"], t["60,000 updates"]["all"]["rate"]
+        u = t["60,000 updates, not calibrated"]["all"]["rate"]
+        p_len = tests["60,000 against 20,000 updates"]["all"]["p"]
+        p_cal = tests["calibrated against not calibrated"]["all"]["p"]
+        num.update({"exp-20k": pct(a), "exp-60k": pct(b), "exp-uncal": pct(u)})
+        num["exp-p-length"], num["exp-p-cal"] = p_text(p_len), p_text(p_cal)
+        rows += [
+            f"2 & Training length & 20,000 $\\to$ 60,000 updates & found, all {sum(K[k]['n'] for k in KINDS)} "
+            f"defects & {pct(a)} $\\to$ {pct(b)} ({p_text(p_len)}) \\\\",
+            "3 & Calibration of the finder & off $\\to$ on & defect-free glasses flagged; found, "
+            f"all defects & {pct(level['raw']['defect_free_flagged'])} $\\to$ "
+            f"{pct(level['calibrated']['defect_free_flagged'])}; {pct(u)} $\\to$ {pct(b)} "
+            f"({p_text(p_cal)}) \\\\",
+        ]
+    rows += [
+        "4 & Loss of the repair network & version 1 $\\to$ version 2 & error on the displaced "
+        f"atoms removed by one step & {num['repair-removed-v1']} $\\to$ {num['repair-removed-v2']} "
+        "\\\\",
+        " & Steps of the repair network & 1 $\\to$ 10 steps (version 2) & glasses left with "
+        f"overlapping atoms & {num['repair-overlap-1']} $\\to$ {num['repair-overlap-10']} \\\\",
+        " & Repair network before minimisation & without $\\to$ with (version 2) & restored: "
+        "vacancy / interstitial$^{\\dagger}$ & 51 / 34.5 $\\to$ 51.5 / 34 \\\\",
+        "5 & Check of the labels & all 200 $\\to$ the "
+        f"{K['frenkel']['n']} real Frenkel pairs & Frenkel pairs found / restored & 37 / 18 $\\to$ "
+        f"{pct(K['frenkel']['found']['finder']['rate'])} / "
+        f"{pct(K['frenkel']['restored']['finder']['rate'])} \\\\",
+    ]
+    (ROOT / "paper/pd_table_experiments.tex").write_text(
+        "% written by make_report_numbers.py\n"
+        "\\begin{table}[t]\n\\centering\n"
+        "\\caption{The comparisons made on the way, on the test defects (\\%). The numbers at the "
+        "left are those of the experimental iterations. $^{\\dagger}$Measured with the finder "
+        "after 20,000 updates.}\n"
+        "\\label{tab:experiments}\n\\footnotesize\n"
+        "\\begin{tabularx}{\\linewidth}{@{}r>{\\raggedright\\arraybackslash}p{1.12in}"
+        ">{\\raggedright\\arraybackslash}p{1.2in}>{\\raggedright\\arraybackslash}X"
+        ">{\\raggedright\\arraybackslash}p{1.25in}@{}}\n\\toprule\n"
+        " & Experiment & Compared & Measure & Result \\\\\n\\midrule\n"
+        + "\n".join(rows)
+        + "\n\\bottomrule\n\\end{tabularx}\n\\end{table}\n"
+    )
+
+    # ---- the ablation runs: only when all are there
+    table = ROOT / "paper/pd_table_ablations.tex"
+    runs = abl["ablations"] if abl else {}
+    if not all(name in runs for name, _, _ in ABLATION_ROWS):
+        table.unlink(missing_ok=True)
+        return num
+    order = (*KINDS, "all")
+    rows = []
+    for name, what, base in ABLATION_ROWS:
+        f = runs[name]["found"]
+        cells = [pct(f[k]["rate"]) for k in order]
+        lo, hi = 100 * f["all"]["lo"], 100 * f["all"]["hi"]
+        cells[-1] += f" {{\\scriptsize[{lo:.0f}, {hi:.0f}]}}"
+        if base:
+            p = abl["ablation_tests"][f"{name} against {base}"]["all"]["p"]
+            num[f"abl-p-{name}"] = p_text(p)
+            cells.append(p_text(p))
+        else:
+            cells.append("--")
+        for k in order:
+            num[f"abl-{name}-{k}"] = pct(f[k]["rate"])
+        num[f"abl-{name}-size"] = f"{runs[name]['parameters'] / 1e6:.2f}"
+        size = f"{runs[name]['parameters'] / 1e6:.2f}"
+        rows.append(f"{what} & {size} & " + " & ".join(cells) + " \\\\")
+        if name in ("reference", "layers1"):
+            rows.append("\\addlinespace")
+    num["abl-updates"] = f"{runs['reference']['updates']:,}"
+    table.write_text(
+        "% written by make_report_numbers.py\n"
+        "\\begin{table}[t]\n\\centering\n"
+        f"\\caption{{Ablations of the finder: defects found (\\%) on the real test defects after "
+        f"{num['abl-updates']} updates, one setting changed per run. Size in millions of "
+        "parameters. Brackets: 95\\% interval. $p$: McNemar's test over all defects against the "
+        "run that differs in that one setting (the reference, or random starting weights with "
+        "4 layers for the two runs with fewer layers).}\n"
+        "\\label{tab:ablations}\n\\footnotesize\\setlength{\\tabcolsep}{3.5pt}\n"
+        "\\begin{tabularx}{\\linewidth}{@{}>{\\raggedright\\arraybackslash}Xcccccll@{}}\n"
+        "\\toprule\n"
+        "Run & Size & Vacancy & Interst. & Antisite & Frenkel & All & $p$ \\\\\n\\midrule\n"
+        + "\n".join(rows)
+        + "\n\\bottomrule\n\\end{tabularx}\n\\end{table}\n"
+    )
+    return num
 
 
 def main() -> None:
@@ -214,6 +346,7 @@ def main() -> None:
         for key, t in K[k]["tests"].items():
             what, other = key.split(": finder vs ")
             num[f"p-{what}-{other}-{k}"] = "<0.001" if t["p"] < 0.001 else f"{t['p']:.3f}"
+    num.update(experiments(K))
     lines = [f"\\pdset{{{k}}}{{{v}}}" for k, v in sorted(num.items())]
     (ROOT / "paper/pd_numbers.tex").write_text(
         "% written by make_report_numbers.py\n" + "\n".join(lines) + "\n"

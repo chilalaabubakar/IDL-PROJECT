@@ -7,6 +7,7 @@
                                       after relaxation (real test examples)
     2  figures/pd_fig2_pipeline.pdf   find, fix, minimise, compare, on one test vacancy
     3  figures/pd_fig3_results.pdf    found and restored, learned finder against the baselines
+    4  figures/pd_fig4_network.pdf    the deep learning model: network, one layer, training
 
 Figure 2 needs the trained finder once; its example is cached in data/pd_report_example.npz.
 Figure 3 reads results/point_defects_recheck_20261111/. Colours: a validated colour-blind-safe
@@ -27,7 +28,12 @@ import numpy as np  # noqa: E402
 import torch  # noqa: E402
 from matplotlib.collections import EllipseCollection  # noqa: E402
 from matplotlib.colors import LinearSegmentedColormap  # noqa: E402
-from matplotlib.patches import Circle, FancyArrowPatch, FancyBboxPatch  # noqa: E402
+from matplotlib.patches import (  # noqa: E402
+    Circle,
+    FancyArrow,
+    FancyArrowPatch,
+    FancyBboxPatch,
+)
 
 sys.path.insert(0, str(Path(__file__).resolve().parent))
 from figstyle import apply_publication_style, finalize_figure, panel_letter  # noqa: E402
@@ -453,15 +459,191 @@ def fig_results() -> None:
     finalize_figure(fig, FIG / "pd_fig3_results")
 
 
+# --------------------------------------------------------------------------- the network
+
+SCALAR = ("#DCE9FB", "#2A78D6")  # features that do not change when the glass is rotated
+VECTOR = ("#FCE3D8", "#D4551F")  # vectors that turn with the glass
+INPUT = ("#DDF3E8", "#12805A")
+PLAIN = ("#F3F2EE", INK)
+
+
+def _inch_axes(fig, x, y, w, h):
+    width, height = fig.get_size_inches()
+    return fig.add_axes((x / width, y / height, w / width, h / height))
+
+
+def _rbox(ax, x, y, w, h, fc, ec, lw=0.7, r=0.05, z=1.0) -> None:
+    ax.add_patch(
+        FancyBboxPatch(
+            (x, y), w, h, boxstyle=f"round,pad=0,rounding_size={r}", fc=fc, ec=ec, lw=lw, zorder=z
+        )
+    )
+
+
+def _titled(ax, x, y, w, h, title, lines, kind, title_colour=None) -> None:
+    """A rounded box with a bold title and a few lines of text."""
+    fc, ec = kind
+    _rbox(ax, x, y, w, h, fc, ec, lw=0.8, r=0.06)
+    top = y + h - 0.105
+    ax.text(x + 0.07, top, title, fontsize=7, fontweight="bold", va="center", zorder=4,
+            color=title_colour or (ec if ec != INK else INK))  # fmt: skip
+    for k, line in enumerate(lines):
+        ax.text(x + 0.07, top - 0.165 - 0.107 * k, line, fontsize=6, va="center", zorder=4)
+
+
+def _chip(ax, x, y, w, text, kind, h=0.17) -> None:
+    fc, ec = kind
+    _rbox(ax, x, y - h / 2, w, h, fc, ec, lw=0.6, r=0.04, z=3)
+    ax.text(x + w / 2, y, text, fontsize=6, ha="center", va="center", zorder=4)
+
+
+def _op(ax, x, y, w, h, text, kind=("white", INK)) -> None:
+    _rbox(ax, x, y, w, h, kind[0], kind[1], lw=0.7, r=0.04, z=3)
+    ax.text(x + w / 2, y + h / 2, text, fontsize=6, ha="center", va="center", zorder=4)
+
+
+def _line(ax, pts, colour=INK, lw=0.7) -> None:
+    """A line through pts with an arrowhead on its last piece."""
+    if len(pts) > 2:
+        xs, ys = zip(*pts[:-1])
+        ax.plot(xs, ys, color=colour, lw=lw, zorder=2, solid_capstyle="butt")
+    ax.annotate(
+        "", xy=pts[-1], xytext=pts[-2], zorder=2,
+        arrowprops=dict(arrowstyle="-|>,head_width=0.15,head_length=0.3", color=colour, lw=lw,
+                        shrinkA=0, shrinkB=0),
+    )  # fmt: skip
+
+
+def _block_arrow(ax, x0, y0, x1, y1) -> None:
+    ax.add_patch(
+        FancyArrow(x0, y0, x1 - x0, y1 - y0, width=0.045, head_width=0.11, head_length=0.065,
+                   length_includes_head=True, fc="#CFCECE", ec=INK, lw=0.6, zorder=2)
+    )  # fmt: skip
+
+
+def fig_network() -> None:
+    """The deep learning model: (a) one network with two heads, (b) one layer, (c) training."""
+    width, height = 5.5, 3.72
+    fig = plt.figure(figsize=(width, height))
+    ax = _inch_axes(fig, 0, 0, width, height)
+    ax.set_xlim(0, width)
+    ax.set_ylim(0, height)
+    ax.axis("off")
+
+    def letter(x, y, text):
+        fig.text(x / width, y / height, text, fontsize=9, fontweight="bold", va="top", ha="left")
+
+    # (a) the network ----------------------------------------------------------------------
+    letter(0.0, height, "a")
+    ax.text(0.17, height - 0.04, "One periodic EGNN with two heads", fontsize=7,
+            fontweight="bold", va="top")  # fmt: skip
+    y1, y2, bh = 3.2, 2.54, 0.58  # centre heights of the geometry and feature streams
+    _titled(ax, 0.02, y1 - bh / 2, 0.98, bh, "Atom positions",
+            [r"$x_i$ in a periodic box", r"(+ noise $\sigma_n\epsilon$)*"], INPUT)  # fmt: skip
+    _titled(ax, 0.02, y2 - bh / 2, 0.98, bh, "Per-atom inputs",
+            [r"species $t_i$ (A or B)", r"noise level $\sigma_n$*"], INPUT)  # fmt: skip
+    _titled(ax, 1.2, y1 - bh / 2, 1.75, bh, "Periodic graph",
+            [r"neighbours within $r_c$ = 2.5σ (about 22)", r"shortest vectors $r_{ij}$ across the box",
+             "16 radial basis functions × smooth cutoff"], PLAIN)  # fmt: skip
+    _titled(ax, 1.2, y2 - bh / 2, 1.75, bh, "Node embedding",
+            [r"$E(t_i)$ + MLP(Fourier(log $\sigma_n$))*", r"→ MLP → $h_i^0 \in \mathbb{R}^{128}$"],
+            PLAIN)  # fmt: skip
+    for yy in (y1, y2):
+        _block_arrow(ax, 1.02, yy, 1.18, yy)
+    sx, sw = 3.17, 1.0  # the stack of four layers
+    for k in range(3, -1, -1):
+        _rbox(ax, sx + 0.05 * k, y2 - bh / 2 - 0.03 * k + 0.06, sw, y1 - y2 + bh - 0.12,
+              SCALAR[0], SCALAR[1], z=1 + (3 - k) * 0.1)  # fmt: skip
+    ax.text(sx + sw / 2, y1 + 0.1, "EGNN layer × 4", fontsize=7, fontweight="bold",
+            color=SCALAR[1], ha="center", va="center", zorder=5)  # fmt: skip
+    ax.text(sx + sw / 2, (y1 + y2) / 2 - 0.02, "messages $m_{ij}$\nfeatures $h_i^\\ell$\nvector $v_i^\\ell$",
+            fontsize=6, ha="center", va="center", zorder=5, linespacing=1.3)  # fmt: skip
+    _block_arrow(ax, 2.97, y1, sx - 0.02, y1)
+    _block_arrow(ax, 2.97, y2, sx - 0.02, y2)
+    hx, hw = 4.5, 0.98  # the two heads
+    _titled(ax, hx, y1 - bh / 2, hw, bh, "Vector head",
+            [r"$d_i = \Sigma_\ell\, v_i^\ell$  (2D)", "denoiser, repair", "loss: squared error"],
+            VECTOR)  # fmt: skip
+    _titled(ax, hx, y2 - bh / 2, hw, bh, "Role head",
+            [r"MLP($h_i^4$) → 5 roles", "finder", "loss: cross-entropy"], SCALAR)  # fmt: skip
+    ox = sx + sw + 0.17
+    _line(ax, [(ox, y1), (hx, y1)], colour=VECTOR[1])
+    _line(ax, [(ox, y2), (hx, y2)], colour=SCALAR[1])
+    ax.text(0.02, y2 - bh / 2 - 0.1, "* denoiser and repair network only; the finder reads the"
+            " relaxed glass as it is", fontsize=5.6, color=MUTED, va="center")  # fmt: skip
+
+    # (b) one layer ------------------------------------------------------------------------
+    top = 1.98
+    letter(0.0, top + 0.06, "b")
+    ax.text(0.17, top, r"One EGNN layer $\ell$  (117,890 parameters)", fontsize=7,
+            fontweight="bold", va="top")  # fmt: skip
+    ys = {"hi": 1.66, "hj": 1.43, "rbf": 1.2, "r": 0.89}
+    _chip(ax, 0.05, ys["hi"], 0.48, r"$h_i^\ell$", SCALAR)
+    _chip(ax, 0.05, ys["hj"], 0.48, r"$h_j^\ell$", SCALAR)
+    _chip(ax, 0.05, ys["rbf"], 0.48, r"rbf$(|r_{ij}|)$", SCALAR)
+    _chip(ax, 0.05, ys["r"], 0.48, r"$r_{ij}$", VECTOR)
+    _op(ax, 0.75, 1.11, 0.42, 0.64, "$\\phi_e$\nMLP", SCALAR)
+    for k in ("hi", "hj", "rbf"):
+        _line(ax, [(0.53, ys[k]), (0.75, ys[k])])
+    _chip(ax, 1.33, 1.43, 0.38, r"$m_{ij}$", SCALAR)
+    _line(ax, [(1.17, 1.43), (1.33, 1.43)])
+    ax.text(1.25, 1.03, r"× cutoff $f_c(|r_{ij}|)$", fontsize=5.5, ha="center", va="center",
+            color=MUTED)  # fmt: skip
+    # upper branch: gated sum over the neighbours, then the residual update of the features
+    _op(ax, 1.86, 1.55, 0.52, 0.26, r"$K_0^{-1}\Sigma_j\, g\, m_{ij}$")
+    _op(ax, 2.52, 1.55, 0.34, 0.26, r"$\phi_h$", SCALAR)
+    _line(ax, [(1.71, 1.48), (1.78, 1.68), (1.86, 1.68)])
+    _line(ax, [(2.38, 1.68), (2.52, 1.68)])
+    _chip(ax, 2.98, 1.68, 0.42, r"$h_i^{\ell+1}$", SCALAR)
+    _line(ax, [(2.86, 1.68), (2.98, 1.68)])
+    ax.text(2.69, 1.87, r"$h_i + \phi_h(\mathrm{LN}(h_i), \cdot)$", fontsize=5.5, ha="center",
+            color=MUTED)  # fmt: skip
+    # lower branch: one number per neighbour times the vector to that neighbour
+    _op(ax, 1.86, 1.06, 0.36, 0.26, r"$\phi_x$", SCALAR)
+    _line(ax, [(1.71, 1.38), (1.78, 1.19), (1.86, 1.19)])
+    _op(ax, 2.34, 0.76, 0.52, 0.26, r"$K_0^{-1}\Sigma_j\, r_{ij}\,w_{ij}$", VECTOR)
+    _line(ax, [(2.22, 1.19), (2.6, 1.19), (2.6, 1.02)])
+    ax.text(2.65, 1.105, r"$w_{ij}$", fontsize=5.5, color=MUTED, va="center")
+    _line(ax, [(0.53, ys["r"]), (2.34, ys["r"])], colour=VECTOR[1])
+    _chip(ax, 2.98, 0.89, 0.42, r"$v_i^\ell$", VECTOR)
+    _line(ax, [(2.86, 0.89), (2.98, 0.89)], colour=VECTOR[1])
+    _chip(ax, 0.05, 0.58, 0.3, "", SCALAR, h=0.12)
+    ax.text(0.4, 0.58, "unchanged when the glass is rotated", fontsize=5.8, va="center")
+    _chip(ax, 0.05, 0.38, 0.3, "", VECTOR, h=0.12)
+    ax.text(0.4, 0.38, "vectors that turn with the glass", fontsize=5.8, va="center")
+
+    # (c) training order -------------------------------------------------------------------
+    cx, cw, ch = 3.72, 1.76, 0.47
+    letter(cx - 0.2, top + 0.06, "c")
+    ax.text(cx, top, "Training: one start, two tasks", fontsize=7, fontweight="bold", va="top")
+    yb = (1.27, 0.7, 0.13)  # bottoms of the three boxes
+    _titled(ax, cx, yb[0], cw, ch, "1  Denoiser",
+            ["defect-free glass + noise → the shift", "40,000 updates, no labels"], PLAIN)  # fmt: skip
+    _titled(ax, cx, yb[1], cw, ch, "2  Finder",
+            ["relaxed defect → role of every atom", "20,000 + 40,000 updates"], SCALAR)  # fmt: skip
+    _titled(ax, cx, yb[2], cw, ch, "3  Repair network",
+            ["corrected defect + noise → the shift", "2 × 20,000 updates"], VECTOR)  # fmt: skip
+    lx = cx - 0.1  # the weights of the denoiser start both
+    ax.plot([cx, lx, lx], [yb[0] + ch / 2, yb[0] + ch / 2, yb[2] + ch / 2], color=INK, lw=0.7,
+            zorder=2, solid_capstyle="butt")  # fmt: skip
+    for y in (yb[1], yb[2]):
+        _line(ax, [(lx, y + ch / 2), (cx, y + ch / 2)])
+    ax.text(lx - 0.04, (yb[0] + yb[2] + ch) / 2, "starting weights", fontsize=5.6, color=MUTED,
+            rotation=90, ha="right", va="center")  # fmt: skip
+    finalize_figure(fig, FIG / "pd_fig4_network")
+
+
 def main() -> None:
     apply_publication_style()
-    which = set(sys.argv[1:]) or {"1", "2", "3"}
+    which = set(sys.argv[1:]) or {"1", "2", "3", "4"}
     if "1" in which:
         fig_defects()
     if "2" in which:
         fig_pipeline()
     if "3" in which:
         fig_results()
+    if "4" in which:
+        fig_network()
     print("figures in", FIG)
 
 

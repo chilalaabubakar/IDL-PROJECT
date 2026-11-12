@@ -1,0 +1,20 @@
+% written by make_report_numbers.py
+\begin{table}[t]
+\centering
+\caption{The comparisons made on the way, on the test defects (\%). The numbers at the left are those of the experimental iterations. $^{\dagger}$Measured with the finder after 20,000 updates.}
+\label{tab:experiments}
+\footnotesize
+\begin{tabularx}{\linewidth}{@{}r>{\raggedright\arraybackslash}p{1.12in}>{\raggedright\arraybackslash}p{1.2in}>{\raggedright\arraybackslash}X>{\raggedright\arraybackslash}p{1.25in}@{}}
+\toprule
+ & Experiment & Compared & Measure & Result \\
+\midrule
+1 & Training on defects & denoiser alone $\to$ trained finder & found: vacancy / interstitial / antisite & 44 / 12 / 15 $\to$ 69.5 / 50 / 49 \\
+2 & Training length & 20,000 $\to$ 60,000 updates & found, all 750 defects & 50.3 $\to$ 54 ($p=0.001$) \\
+3 & Calibration of the finder & off $\to$ on & defect-free glasses flagged; found, all defects & 68 $\to$ 2; 50.7 $\to$ 54 ($p<0.001$) \\
+4 & Loss of the repair network & version 1 $\to$ version 2 & error on the displaced atoms removed by one step & 7--9 $\to$ 13--16 \\
+ & Steps of the repair network & 1 $\to$ 10 steps (version 2) & glasses left with overlapping atoms & 1--40 $\to$ 50--73 \\
+ & Repair network before minimisation & without $\to$ with (version 2) & restored: vacancy / interstitial$^{\dagger}$ & 51 / 34.5 $\to$ 51.5 / 34 \\
+5 & Check of the labels & all 200 $\to$ the 150 real Frenkel pairs & Frenkel pairs found / restored & 37 / 18 $\to$ 45.3 / 12.7 \\
+\bottomrule
+\end{tabularx}
+\end{table}
