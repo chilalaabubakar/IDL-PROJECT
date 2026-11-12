@@ -48,52 +48,81 @@
 \maketitle
 
 \begin{abstract}
-In a crystal, a missing, extra or misplaced atom is found by comparing the structure with its lattice. A glass has no lattice, and once the glass relaxes around such a defect, little of it is left to see. We ask whether a neural network can find the defect from the positions and species of the atoms alone, and whether the glass can then be returned to the defect-free structure it came from. In a two-dimensional model glass we make the four standard point defects (vacancy, interstitial, Frenkel pair and antisite) by known operations and relax them, so the correct answer is always known. A graph network that starts from a denoising diffusion model of the glass and is then trained to label atoms finds \pd{found-finder-vacancy}\% of vacancies, \pd{found-finder-interstitial}\% of interstitials, \pd{found-finder-antisite}\% of antisites and \pd{found-finder-frenkel}\% of Frenkel pairs. It does not use the interatomic potential. Three measures that involve no learning find fewer: the energy of each atom, which does need the potential (\pd{found-energy-min}--\pd{found-energy-max}\%), the number of unlike neighbours of each atom (\pd{found-bonds-min}--\pd{found-bonds-max}\%) and the size of each atom's cell (\pd{found-geometry-min}--\pd{found-geometry-max}\%). Correcting the number or species of atoms at the flagged atom and then minimising the energy restores \pd{restored-finder-vacancy}\%, \pd{restored-finder-interstitial}\%, \pd{restored-finder-antisite}\% and \pd{restored-finder-frenkel}\% of the original glasses. A second network, trained to undo the defect directly, adds nothing once minimisation follows. Finding is what limits the result: when the true location is given, minimisation alone restores \pd{restored-ceiling-min}--\pd{restored-ceiling-max}\%.
+Solids are never perfect. Here and there an atom is missing, an extra atom is squeezed in, or two atoms sit in each other's places. Such \emph{point defects} are easy to spot in a crystal, where the atoms form a regular pattern and anything out of pattern stands out. A glass has no pattern: its atoms are frozen in disorder, and once a defect is made, the neighbouring atoms shift and largely hide it. We ask whether a neural network can find the defect from the positions and kinds of the atoms alone, and whether the glass can then be returned to the defect-free structure it came from. We work with a simulated two-dimensional glass, make the four standard point defects ourselves (vacancy, interstitial, Frenkel pair and antisite) and let the glass settle, so the right answer is always known. A graph neural network that is first trained to remove random noise from glasses, and then to label atoms, finds \pd{found-finder-vacancy}\% of vacancies, \pd{found-finder-interstitial}\% of interstitials, \pd{found-finder-antisite}\% of antisites and \pd{found-finder-frenkel}\% of Frenkel pairs. It does not need the formula for the forces between atoms (the interatomic potential). Three measures that involve no learning find fewer: the energy of each atom, which does need the potential (\pd{found-energy-min}--\pd{found-energy-max}\%), the number of unlike neighbours of each atom (\pd{found-bonds-min}--\pd{found-bonds-max}\%) and the room each atom has (\pd{found-geometry-min}--\pd{found-geometry-max}\%). Correcting the number or kind of atoms where the network points, and then letting the atoms settle, restores \pd{restored-finder-vacancy}\%, \pd{restored-finder-interstitial}\%, \pd{restored-finder-antisite}\% and \pd{restored-finder-frenkel}\% of the original glasses. A second network, trained to undo the defect directly, adds nothing to this. Finding is what limits the result: when the true location is given, settling alone restores \pd{restored-ceiling-min}--\pd{restored-ceiling-max}\%.
 \end{abstract}
 
 \section{Introduction}
 
-Point defects are the simplest faults a solid can have. A \emph{vacancy} is a missing atom, an \emph{interstitial} is an extra atom squeezed between the others, a \emph{Frenkel pair} is an atom knocked off its site into a gap (a vacancy and an interstitial together, the basic damage left by irradiation), and an \emph{antisite} is a pair of atoms of different species that have exchanged places~\citep{kittel2005,was2017}. They control diffusion, ageing and the response to radiation. In a crystal each of them is defined against the lattice and can be found by comparing the structure with the ideal sites.
+Every solid has faults in the arrangement of its atoms. The simplest are \emph{point defects}, faults the size of one atom (Figure~\ref{fig:defects}). A \emph{vacancy} is a missing atom. An \emph{interstitial} is an extra atom squeezed in between the others. A \emph{Frenkel pair} is an atom knocked out of its place into a gap nearby, which leaves a vacancy and an interstitial together; it is the basic damage that radiation does. An \emph{antisite} is a pair of atoms of different kinds that have exchanged places~\citep{kittel2005,was2017}. Point defects matter far beyond their size: they decide how atoms move through a material, how it ages and how it stands up to radiation.
 
-A glass has no lattice~\citep{zachariasen1932}. A point defect can still be \emph{made} in a glass, by removing, adding, moving or swapping an atom, but once the glass relaxes, the neighbours close in and the defect is spread over a few tens of atoms. Early simulations found that most vacancies in a Lennard-Jones glass do not survive relaxation as open holes~\citep{bennett1979}, although some remain and behave like crystal vacancies~\citep{delaye1993}. This makes two questions hard:
+In a \emph{crystal} the atoms sit on a regular repeating pattern, the lattice, like tiles on a floor. A defect is then easy to define and to find: compare the structure with the perfect pattern and see what is missing, extra or misplaced.
+
+A \emph{glass} has no such pattern~\citep{zachariasen1932}. Its atoms are packed as closely as in a crystal but without order, like a liquid frozen in place. A point defect can still be \emph{made} in a glass, by removing, adding, moving or swapping an atom. But the atoms around it then shift until the forces on them balance again (the glass \emph{relaxes}), and the fault is spread over a few tens of atoms. Early simulations found that most vacancies in a simple model glass do not survive relaxation as open holes~\citep{bennett1979}, although some remain and behave like vacancies in a crystal~\citep{delaye1993}. This makes two questions hard:
 \begin{enumerate}
 \item \textbf{Find.} Given a relaxed glass that contains one point defect, which atoms are wrong?
 \item \textbf{Repair.} What is the defect-free glass it came from?
 \end{enumerate}
 
-The usual tools are of two kinds. Geometric measures, such as the free volume around each atom~\citep{starr2002}, need only the positions but are weak, because a glass is full of loosely and tightly packed places that are not defects. Energies and forces are sharper, but they need an interatomic potential, and for many materials no trusted potential exists; structures measured by atomic-resolution microscopy, such as two-dimensional silica glass~\citep{huang2012}, come as positions only. A network that has learned what a normal glass looks like could find what is abnormal from the structure alone. This is where a learned model can add something that a simulation does not already give, and a simulated glass is the right place to test it, because there the defect and the original are known exactly.
+The usual tools are of two kinds. \emph{Geometric} measures, such as the empty space around each atom~\citep{starr2002}, need only the positions of the atoms. But they are weak, because a glass is full of loosely and tightly packed places that are not defects. \emph{Energy} measures are sharper, but they need the \emph{interatomic potential}, the formula that gives the forces between atoms. For many materials no trusted potential exists, and structures seen under a microscope at atomic resolution, such as two-dimensional silica glass~\citep{huang2012}, come as positions only. A neural network that has learned what normal glass looks like could find what is abnormal from the structure alone. This is where a learned model can add something that a simulation does not already give. A simulated glass is the right place to test the idea, because there the defect and the original are known exactly.
 
-This report gives the complete study in a two-dimensional model glass. It replaces the approach of our midterm report, which trained a diffusion model to \emph{place} defects that we had defined ourselves by neighbour counts. After a discussion with Prof.\ Ismaila Dabo we changed the defects to the standard ones, changed the task from placing defects to finding and repairing them, and reduced the method to one network family whose every part has a stated reason (Appendix~\ref{app:feedback}). Our findings are:
+\begin{table}[t]
+\centering
+\caption{Terms used in this report.}
+\label{tab:terms}
+\small
+\begin{tabularx}{\linewidth}{@{}>{\raggedright\arraybackslash}p{1.35in}>{\raggedright\arraybackslash}X@{}}
+\toprule
+Term & Meaning \\
+\midrule
+Crystal, lattice & A solid whose atoms sit on a regular repeating pattern (the lattice). \\
+Glass & A solid whose atoms are frozen in disorder, with no repeating pattern. \\
+Species & The kind of atom. Our glass has two: large A atoms and small B atoms. \\
+Point defect & A fault the size of one atom: an atom missing, extra, displaced or exchanged. \\
+Site & The place where an atom sits. \\
+Interatomic potential & The formula for the energy of two atoms at a given distance. It gives the forces between the atoms. \\
+Relaxation (energy minimisation) & Letting the atoms shift until the forces on them balance. The structure then rests in a ``valley'' of the energy, a local minimum. \\
+Periodic box & The simulated square of glass repeats in every direction: an atom that leaves on one side comes back on the other. This imitates a large sample without edges. \\
+Cell of an atom & The patch of space that is closer to this atom than to any other (its Voronoi cell): the room the atom has. \\
+$\sigma$, $\epsilon$ & Our units. $\sigma$ is about one atom diameter; $\epsilon$ is the strength of the attraction between two A atoms. \\
+Denoiser & A neural network trained to undo random shifts (``noise'') of the atoms. \\
+\bottomrule
+\end{tabularx}
+\end{table}
+
+This report gives the complete study in a two-dimensional model glass. It replaces the approach of our midterm report, which trained a model to \emph{place} defects that we had defined ourselves. After a discussion with Prof.\ Ismaila Dabo we changed the defects to the standard ones, changed the task from placing defects to finding and repairing them, and reduced the method to one network whose every part has a stated reason. Table~\ref{tab:terms} explains the terms we use. Our findings are:
 \begin{itemize}
-\item A learned finder that needs no potential locates each of the four defects more often than three measures that involve no learning: the atom energy (which needs the potential), the number of unlike neighbours and the cell size. For vacancies, interstitials and antisites it finds \pd{ratio-finder-energy-min}--\pd{ratio-finder-energy-max} times as many as the atom energy (Section~\ref{sec:find}).
-\item Once the defect is found, standard energy minimisation does the repair. A network trained to undo the defect learns to move the right atoms, but adds nothing after minimisation and damages the structure without it (Sections~\ref{sec:restore} and~\ref{sec:repairnet}).
-\item A quarter of our Frenkel pairs annihilated during relaxation and left no defect. We found this while checking the physics for this report, removed them from the test, and report its consequences openly (Sections~\ref{sec:defects} and~\ref{sec:limits}).
+\item A neural network, the \emph{finder}, locates each of the four defects more often than three measures that involve no learning: the energy of each atom (which needs the potential), its number of unlike neighbours, and the size of its cell. The finder needs no potential. For vacancies, interstitials and antisites it finds \pd{ratio-finder-energy-min}--\pd{ratio-finder-energy-max} times as many as the atom energy (Section~\ref{sec:find}).
+\item Once the defect is found, ordinary energy minimisation does the repair. A network trained to undo the defect learns to move the right atoms, but adds nothing after minimisation and damages the structure without it (Sections~\ref{sec:restore} and~\ref{sec:repairnet}).
+\item A quarter of our Frenkel pairs undid themselves while the glass relaxed, and left no defect. We found this while checking the physics for this report, removed them from the test, and report the consequences openly (Sections~\ref{sec:defects} and~\ref{sec:limits}).
+\ifablations
+\item Short ablation runs show which design choices of the finder matter (Section~\ref{sec:ablations}).
+\fi
 \end{itemize}
 
 \section{Background}
 
-\textbf{Denoising diffusion models of glasses.} Our starting point is DM2~\citep{yang2026dm2}. A network is shown glass structures whose atoms have been shifted by random noise and learns to predict the shifts. Applied repeatedly with decreasing noise, it turns random positions into a realistic glass. Hsu et al.~\citep{hsu2024denoising} used the same idea on crystals for a purpose close to ours: a denoiser removes thermal vibration so that the underlying crystal structure, and its defects, can be identified. Diffusion models have also been used to relax crystals that contain given point defects~\citep{cui2026constrained}. We are not aware of work that finds and repairs point defects in a glass.
+\textbf{Denoising diffusion models of glasses.} Our starting point is DM2~\citep{yang2026dm2}. A network is shown glasses whose atoms have been shifted at random, and learns to predict the shifts so that they can be undone. Applied again and again with smaller and smaller shifts, it turns random positions into a realistic glass. Hsu et al.~\citep{hsu2024denoising} used the same idea on crystals for a purpose close to ours: a denoiser removes the jitter of thermal motion, so that the crystal structure underneath, and its defects, can be identified. Diffusion models have also been used to relax crystals that contain given point defects~\citep{cui2026constrained}. We are not aware of work that finds and repairs point defects in a glass.
 
-\textbf{Learned structural indicators.} Cubuk et al.~\citep{cubuk2015} trained a classifier on local structure to identify the particles of a glass that are about to rearrange. Our finder is similar in spirit, a learned per-atom label from structure alone, but its labels are exact, because we make each defect ourselves.
+\textbf{Learned structural indicators.} Cubuk et al.~\citep{cubuk2015} trained a classifier on the surroundings of each particle to pick out the particles of a glass that are about to move. Our finder is similar in spirit: a label for each atom, learned from structure alone. But its labels are exact, because we make each defect ourselves.
 
-\textbf{Inherent structures.} Minimising the energy of a configuration takes it to the nearest local minimum of the energy landscape, its inherent structure~\citep{stillinger1982}. A glass has a very large number of such minima. All our glasses, with and without defects, are inherent structures, and ``the same glass'' means the same minimum.
+\textbf{Resting structures.} Letting the atoms settle takes any arrangement to the nearest valley of the energy, called its inherent structure~\citep{stillinger1982}. A glass has an enormous number of such valleys close to each other. All our glasses, with and without defects, rest in a valley, and ``the same glass'' means the same valley.
 
 \section{Methods}
 
 \subsection{The glass}
 
-We use the two-dimensional Kob--Andersen mixture~\citep{kob1995,bruning2009}: 65\% large A atoms and 35\% small B atoms that interact through Lennard-Jones pair potentials,
+We use a standard model glass, the two-dimensional Kob--Andersen mixture~\citep{kob1995,bruning2009}. It has two species: 65\% large A atoms and 35\% small B atoms. Two atoms of species $\alpha$ and $\beta$ at distance $r$ have the Lennard-Jones energy
 \begin{equation}
-u_{\alpha\beta}(r)=4\epsilon_{\alpha\beta}\left[\left(\frac{\sigma_{\alpha\beta}}{r}\right)^{12}-\left(\frac{\sigma_{\alpha\beta}}{r}\right)^{6}\right],
+u_{\alpha\beta}(r)=4\epsilon_{\alpha\beta}\left[\left(\frac{\sigma_{\alpha\beta}}{r}\right)^{12}-\left(\frac{\sigma_{\alpha\beta}}{r}\right)^{6}\right].
 \end{equation}
-with $\epsilon_{AA}=1$, $\epsilon_{AB}=1.5$, $\epsilon_{BB}=0.5$, $\sigma_{AA}=1$, $\sigma_{AB}=0.8$ and $\sigma_{BB}=0.88$, cut off and shifted to zero at $2.5\,\sigma_{\alpha\beta}$. Lengths are in units of $\sigma\equiv\sigma_{AA}$ and energies in units of $\epsilon_{AA}$. The strong A--B attraction and the 65:35 composition prevent crystallisation in two dimensions~\citep{bruning2009}. We chose this model because one glass takes seconds to make, so we can afford thousands of defects with exact answers, and because every atom can be drawn and inspected.
+In words: two atoms repel strongly when they come closer than about $\sigma_{\alpha\beta}$, attract each other a little further out, and do not feel each other when far apart. $\sigma_{\alpha\beta}$ sets the size of the atoms and $\epsilon_{\alpha\beta}$ the strength of the attraction. The values are $\epsilon_{AA}=1$, $\epsilon_{AB}=1.5$, $\epsilon_{BB}=0.5$, $\sigma_{AA}=1$, $\sigma_{AB}=0.8$ and $\sigma_{BB}=0.88$, and the energy is set to zero beyond $2.5\,\sigma_{\alpha\beta}$. We measure lengths in units of $\sigma\equiv\sigma_{AA}$, about one atom diameter, and energies in units of $\epsilon\equiv\epsilon_{AA}$. Unlike atoms attract each other most strongly ($\epsilon_{AB}$ is the largest). This, and the 65:35 mixture, keep the atoms from ordering into a crystal~\citep{bruning2009}. We chose this model because one glass takes seconds to make, so we can afford thousands of defects with exact answers, and because every atom can be drawn and inspected.
 
-Each glass has $N=256$ atoms in a periodic square box of side $14.6\sigma$ (number density 1.2). With LAMMPS~\citep{thompson2022lammps} we melt it at temperature $T=2.0$, cool it to $T=0.01$ at a rate of $10^{-2}$ per time unit, and then minimise its energy. The dataset has 800 training, 100 validation and 100 test glasses. This cooling is fast, so the glasses are poorly annealed, which matters for the antisite (Section~\ref{sec:defects}).
+Each glass has $N=256$ atoms in a periodic square box of side $14.6\sigma$. With the simulation program LAMMPS~\citep{thompson2022lammps} we make it the way real glass is made. We heat the atoms until they form a liquid (temperature $T=2.0$ in the units of the model), cool the liquid quickly (to $T=0.01$ at a rate of $10^{-2}$ per time unit) so that the atoms freeze in disorder, and then let them settle by energy minimisation. The dataset has 800 training, 100 validation and 100 test glasses. Because the cooling is fast, these glasses are not the most stable ones possible, which matters for the antisite (Section~\ref{sec:defects}).
 
 \subsection{The four point defects}
 \label{sec:defects}
 
-Each defect is made by a known operation on a defect-free glass (Table~\ref{tab:defects}, Figure~\ref{fig:defects}). The names are used by analogy with crystals: the operations are the same, but a glass has no lattice site that could be empty or doubly occupied and no sublattice for a species to be wrong on, so the defect is defined by the operation that made it. The defected glass is then relaxed: its energy is minimised with every atom free and the box fixed, so it sits in a local minimum as a real defected sample would. Because we know the operation, we know the original glass, which is the exact target for repair, and we need no thresholds to decide what counts as a defect. Each training glass receives 8 defects of each type at random sites (about 6,400 examples per type); each validation and test glass receives 2 (200 per type). A defect is never made in a glass of another split.
+Each defect is made by a known operation on a defect-free glass (Table~\ref{tab:defects}, Figure~\ref{fig:defects}). The names come from crystals. A glass has no lattice site that could be empty or doubly occupied, so here a defect is defined by the operation that made it. After the operation the glass is relaxed: all atoms are free to shift until the forces balance, with the box fixed. The defected glass then rests in a valley of the energy, as a real sample would. Because we know the operation, we know the original glass. It is the exact target for repair, and we need no thresholds to decide what counts as a defect. Each training glass receives 8 defects of each type at random places (about 6,400 examples per type); each validation and test glass receives 2 (200 per type). Glasses of the three sets are never mixed.
 
 \begin{table}[t]
 \centering
@@ -106,7 +135,7 @@ Defect & Operation on the defect-free glass & Atoms \\
 \midrule
 Vacancy & remove one atom (A or B, chosen at random) & 255 \\
 Interstitial & add one small B atom at the most open point within $2\sigma$ of a random position & 257 \\
-Frenkel pair & move one atom to the most open point between $1.2\sigma$ and $3\sigma$ from its site & 256 \\
+Frenkel pair & move one atom to the most open point between $1.2\sigma$ and $3\sigma$ from its place & 256 \\
 Antisite & exchange the species of an A atom and its nearest B atom & 256 \\
 \bottomrule
 \end{tabularx}
@@ -115,25 +144,25 @@ Antisite & exchange the species of an A atom and its nearest B atom & 256 \\
 \begin{figure}[t]
 \centering
 \includegraphics[width=\linewidth]{figures/pd_fig1_defects.pdf}
-\caption{The four point defects in test glasses. Top: the original glass and the operation ($\times$ atom removed, $+$ atom added, arrow: atom moved, two rings: species exchanged). Bottom: the same region after relaxation. Each example is the one with the median number of displaced atoms for its type. In the vacancy example, neighbours have moved into the empty site.}
+\caption{The four point defects in test glasses. Top: the original glass and the operation ($\times$ atom removed, $+$ atom added, arrow: atom moved, two rings: species exchanged). Bottom: the same region after relaxation. Each example is the one with the median number of displaced atoms for its type. In the vacancy example, neighbours have moved into the empty place.}
 \label{fig:defects}
 \end{figure}
 
 \textbf{What the defects become.} We measured each relaxed defect on the test glasses (Table~\ref{tab:physics}).
 
-\emph{Vacancies partly close.} Right after an atom is removed, the most open point at its site is $0.87\sigma$ from the nearest atom. After relaxation this falls to $0.74\sigma$ (median). In defect-free glass the same measure around an atom is $0.63\sigma$, and $0.70\sigma$ at the 95th percentile. About \pd{vacancy-open}\% of the relaxed vacancies are more open than that. The other \pd{vacancy-closed}\% have given up their free volume to the surroundings and no longer stand out as a hole (as in the example of Figure~\ref{fig:defects}). This agrees with early simulations of Lennard-Jones glasses~\citep{bennett1979,delaye1993}.
+\emph{Vacancies partly close.} Right after an atom is removed, the emptiest point of the hole is $0.87\sigma$ from the nearest atom. After relaxation this distance has fallen to $0.74\sigma$ (median), because neighbours move in. For comparison, around an atom of defect-free glass it is $0.63\sigma$, and only one place in twenty is more open than $0.70\sigma$. About \pd{vacancy-open}\% of the relaxed vacancies are still more open than that. The other \pd{vacancy-closed}\% have handed their empty space to the surroundings and no longer stand out as a hole (as in the example of Figure~\ref{fig:defects}). This agrees with early simulations of model glasses~\citep{bennett1979,delaye1993}.
 
-\emph{An interstitial makes room for itself.} After relaxation the neighbours have moved apart to take the extra B atom in. It is $0.85\sigma$ from its nearest neighbour, only slightly closer than the $0.87\sigma$ that is normal for a B atom, and somewhat higher in energy ($-3.0$ against $-3.4\,\epsilon_{AA}$).
+\emph{An interstitial makes room for itself.} After relaxation the neighbours have moved apart to take the extra B atom in. It is $0.85\sigma$ from its nearest neighbour, only slightly closer than the $0.87\sigma$ that is normal for a B atom, and somewhat higher in energy ($-3.0$ against $-3.4\,\epsilon$).
 
-\emph{A quarter of the Frenkel pairs annihilate.} In 50 of the 200 test Frenkel pairs (and 27\% of the training pairs), the moved atom pushed a neighbour of its own species into the empty site and took that neighbour's place. The relaxed glass is then the original glass with two identical atoms exchanged: the same structure with the same energy, and no defect. Recombination of close Frenkel pairs, also by such replacement of one atom by another, is well known from radiation damage in crystals~\citep{was2017}. Our generator only checked whether the moved atom had returned to \emph{its own} site, so it did not catch these cases. We exclude them from the test, which leaves 150 Frenkel pairs; the consequences for training are discussed in Section~\ref{sec:limits}.
+\emph{A quarter of the Frenkel pairs undo themselves.} In 50 of the 200 test Frenkel pairs (and 27\% of the training pairs), the moved atom pushed a neighbour of its own species into the empty place and took that neighbour's place. The relaxed glass is then the original glass with two identical atoms exchanged: the same structure with the same energy, and no defect. That a displaced atom and an empty place close to each other cancel out, also by one atom replacing another, is well known from radiation damage in crystals~\citep{was2017}. Our program only checked whether the moved atom had returned to \emph{its own} place, so it missed these cases. We exclude them from the test, which leaves 150 Frenkel pairs; the consequences for training are discussed in Section~\ref{sec:limits}.
 
-\emph{An antisite is a defect of chemical order, not of volume.} After relaxation the neighbours have adjusted their distances to the exchanged atoms, and the two cells are close to normal for their species: the cell of the A atom on a B site is slightly large, and that of the B atom on an A site is normal. What remains is the wrong chemistry. Both atoms have lost bonds to the other species: the A atom has 1.8 unlike neighbours on average where 2.4 is usual, and the B atom 3.8 where 4.4 is usual. The A--B bond is the strongest in this mixture, so this is also where the energy is lost.
+\emph{An antisite is a fault in who sits next to whom, not in how much room there is.} After relaxation the neighbours have adjusted their distances to the two exchanged atoms, and the cell of each is close to normal for its species: the cell of the A atom in a B place is slightly large, and that of the B atom in an A place is normal. What remains is the wrong chemistry. Both atoms have lost neighbours of the other species: the A atom has 1.8 unlike neighbours on average where 2.4 is usual, and the B atom 3.8 where 4.4 is usual. Unlike atoms attract each other most strongly in this mixture, so this is also where energy is lost.
 
-\emph{An antisite does not always cost energy.} The Frenkel pair and the antisite keep all atoms, so the energy difference to the original glass is their formation energy. It is positive for 91\% of the Frenkel pairs (median $3.2\,\epsilon_{AA}$) and for 89\% of the antisites (median $2.8\,\epsilon_{AA}$). In the other 11\% the swapped and relaxed glass is \emph{lower} in energy than the original. In a stable ordered crystal an antisite always costs energy. A quickly cooled glass is not in its lowest state, and exchanging two atoms can help it to a lower one; this is the principle of the swap Monte Carlo method, which equilibrates glasses by such exchanges~\citep{ninarello2017}. The original glass is still the well-defined target for repair, but in these cases it is not the more stable structure.
+\emph{An antisite does not always cost energy.} The Frenkel pair and the antisite keep all atoms, so their energy can be compared directly with that of the original glass. It is higher for 91\% of the Frenkel pairs (median $3.2\,\epsilon$) and for 89\% of the antisites (median $2.8\,\epsilon$). In the other 11\% the swapped and relaxed glass is \emph{lower} in energy than the original. In a stable ordered crystal a swap always costs energy. A quickly cooled glass is not in its most stable state, and exchanging two atoms can help it to a more stable one; a well-known simulation method, swap Monte Carlo, uses exactly such exchanges to make very stable glasses~\citep{ninarello2017}. The original glass is still the well-defined target for repair, but in these cases it is not the more stable structure.
 
 \begin{table}[t]
 \centering
-\caption{The relaxed defects on the test glasses (median, with the middle half of the cases in brackets). ``Atoms displaced'' counts other atoms moved by more than $0.1\sigma$.}
+\caption{The relaxed defects on the test glasses. Values are medians (half of the cases lie below, half above), with the middle half of the cases in brackets. ``Atoms displaced'' counts other atoms moved by more than $0.1\sigma$.}
 \label{tab:physics}
 \small
 \begin{tabular}{@{}lcccc@{}}
@@ -143,14 +172,14 @@ Antisite & exchange the species of an A atom and its nearest B atom & 256 \\
 Real defects in the test & 200 & 200 & 150 & 200 \\
 Atoms displaced & 14 [3, 43] & 22 [12, 40] & 44 [21, 69] & 29 [15, 55] \\
 Largest displacement of another atom ($\sigma$) & 0.33 & 0.32 & 0.64 & 0.42 \\
-Energy above the original ($\epsilon_{AA}$) & -- & -- & 3.2 [1.5, 5.0] & 2.8 [1.4, 4.3] \\
+Energy above the original ($\epsilon$) & -- & -- & 3.2 [1.5, 5.0] & 2.8 [1.4, 4.3] \\
 \bottomrule
 \end{tabular}
 \end{table}
 
-\subsection{Which model is used at each stage, and why}
+\subsection{Which tool is used at each stage, and why}
 
-Table~\ref{tab:stages} lists every tool in the study. The learned parts are one network, a graph network with the symmetries of the problem, used in three ways.
+Table~\ref{tab:stages} lists every tool in the study. The learned parts are one neural network, used in three ways.
 
 \begin{table}[t]
 \centering
@@ -161,12 +190,12 @@ Table~\ref{tab:stages} lists every tool in the study. The learned parts are one 
 \toprule
 Stage & Tool & Why \\
 \midrule
-Make glasses & molecular dynamics with the Kob--Andersen potential (LAMMPS) & The physical ground truth. \\
-Relax defects; final step of repair & energy minimisation (FIRE~\citep{bitzek2006fire}) & Defines a relaxed glass, and decides which minimum a corrected glass falls into. \\
-Learn the glass without labels & periodic EGNN, denoising loss & Learns what normal glass looks like from defect-free glasses only (Section~\ref{sec:equations}). \\
-Find the defect & the same EGNN with a per-atom classifier & The answer must not change when the glass is shifted, rotated or its atoms renumbered, and must respect the periodic box. \\
-Repair without a potential (tested) & the same EGNN, denoising loss with a defect as the perturbation & Tests whether the network can replace minimisation. \\
-Baselines for finding & cell size; number of unlike neighbours; atom energy & The simplest measures of free volume and of chemical order, and the standard measure that uses the potential. \\
+Make glasses & simulation of the atoms' motion (molecular dynamics, LAMMPS) & The physical ground truth. \\
+Relax defects; final step of repair & energy minimisation (FIRE~\citep{bitzek2006fire}) & Defines a relaxed glass, and decides which valley a corrected glass falls into. \\
+Learn the glass without labels & graph neural network (EGNN), denoising loss & Learns what normal glass looks like from defect-free glasses only (Section~\ref{sec:equations}). \\
+Find the defect & the same network with a label for every atom & The answer must not change when the glass is shifted, turned or its atoms renumbered, and must respect the periodic box. \\
+Repair without a potential (tested) & the same network, denoising loss with a defect as the disturbance & Tests whether the network can replace minimisation. \\
+Baselines for finding & cell size; number of unlike neighbours; atom energy & The simplest measures of empty space and of chemical order, and the standard measure that uses the potential. \\
 \bottomrule
 \end{tabularx}
 \end{table}
@@ -174,17 +203,17 @@ Baselines for finding & cell size; number of unlike neighbours; atom energy & Th
 \subsection{Model description}
 \label{sec:model}
 
-All learned parts are one deep network, an equivariant graph neural network (EGNN~\citep{satorras2021egnn}) adapted to a periodic box, with two output heads (Figure~\ref{fig:network}, Table~\ref{tab:models}).
+A neural network for atoms has to respect three facts. The atoms have no natural order. The glass can be shifted or turned without changing it. And the simulated box repeats in every direction. A \emph{graph neural network} handles all three. It treats the glass as a network in which every atom is a node and atoms close to each other are linked. Each atom carries a list of 128 numbers, its \emph{features}, that describes its surroundings. In every layer each atom receives a message from each of its neighbours and updates its features, so that after several layers the features describe a wider and wider neighbourhood. We use the EGNN design~\citep{satorras2021egnn}, adapted to a periodic box, with two outputs, called heads (Figure~\ref{fig:network}, Table~\ref{tab:models}). The layers are as follows.
 
-\textbf{Input layer.} The input is one glass: for each of its $N$ atoms a position $x_i\in\mathbb{R}^2$ in the periodic box and a species $t_i\in\{\mathrm{A},\mathrm{B}\}$. The denoiser and the repair network also receive the noise level $\sigma_n$, encoded as 64 random Fourier features of $\log\sigma_n$. The starting feature vector of atom $i$ is
+\textbf{Input layer.} The input is one glass: for each of its $N$ atoms a position $x_i\in\mathbb{R}^2$ in the periodic box and a species $t_i\in\{\mathrm{A},\mathrm{B}\}$. The denoiser and the repair network also receive the noise level $\sigma_n$ (how far the atoms were shifted), encoded as 64 random Fourier features of $\log\sigma_n$. The starting features of atom $i$ are
 \begin{equation}
 h_i^0=\mathrm{MLP}\big(E(t_i)+\mathrm{MLP}(\mathrm{Fourier}(\log\sigma_n))\big)\in\mathbb{R}^{128},
 \end{equation}
-where $E$ is a learned look-up table; the finder has no noise term. Positions enter only through the graph.
+where $E$ is a learned look-up table and MLP stands for a small fully connected network; the finder has no noise term. Positions enter only through the graph.
 
-\textbf{Graph layer.} Atoms closer than $r_c=2.5\sigma$ are linked (about 22 neighbours each), and $r_{ij}$ is the shortest vector from atom $i$ to atom $j$ across the periodic box. Distances are expanded in 16 Gaussian radial basis functions and multiplied by a smooth cutoff $f_c(r)=\tfrac12[\cos(\pi r/r_c)+1]$.
+\textbf{Graph layer.} Atoms closer than $r_c=2.5\sigma$ are linked (about 22 neighbours each), and $r_{ij}$ is the shortest vector from atom $i$ to atom $j$ across the periodic box. Distances are expanded in 16 Gaussian radial basis functions (rbf) and multiplied by a smooth cutoff $f_c(r)=\tfrac12[\cos(\pi r/r_c)+1]$, so that a neighbour fades out gradually as it reaches the edge of the range.
 
-\textbf{EGNN layers.} Four layers (Figure~\ref{fig:network}b) pass messages between linked atoms, update the features and produce one vector per atom:
+\textbf{EGNN layers.} Four layers (Figure~\ref{fig:network}b) pass messages $m_{ij}$ between linked atoms, update the features and produce one vector per atom:
 \begin{equation}
 \begin{aligned}
 m_{ij} &= \phi_e\big(h_i,h_j,\mathrm{rbf}(|r_{ij}|)\big)\,f_c(|r_{ij}|), \qquad
@@ -195,14 +224,14 @@ v_i^{\ell} &= \tfrac{1}{K_0}\textstyle\sum_j r_{ij}\,\phi_x(m_{ij})\,f_c(|r_{ij}
 \end{equation}
 $\phi_e$ ($272\to128\to128$), $\phi_h$ ($256\to128\to128$) and $\phi_x$ ($128\to128\to1$) are two-layer networks with SiLU activations, $g$ is a sigmoid gate, LN is layer normalisation and $K_0=24$. Each layer has 117,890 parameters.
 
-\textbf{Output heads.} The \emph{vector head} adds the vectors of the four layers, $d_i=\sum_\ell v_i^\ell\in\mathbb{R}^2$ (no activation): the predicted shift of atom $i$. The denoiser and the repair network use it. The \emph{role head} is a two-layer network ($128\to128\to5$) on the final features $h_i^4$. It gives each atom a score for five roles: \emph{intact}, \emph{next to an empty site}, \emph{extra atom}, \emph{displaced atom} and \emph{wrong species}. The finder uses it.
+\textbf{Output heads.} The \emph{vector head} adds the vectors of the four layers, $d_i=\sum_\ell v_i^\ell\in\mathbb{R}^2$ (no activation). It is an arrow for every atom: the predicted shift of that atom. The denoiser and the repair network use it. The \emph{role head} is a two-layer network ($128\to128\to5$) on the final features $h_i^4$. It gives each atom a score for five roles: \emph{intact}, \emph{next to an empty site}, \emph{extra atom}, \emph{displaced atom} and \emph{wrong species}. The finder uses it.
 
-\textbf{What the equations model.} The messages depend only on distances and species, so the features $h_i$, and with them the role scores, do not change when the glass is shifted, rotated or its atoms renumbered. The vector $v_i^\ell$ is a sum of neighbour vectors with learned weights, so it turns with the glass. This is the form of a pair force, $F_i=\sum_j r_{ij}\,f(|r_{ij}|)$, except that the weight depends on the whole neighbourhood and not on one distance: the vector head is a learned many-body force field. Each layer reaches $2.5\sigma$, so after four layers an atom's output depends on the structure up to $10\sigma$ away.
+\textbf{What the equations model.} The messages depend only on distances and species. So the features $h_i$, and with them the role scores, do not change when the glass is shifted, turned or its atoms renumbered. The vector $v_i^\ell$ is a sum of the arrows to the neighbours, each with a learned weight, so it turns when the glass is turned. This is exactly the form of a force between pairs of atoms, $F_i=\sum_j r_{ij}\,f(|r_{ij}|)$, except that the weight depends on the whole neighbourhood and not on one distance. The vector head is therefore a learned force field. Each layer reaches $2.5\sigma$, so after four layers an atom's output depends on the structure up to $10\sigma$ away, about ten atom diameters.
 
 \begin{figure}[t]
 \centering
 \includegraphics[width=\linewidth]{figures/pd_fig4_network.pdf}
-\caption{The deep learning model. (a)~One network: the positions define a periodic graph, the per-atom inputs define the starting features, and four EGNN layers turn both into features and a vector for every atom. The vector head gives the denoiser and the repair network, the role head the finder. (b)~One EGNN layer: blue items do not change when the glass is rotated, orange items turn with it. (c)~Training: the denoiser is trained first, without labels, and its weights start the finder and the repair network.}
+\caption{The deep learning model. (a)~One network: the positions define a periodic graph, the per-atom inputs define the starting features, and four EGNN layers turn both into features and a vector for every atom. The vector head gives the denoiser and the repair network, the role head the finder. (b)~One EGNN layer: blue items do not change when the glass is turned, orange items turn with it. (c)~Training: the denoiser is trained first, without labels, and its weights start the finder and the repair network.}
 \label{fig:network}
 \end{figure}
 
@@ -226,41 +255,41 @@ Repair network, version 2 & as the denoiser & the same with the displaced atoms 
 \subsection{Loss functions and training}
 \label{sec:equations}
 
-\textbf{The denoising loss.} Following DM2, we take a defect-free glass $x_0$, shift every atom by Gaussian noise of size $\sigma_n$, $x=x_0+\sigma_n\varepsilon$, and train the network to predict the shift:
+\textbf{The denoising loss.} Following DM2, we take a defect-free glass $x_0$, shift every atom by random (Gaussian) noise of size $\sigma_n$, $x=x_0+\sigma_n\varepsilon$, and train the network to predict the shift:
 \begin{equation}
 \mathcal{L}=\mathbb{E}\,\big\|d_\theta(x,\sigma_n)-(x-x_0)\big\|^2 .
 \label{eq:loss}
 \end{equation}
-The best possible prediction is the average shift over all glasses that could have produced $x$. By Tweedie's formula~\citep{efron2011,vincent2011} this is $d^{*}(x)=-\sigma_n^{2}\,\nabla\log p_{\sigma_n}(x)$, where $p_{\sigma_n}$ is the distribution of noisy glasses. The correction $-d^{*}$ therefore points towards more probable structures. For a system in thermal equilibrium, $\log p=-U/k_BT$ up to a constant, and the gradient of $\log p$ is the physical force divided by $k_BT$. So the loss teaches the network a \emph{restoring force}. Our glasses are not in equilibrium, so we checked this directly: at $\sigma_n=0.05$ the learned correction and the true Kob--Andersen force point the same way (average cosine 0.81), more closely than the straight line back to the original does (0.68).
+Many different glasses could have produced the same noisy structure $x$, so the best the network can do is to predict the average shift over all of them. A classical result, Tweedie's formula~\citep{efron2011,vincent2011}, says what this average is: $d^{*}(x)=-\sigma_n^{2}\,\nabla\log p_{\sigma_n}(x)$, where $p_{\sigma_n}(x)$ says how likely the noisy structure $x$ is. In words: undoing the predicted shift moves the atoms towards more likely structures. For atoms that move freely at a fixed temperature (thermal equilibrium), the likely structures are those of low energy ($\log p=-U/k_BT$ up to a constant, with $U$ the energy and $T$ the temperature), and the direction towards more likely structures is the direction of the physical force. So the loss teaches the network a \emph{restoring force}, although it is never shown a force. Our glasses are not in equilibrium, so we checked this directly: at $\sigma_n=0.05$ the learned correction and the true force of the model point the same way (average cosine 0.81, where 1 means the same direction), more closely than the straight line back to the original does (0.68).
 
-\textbf{The finder's loss.} The finder is trained on the relaxed defected glasses. The true role $y_i$ of every atom is known from the operation that made the defect, and the loss is the cross-entropy between the role scores and the true roles:
+\textbf{The finder's loss.} The finder is trained on the relaxed defected glasses. The true role $y_i$ of every atom is known from the operation that made the defect. The loss is the cross-entropy, the standard loss for classification, between the role scores and the true roles:
 \begin{equation}
 \mathcal{L}_{\text{find}}=-\,\mathbb{E}\left[\frac{\sum_i w_{y_i}\,\log p_\theta(y_i\mid x)_i}{\sum_i w_{y_i}}\right],\qquad w_c\propto(\text{frequency of role }c)^{-1/2}.
 \label{eq:find}
 \end{equation}
-More than 98\% of the atoms are intact, so the rare roles are weighted up: $w=1$, 9.2, 31.7, 31.8 and 22.4 for the five roles. Such weights inflate the predicted probabilities of the rare roles. At test time we subtract $\log w_c$ from each score, the standard correction (logit adjustment~\citep{menon2021}); it needs no retraining.
+More than 98\% of the atoms are intact, so a network could score well by calling every atom intact. To prevent this, mistakes on the rare roles count more: $w=1$, 9.2, 31.7, 31.8 and 22.4 for the five roles. Such weights make the network overstate the probabilities of the rare roles. At test time we therefore subtract $\log w_c$ from each score, the standard correction (logit adjustment~\citep{menon2021}); it needs no retraining. We call this step \emph{calibration}.
 
-\textbf{The repair loss.} To test repair without a potential, we train the denoiser on one more kind of perturbation. The input is a defected glass with the number and species of atoms already corrected, plus noise, $x=x_{\text{corrected}}+\sigma_n\varepsilon$, and the target is again the shift to the original glass:
+\textbf{The repair loss.} To test repair without a potential, we train the denoiser on one more kind of disturbance. The input is a defected glass in which the number and species of the atoms have already been corrected, plus noise, $x=x_{\text{corrected}}+\sigma_n\varepsilon$. The target is again the shift to the original glass:
 \begin{equation}
 \mathcal{L}_{\text{repair}}=\mathbb{E}\left[\frac{\sum_i \omega_i\,\big\|d_\theta(x,\sigma_n)_i-(x-x_0)_i\big\|^2}{\sum_i\omega_i}\right].
 \label{eq:repair}
 \end{equation}
 In version 1 every atom counts the same ($\omega_i=1$). In version 2 the atoms that the defect displaced by more than $0.1\sigma$ count 11 times, and most examples have little noise.
 
-\textbf{Training.} The glasses are split 800/100/100 into training, validation and test. Validation glasses are used to choose settings and to watch for over-fitting, test glasses only for the results. The denoiser is trained first, on defect-free glasses only. The finder and the repair network start from its weights (Figure~\ref{fig:network}c). We use PyTorch, AdamW with learning rate $2\times10^{-4}$, batches of 16 glasses and an exponential moving average of the weights (0.999). One batch in five contains defect-free glasses only, so that the networks learn to leave intact glass alone. Each run takes between one and two and a half hours on one T4 GPU.
+\textbf{Training.} The glasses are split 800/100/100 into training, validation and test. Validation glasses are used to choose settings and to watch for over-fitting, test glasses only for the results. The denoiser is trained first, on defect-free glasses only. The finder and the repair network start from its weights (Figure~\ref{fig:network}c). We use PyTorch and the AdamW optimiser with learning rate $2\times10^{-4}$. One \emph{update} is one learning step on a batch of 16 glasses. We keep an exponential moving average of the weights (0.999) and use it for the tests. One batch in five contains defect-free glasses only, so that the networks learn to leave intact glass alone. Each run takes between one and two and a half hours on one T4 GPU.
 
 \subsection{Evaluation metrics}
 \label{sec:test}
 
 All tests use the same \pd{n-test} real defects from the 100 test glasses, and every rate is a fraction of all defects of that type.
 
-\textbf{Found} answers ``is the defect where the method points?''. Each method (the finder, and the baselines of Section~\ref{sec:baselines}) gives every atom a score and flags the atom with the highest score; for the finder the score is the probability of the role that belongs to the defect. The defect is \emph{found} if the flagged atom lies within $1.5\sigma$ of it (of either site, for a Frenkel pair or an antisite); $1.5\sigma$ covers the nearest neighbours. A randomly chosen atom is that close \pd{chance-min}--\pd{chance-max}\% of the time.
+\textbf{Found} answers the question ``is the defect where the method points?''. Each method (the finder, and the baselines of Section~\ref{sec:baselines}) gives every atom a score and flags the atom with the highest score; for the finder the score is the probability of the role that belongs to the defect. The defect is \emph{found} if the flagged atom lies within $1.5\sigma$ of it (of either end, for a Frenkel pair or an antisite); $1.5\sigma$ covers the nearest neighbours. A randomly chosen atom is that close only \pd{chance-min}--\pd{chance-max}\% of the time.
 
-\textbf{Restored} answers ``did we get the original glass back?''. The repair has two steps (Figure~\ref{fig:pipeline}). First the number or species of atoms is corrected at the flagged atom: for a vacancy, an atom of the missing species is put at the most open point within $1.5\sigma$; for an interstitial, the flagged atom is removed; for a Frenkel pair, the flagged atom is moved to one of up to eight open points $1$--$3.2\sigma$ away; for an antisite, a neighbouring A--B pair near the flagged atom is exchanged. Where there is a choice (which open point, which pair), each method chooses with its own score, and the energy route tries every option and keeps the one with the lowest energy. Then the energy is minimised with all atoms free. The glass is \emph{restored} if the result is the original glass: every original atom has an atom of its species within $0.05\sigma$, one to one. Identical atoms may have exchanged places, since that does not change the structure.
+\textbf{Restored} answers the question ``did we get the original glass back?''. The repair has two steps (Figure~\ref{fig:pipeline}). First the number or species of atoms is corrected at the flagged atom: for a vacancy, an atom of the missing species is put at the most open point within $1.5\sigma$; for an interstitial, the flagged atom is removed; for a Frenkel pair, the flagged atom is moved to one of up to eight open points $1$--$3.2\sigma$ away; for an antisite, a neighbouring A--B pair near the flagged atom is exchanged. Where there is a choice (which open point, which pair), each method chooses with its own score, and the energy route tries every option and keeps the one with the lowest energy. Then the energy is minimised with all atoms free. The glass is \emph{restored} if the result is the original glass: every original atom has an atom of its species within $0.05\sigma$, one to one. Identical atoms may have exchanged places, since that does not change the structure.
 
-The type of defect is taken as known in these tests; only its location is not. As a ceiling we also run the repair with the true location given.
+The type of defect is taken as known in these tests; only its location is not. As an upper limit we also run the repair with the true location given.
 
-\textbf{Uncertainty.} Brackets are 95\% intervals obtained by resampling whole test glasses (10,000 bootstrap samples), because the two defects made in one glass are not independent. Methods are compared on the same defects with McNemar's exact test.
+\textbf{Uncertainty.} With 150--200 defects of each type, a rate is only known to within several points. The brackets in our tables give the range that holds the true rate with 95\% confidence. We obtain it by drawing the 100 test glasses again at random, 10,000 times (a bootstrap); whole glasses are drawn because the two defects made in one glass are not independent. To compare two methods we look at the same defects and count those that only one of the two gets right (McNemar's test). The resulting $p$ is the probability that a lead of this size arises by chance; below 0.05 we call a difference significant.
 
 \subsection{Experimental iterations}
 \label{sec:iterations}
@@ -269,9 +298,9 @@ The main results took five training runs (the denoiser, the finder in two stages
 \begin{enumerate}
 \item \emph{Is training on defects needed?} The denoiser alone, which has never seen a defect, already finds 44\% of the vacancies by the size of its correction, but few interstitials and antisites. So we trained the finder on labelled defects, starting from the denoiser.
 \item \emph{Is the finder trained long enough?} Continuing for 40,000 updates at half the learning rate found a few more defects. Over the last 20,000 updates the validation scores moved by two points or less, so we stopped.
-\item \emph{Do its probabilities mean anything?} The class weights made the finder see defects in most defect-free glasses. Subtracting the logarithm of the weights at test time corrected this without retraining.
+\item \emph{Do its probabilities mean anything?} The class weights made the finder see defects in most defect-free glasses. Calibration corrected this without retraining.
 \item \emph{Why did the first repair network not learn the defect?} A defect displaces a few tens of the 256 atoms, so the random noise on all atoms filled the loss. Version 2 weights the displaced atoms up and trains mostly at small noise.
-\item \emph{Are the labels right?} The physics check found the annihilated Frenkel pairs (Section~\ref{sec:defects}). All tests were repeated without them.
+\item \emph{Are the labels right?} The physics check found the Frenkel pairs that had undone themselves (Section~\ref{sec:defects}). All tests were repeated without them.
 \ifablations
 \item \emph{Which design choices matter?} Six short runs change one setting at a time: the starting weights, the number of layers, the class weights and the cleaned training set (Section~\ref{sec:ablations}).
 \fi
@@ -284,15 +313,15 @@ The main results took five training runs (the denoiser, the finder in two stages
 
 \textbf{Baselines (implemented and run by us).} Three measures that involve no learning flag one atom per glass, as the finder does, and are followed by the same repair steps and the same minimiser:
 \begin{itemize}
-\item \emph{Cell size} (no potential, no learning): the area of each atom's Voronoi cell, measured against the mean and spread for its species in defect-free glasses. It measures free volume~\citep{starr2002}. We flag the largest cell for a vacancy, the smallest for an interstitial, and the most unusual for a Frenkel pair or an antisite.
-\item \emph{Unlike neighbours} (no potential, no learning): the number of nearest neighbours of the other species, measured against its species in the same way. It measures chemical order. Each defect leaves atoms that are short of A--B bonds for their species (the neighbours of an empty site, a squeezed-in extra atom, the two exchanged atoms), so we flag the atom with the fewest.
-\item \emph{Atom energy} (needs the potential): each atom's share of the potential energy, measured against its species in the same way. The highest is flagged. Forces cannot be used, because they vanish in a relaxed glass.
+\item \emph{Cell size} (no potential, no learning): the area of each atom's cell, compared with what is usual for its species in defect-free glasses. It measures how much room an atom has~\citep{starr2002}. We flag the largest cell for a vacancy, the smallest for an interstitial, and the most unusual for a Frenkel pair or an antisite.
+\item \emph{Unlike neighbours} (no potential, no learning): the number of nearest neighbours of the other species, compared with what is usual in the same way. It measures chemical order, that is, who sits next to whom. Each defect leaves atoms with too few unlike neighbours for their species (the neighbours of an empty place, a squeezed-in extra atom, the two exchanged atoms), so we flag the atom with the fewest.
+\item \emph{Atom energy} (needs the potential): each atom's share of the total energy, compared with what is usual in the same way. The highest is flagged. Forces cannot be used, because in a relaxed glass they are all zero.
 \end{itemize}
 The rules for the two structural measures (largest, smallest, fewest) were chosen as the best on the validation glasses (Appendix~\ref{app:details}). Two reference values frame the results: a randomly chosen atom, and the repair with the true location given.
 
 \textbf{Reproduction evidence.} Every number comes from our own runs on the same \pd{n-test} defects. The atom-energy baseline was computed by two separate programs, which agree on every single defect. The evaluation of the finder, repeated on a different machine (CPU in place of GPU), gave the same finding rates. The denoiser is our implementation of the DM2 training~\citep{yang2026dm2} for the two-dimensional glass.
 
-\textbf{Extensions beyond DM2.} DM2 is a denoiser used to generate glasses. We add: (i)~the role head and its class-weighted loss, which turn the denoiser into a finder; (ii)~calibration of the finder's probabilities; (iii)~a defect, and not only noise, as the perturbation to remove, with the displaced atoms weighted up; (iv)~tests against measures without learning, on the same defects, with paired statistics.
+\textbf{Extensions beyond DM2.} DM2 is a denoiser used to generate glasses. We add: (i)~the role head and its class-weighted loss, which turn the denoiser into a finder; (ii)~calibration of the finder's probabilities; (iii)~a defect, and not only noise, as the disturbance to remove, with the displaced atoms weighted up; (iv)~tests against measures without learning, on the same defects, with paired statistics.
 
 \begin{figure}[t]
 \centering
@@ -305,23 +334,23 @@ The rules for the two structural measures (largest, smallest, fewest) were chose
 
 \subsection{Before any training on defects}
 
-The denoiser trained only on defect-free glasses already carries information about defects. Ranking atoms by the size of its predicted correction finds 44\% of vacancies, against 29.5\% for the atom energy. It is poor for interstitials and antisites (12\% and 15\%), and it cannot say which species belongs where. This is the reason for training on defects, and for starting that training from the denoiser.
+The denoiser, trained only on defect-free glasses, already carries information about defects. Ranking the atoms by the size of the correction it predicts finds 44\% of vacancies, against 29.5\% for the atom energy. It is poor for interstitials and antisites (12\% and 15\%), and it cannot say which species belongs where. This is the reason for training on defects, and for starting that training from the denoiser.
 
 \subsection{Finding the defect}
 \label{sec:find}
 
 \IfFileExists{pd_table_found.tex}{\input{pd_table_found}}{}
 
-Table~\ref{tab:found} and Figure~\ref{fig:results}a give the main result. The learned finder locates \pd{found-finder-vacancy}\% of vacancies, \pd{found-finder-interstitial}\% of interstitials and \pd{found-finder-antisite}\% of antisites. The best of the three other measures finds \pd{found-best-vacancy}\%, \pd{found-best-interstitial}\% and \pd{found-best-antisite}\%, so the finder is ahead by \pd{lead-found-min}--\pd{lead-found-max} points. Compared on the same defects, its lead over each measure is significant for each of these three types ($\pd{p-worst-found}$, McNemar's test). The finder also locates \pd{found-finder-frenkel}\% of the \pd{n-frenkel} real Frenkel pairs, against \pd{found-energy-frenkel}\% for the atom energy ($p=\pd{p-found-energy-frenkel}$) and less for the two structural measures. A Frenkel pair has two ends, the empty site and the displaced atom, and a flag near either end counts as found. The finder flags exactly the displaced atom, which the repair has to move back, in only \pd{frenkel-exact-finder}\% of the pairs (the atom energy in \pd{frenkel-exact-energy}\%).
+Table~\ref{tab:found} and Figure~\ref{fig:results}a give the main result. The learned finder locates \pd{found-finder-vacancy}\% of vacancies, \pd{found-finder-interstitial}\% of interstitials and \pd{found-finder-antisite}\% of antisites. The best of the three other measures finds \pd{found-best-vacancy}\%, \pd{found-best-interstitial}\% and \pd{found-best-antisite}\%, so the finder is ahead by \pd{lead-found-min}--\pd{lead-found-max} points. Compared on the same defects, its lead over each measure is significant for each of these three types ($\pd{p-worst-found}$). The finder also locates \pd{found-finder-frenkel}\% of the \pd{n-frenkel} real Frenkel pairs, against \pd{found-energy-frenkel}\% for the atom energy ($p=\pd{p-found-energy-frenkel}$) and less for the two structural measures. A Frenkel pair has two ends, the empty place and the displaced atom, and a flag near either end counts as found. The finder flags exactly the displaced atom, which the repair has to move back, in only \pd{frenkel-exact-finder}\% of the pairs (the atom energy in \pd{frenkel-exact-energy}\%).
 
-The three other measures fail in ways that say something about the defects. \emph{Cell size} is a serious competitor only for vacancies (\pd{found-geometry-vacancy}\%), where missing volume is what one looks for. It finds few interstitials and antisites (\pd{found-geometry-interstitial}\% and \pd{found-geometry-antisite}\%), because after relaxation their cells are hardly unusual (Section~\ref{sec:defects}). \emph{The number of unlike neighbours} finds \pd{found-bonds-min}--\pd{found-bonds-max}\% of every type, close to what \emph{the atom energy} finds (\pd{found-energy-min}--\pd{found-energy-max}\%). This is no coincidence. In defect-free glass an atom's energy follows its number of unlike neighbours closely (correlation $-0.90$ for A atoms and $-0.84$ for B atoms), because the A--B bond is by far the strongest. For finding defects, the potential therefore adds little to a count of bonds.
+The three other measures fail in ways that say something about the defects. \emph{Cell size} is a serious competitor only for vacancies (\pd{found-geometry-vacancy}\%), where missing volume is what one looks for. It finds few interstitials and antisites (\pd{found-geometry-interstitial}\% and \pd{found-geometry-antisite}\%), because after relaxation their cells are hardly unusual (Section~\ref{sec:defects}). \emph{The number of unlike neighbours} finds \pd{found-bonds-min}--\pd{found-bonds-max}\% of every type, close to what \emph{the atom energy} finds (\pd{found-energy-min}--\pd{found-energy-max}\%). This is no coincidence. In defect-free glass an atom's energy follows its number of unlike neighbours closely (correlation $-0.90$ for A atoms and $-0.84$ for B atoms, where $-1$ would be a perfect straight-line relation), because unlike atoms attract each other by far the most strongly. For finding defects, the potential therefore adds little to a simple count of neighbours.
 
-All three are limited by the same thing. A relaxed defect has spread its energy and volume over many atoms (Table~\ref{tab:physics}), and a glass has many atoms that are naturally loosely packed, short of unlike neighbours or high in energy. The atom with the highest energy is at the defect about a third of the time or less.
+All three are limited by the same thing. A relaxed defect has spread its energy and its empty space over many atoms (Table~\ref{tab:physics}), and a glass has many atoms that are naturally loosely packed, short of unlike neighbours or high in energy. The atom with the highest energy is at the defect about a third of the time or less.
 
 \begin{figure}[t]
 \centering
 \IfFileExists{figures/pd_fig3_results.pdf}{\includegraphics[width=\linewidth]{figures/pd_fig3_results.pdf}}{\fbox{figure pending}}
-\caption{(a)~Defects found: the flagged atom is within $1.5\sigma$ of the defect. Grey lines: a randomly chosen atom. (b)~Original glasses restored after correcting the atoms at the flagged atom and minimising the energy. Grey lines: the same with the true location given. Whiskers: 95\% intervals from resampling test glasses. The first three methods use no potential to flag the atom. The numbers are the learned finder's rates; all values are in Tables~\ref{tab:found} and~\ref{tab:restored}.}
+\caption{(a)~Defects found: the flagged atom is within $1.5\sigma$ of the defect. Grey lines: a randomly chosen atom. (b)~Original glasses restored after correcting the atoms at the flagged atom and minimising the energy. Grey lines: the same with the true location given. Whiskers: the range that holds the true rate with 95\% confidence. The first three methods use no potential to flag the atom. The numbers are the learned finder's rates; all values are in Tables~\ref{tab:found} and~\ref{tab:restored}.}
 \label{fig:results}
 \end{figure}
 
@@ -330,26 +359,30 @@ All three are limited by the same thing. A relaxed defect has spread its energy 
 
 \IfFileExists{pd_table_restored.tex}{\input{pd_table_restored}}{}
 
-Table~\ref{tab:restored} and Figure~\ref{fig:results}b show what happens when the correction and the minimisation follow. With the learned finder, \pd{restored-finder-vacancy}\% of vacancy glasses, \pd{restored-finder-interstitial}\% of interstitial glasses and \pd{restored-finder-antisite}\% of antisite glasses return to their original structure. The best of the other routes restores \pd{restored-best-vacancy}\%, \pd{restored-best-interstitial}\% and \pd{restored-best-antisite}\% ($\pd{p-worst-restored}$ for the finder against each route). Frenkel pairs are the hardest to restore: \pd{restored-finder-frenkel}\% with the finder, \pd{restored-energy-frenkel}\% with the energy route, which tries every open point and keeps the lowest energy, and \pd{restored-geometry-frenkel}\% and \pd{restored-bonds-frenkel}\% with the two structural measures. Two things have to be right here, the displaced atom and the open point it came from, and the finder's lead over the energy route is within the noise ($p=\pd{p-restored-energy-frenkel}$).
+Table~\ref{tab:restored} and Figure~\ref{fig:results}b show what happens when the correction and the minimisation follow. With the learned finder, \pd{restored-finder-vacancy}\% of vacancy glasses, \pd{restored-finder-interstitial}\% of interstitial glasses and \pd{restored-finder-antisite}\% of antisite glasses return to their original structure. The best of the other routes restores \pd{restored-best-vacancy}\%, \pd{restored-best-interstitial}\% and \pd{restored-best-antisite}\% ($\pd{p-worst-restored}$ for the finder against each route). Frenkel pairs are the hardest to restore: \pd{restored-finder-frenkel}\% with the finder, \pd{restored-energy-frenkel}\% with the energy route, which tries every open point and keeps the lowest energy, and \pd{restored-geometry-frenkel}\% and \pd{restored-bonds-frenkel}\% with the two structural measures. Two things have to be right here, the displaced atom and the open point it came from, and the finder's lead over the energy route could be chance ($p=\pd{p-restored-energy-frenkel}$).
 
-Two things stand out. First, restoring follows finding. With the finder, the restored rate is about three quarters of the found rate for vacancies and interstitials. It is lower for antisites and much lower for Frenkel pairs, where a second choice has to be right as well: which pair to exchange, or which open point to move the atom to. Second, the ceiling is far above every method. With the true location given, minimisation alone restores \pd{restored-ceiling-vacancy}\% of vacancies, \pd{restored-ceiling-interstitial}\% of interstitials, \pd{restored-ceiling-frenkel}\% of Frenkel pairs and \pd{restored-ceiling-antisite}\% of antisites. What is missing is better finding, not better repair. The ceiling is below 100\% because a glass has many minima close to each other: relaxing the defect moved the neighbours, and putting the atom back does not always lead down to the same minimum the glass started in.
+Two things stand out. First, restoring follows finding. With the finder, the restored rate is about three quarters of the found rate for vacancies and interstitials. It is lower for antisites and much lower for Frenkel pairs, where a second choice has to be right as well: which pair to exchange, or which open point to move the atom to. Second, the upper limit is far above every method. With the true location given, minimisation alone restores \pd{restored-ceiling-vacancy}\% of vacancies, \pd{restored-ceiling-interstitial}\% of interstitials, \pd{restored-ceiling-frenkel}\% of Frenkel pairs and \pd{restored-ceiling-antisite}\% of antisites. What is missing is better finding, not better repair. The upper limit is below 100\% because a glass has many valleys of the energy close to each other: relaxing the defect moved the neighbours, and putting the atom back does not always lead down into the valley the glass started in.
+
+\ifablations
+\input{pd_section_ablations}
+\fi
 
 \subsection{The repair network}
 \label{sec:repairnet}
 
-We expected the repair network to be the centre of this study. It was not. Its first version learned to remove noise but not the defect, because the defect moves only a few tens of atoms and random noise on all 256 filled the loss. The second version, with the displaced atoms weighted up, did learn the defect: on the test defects, one step removes 13--16\% of the error on the displaced atoms, against 7--9\% for the first version.
+We expected the repair network to be the centre of this study. It was not. Its first version learned to remove noise but not the defect, because the defect moves only a few tens of atoms and the random noise on all 256 filled the loss. The second version, with the displaced atoms weighted up, did learn the defect: on the test defects, one step removes 13--16\% of the error on the displaced atoms, against 7--9\% for the first version.
 
-It still does not help. When minimisation follows, applying the repair network first changes the restored rates by less than their uncertainty (vacancies 51.5\% with it and 51\% without; interstitials 34\% and 34.5\%, measured with the first finder). Once the right atom is added or removed, minimisation finishes the repair by itself. Without minimisation, the network moves the displaced atoms closer to their original positions, for vacancies and Frenkel pairs slightly closer than minimisation does, but it pushes atoms onto each other: 20\% of the vacancy glasses and 40\% of the Frenkel glasses end with two atoms closer than is ever seen in the data. Applying it repeatedly makes this worse. A network trained only on distances to a target has no notion that atoms cannot overlap, and the interatomic potential supplies exactly that.
+It still does not help. When minimisation follows, applying the repair network first changes the restored rates by less than their uncertainty (vacancies 51.5\% with it and 51\% without; interstitials 34\% and 34.5\%, measured with the finder after 20,000 updates). Once the right atom is added or removed, minimisation finishes the repair by itself. Without minimisation, the network moves the displaced atoms closer to their original positions, for vacancies and Frenkel pairs slightly closer than minimisation does. But it pushes atoms onto each other: 20\% of the vacancy glasses and 40\% of the Frenkel glasses end with two atoms closer than is ever seen in the data. Applying it repeatedly makes this worse. A network trained only on distances to a target does not know that atoms cannot overlap. The interatomic potential supplies exactly that knowledge.
 
 \subsection{Is there a defect at all?}
 
-The finder ranks the atoms of a glass that is known to contain a defect. Deciding whether a glass contains one at all is a different question. Without the correction for the class weights, the finder gives some atom a defect probability above one half in \pd{glass-clean-raw}\% of \emph{defect-free} glasses. With the correction this falls to \pd{glass-clean-cal}\%, but then only \pd{glass-def-cal}\% of defected glasses are flagged. Ranking glasses by their highest defect probability separates defected from defect-free ones with an area under the curve of \pd{glass-auc} (0.5 is chance, 1 is perfect). The finder is useful for saying where a defect is, and not yet for saying whether there is one. The correction also helps finding: over all test defects the finder locates \pd{exp-60k}\% with it and \pd{exp-uncal}\% without (\pd{exp-p-cal}), most of the gain coming from Frenkel pairs.
+The finder ranks the atoms of a glass that is known to contain a defect. Deciding whether a glass contains one at all is a different question. Without calibration, the finder gives some atom a defect probability above one half in \pd{glass-clean-raw}\% of \emph{defect-free} glasses. With calibration this falls to \pd{glass-clean-cal}\%, but then only \pd{glass-def-cal}\% of defected glasses are flagged. Ranking glasses by their highest defect probability separates defected from defect-free ones with a score of \pd{glass-auc} (the area under the ROC curve: 0.5 is chance, 1 is perfect). The finder is useful for saying where a defect is, and not yet for saying whether there is one. Calibration also helps finding: over all test defects the finder locates \pd{exp-60k}\% with it and \pd{exp-uncal}\% without (\pd{exp-p-cal}), most of the gain coming from Frenkel pairs.
 
 \section{Discussion}
 
-\textbf{Why a learned model.} The question from our review was why artificial intelligence should be used at all, when defects can be made without it. Making defects needs no learning, and we no longer use a model for it. Finding them is different. The finder was shown examples of relaxed defects and then locates new ones from positions and species alone, more reliably than two simple structural measures and than the energies of the potential that made the glass. It can therefore be applied where no potential is available. The simulation's role is to supply examples and to check the answers.
+\textbf{Why a learned model.} The question from our review was why artificial intelligence should be used at all, when defects can be made without it. Making defects needs no learning, and we no longer use a model for it. Finding them is different. The finder was shown examples of relaxed defects and then locates new ones from the positions and species of the atoms alone, more reliably than two simple structural measures and than the energies from the very potential that made the glass. It can therefore be applied where no potential is available. The simulation's role is to supply examples and to check the answers.
 
-\textbf{What the network adds, physically.} The denoising loss gives the network a model of the forces in normal glass (Section~\ref{sec:equations}), and the finder is built on those features. Each simple measure sees one side of a defect, free volume or chemical order, on one atom at a time. A relaxed defect is not marked by one atom with too much volume or too few bonds but by a pattern over many atoms (Table~\ref{tab:physics}). A network that passes messages four times, so that each atom's label depends on the structure up to $10\sigma$ away, can read such a pattern, and both sides of it at once.
+\textbf{What the network adds, physically.} The denoising loss gives the network a model of the forces in normal glass (Section~\ref{sec:equations}), and the finder is built on those features. Each simple measure sees one side of a defect, empty space or chemical order, on one atom at a time. A relaxed defect is not marked by one atom with too much room or too few unlike neighbours, but by a pattern over many atoms (Table~\ref{tab:physics}). A network that passes messages four times, so that each atom's label depends on the structure up to ten atom diameters away, can read such a pattern, and both sides of it at once.
 
 \textbf{Repair is a job for physics.} Once the right atom is added, removed or exchanged, energy minimisation is fast, exact and free of the overlaps that the repair network produces. We see no reason to replace it when a potential is available. When none is available, a repair network would need at least a built-in rule that atoms cannot overlap.
 
@@ -357,24 +390,24 @@ The finder ranks the atoms of a glass that is known to contain a defect. Decidin
 \label{sec:limits}
 
 \begin{itemize}
-\item \textbf{The Frenkel labels used in training were partly wrong.} 27\% of the training Frenkel pairs had annihilated (Section~\ref{sec:defects}) but were still labelled as defects. The finder was therefore taught to call intact atoms displaced, and its Frenkel result is probably lower than it could be. All test numbers here exclude such cases; the finder has not yet been retrained without them.
+\item \textbf{The Frenkel labels used in training were partly wrong.} 27\% of the training Frenkel pairs had undone themselves (Section~\ref{sec:defects}) but were still labelled as defects. The finder was therefore taught to call intact atoms displaced, and its Frenkel result is probably lower than it could be. All test numbers here exclude such cases; the finder of the main results has not yet been retrained without them.
 \item \textbf{The type of defect is given.} The finder is asked for a vacancy, an interstitial, a Frenkel pair or an antisite. A count of the atoms separates the first two from the others, but not a Frenkel pair from an antisite.
 \item \textbf{One defect per glass,} in a small box (256 atoms). Real damage produces many defects that interact.
-\item \textbf{A model glass in two dimensions,} at zero temperature. It has no directional bonds and no charges. The defects that matter in a real glass such as silica are of a different kind (broken or extra bonds), which is why we started a study there (Section~\ref{sec:next}).
-\item \textbf{``Restored'' is strict.} It asks for the exact original minimum. In a glass, other minima close by are equally natural, and for 11\% of the antisites the defected glass is the more stable one.
-\item \textbf{Uncertainty.} With 150--200 defects per type from 100 glasses, the intervals are about $\pm 7$ points wide on each side.
+\item \textbf{A model glass in two dimensions,} at zero temperature (the atoms do not vibrate). Its atoms are simple spheres without the directed chemical bonds or electric charges of real materials. The defects that matter in a real glass such as silica are of a different kind (broken or extra bonds), which is why we started a study there (Section~\ref{sec:next}).
+\item \textbf{``Restored'' is strict.} It asks for the exact original valley of the energy. In a glass, other valleys close by are equally natural, and for 11\% of the antisites the defected glass is the more stable one.
+\item \textbf{Uncertainty.} With 150--200 defects per type from 100 glasses, the rates are known to about $\pm 7$ points.
 \end{itemize}
 
 \section{Conclusion and next steps}
 \label{sec:next}
 
-In a model glass, a graph network that starts from a denoising diffusion model and is trained on relaxed defects finds point defects without an interatomic potential, more often than the potential's own atom energies and more often than two simple structural measures. Correcting the atoms at the flagged site and minimising the energy then restores more vacancy, interstitial and antisite glasses than any of the other routes; for Frenkel pairs every route restores few. A network trained to undo the defect directly is not needed. The room for improvement is in finding: given the true location, minimisation restores \pd{restored-ceiling-min}--\pd{restored-ceiling-max}\% of the glasses.
+In a model glass, a graph neural network that starts from a denoising diffusion model and is trained on relaxed defects finds point defects without an interatomic potential, more often than the potential's own atom energies and more often than two simple structural measures. Correcting the atoms where it points and minimising the energy then restores more vacancy, interstitial and antisite glasses than any of the other routes; for Frenkel pairs every route restores few. A network trained to undo the defect directly is not needed. The room for improvement is in finding: given the true location, minimisation restores \pd{restored-ceiling-min}--\pd{restored-ceiling-max}\% of the glasses.
 
 Next steps, in order:
 \begin{enumerate}
-\item Retrain the finder without the annihilated Frenkel pairs, and let it name the type of defect.
-\item Test the stability of repaired glasses in molecular dynamics, and repeat the study with several defects per glass.
-\item Amorphous silica. A first stage without any learned model is complete: with the true site given, minimisation restores 76--96\% of four standard silica defects, but the standard coordination analysis finds only 11--29\% of them. As in two dimensions, finding is the bottleneck, which justifies training a three-dimensional finder.
+\item Retrain the finder for the full length without the Frenkel pairs that undid themselves, and let it name the type of defect.
+\item Test whether repaired glasses stay stable when the atoms are set in motion (molecular dynamics), and repeat the study with several defects per glass.
+\item Silica glass (amorphous SiO$_2$, the main component of window glass). A first stage without any learned model is complete: with the true location given, minimisation restores 76--96\% of four standard silica defects, but the standard method there, counting the neighbours of each atom, finds only 11--29\% of them. As in two dimensions, finding is the bottleneck, which justifies training a three-dimensional finder.
 \end{enumerate}
 
 \section*{Team contributions}
@@ -395,7 +428,7 @@ Supervision & course teaching assistant; supervised the project & Boniface Godwi
 
 \paragraph{Acknowledgements.} We thank Prof.\ Ismaila Dabo (Materials Science and Engineering, Carnegie Mellon University) for the discussion that redirected this project.
 
-\paragraph{Code and data.} Code, datasets, trained models and every result in this report: \repo{} (branch \path{dabo-point-defects}; the numbers in this report are in \path{results/point_defects_recheck_20261111/}).
+\paragraph{Code and data.} {\raggedright Code, datasets, trained models and every result in this report: \repo{} (branch \path{dabo-point-defects}). The numbers of this report are in \path{results/point_defects_recheck_20261111/} and \path{results/point_defects_ablations_20261112/}.\par}
 
 \bibliographystyle{abbrvnat}
 {\small\bibliography{refs}}
@@ -403,50 +436,23 @@ Supervision & course teaching assistant; supervised the project & Boniface Godwi
 \clearpage
 \appendix
 
-\section{How the review shaped this study}
-\label{app:feedback}
-
-Prof.\ Dabo raised ten points about the midterm report. Table~\ref{tab:feedback} lists what changed in response.
-
-\begin{table}[h]
-\centering
-\caption{The points raised in review and the response in this report.}
-\label{tab:feedback}
-\small
-\begin{tabularx}{\linewidth}{@{}r>{\raggedright\arraybackslash}p{1.9in}>{\raggedright\arraybackslash}X@{}}
-\toprule
- & Point raised & Response \\
-\midrule
-1 & Which models are used at each stage, and why? & Table~\ref{tab:stages} states the tool and the reason for every stage; Figure~\ref{fig:network} and Table~\ref{tab:models} describe the networks. \\
-2 & The sections are not connected. & The report follows one question from problem to method, test and result. \\
-3 & Methodological and conceptual inconsistencies. & One dataset, one network, one success test and one denominator: every rate is a fraction of all real test defects of a type (Section~\ref{sec:test}). \\
-4 & The minimum viable study is in the training section. & The study is that training loss, a network that removes a perturbation from a glass, with a physical defect as the perturbation. \\
-5 & What do the equations model? & Sections~\ref{sec:model} and~\ref{sec:equations}: the layer has the form of a force, and the loss teaches a restoring force (cosine 0.81 with the true force). \\
-6 & Try reconstructing the original structure from its defected counterpart. & The repair task (Sections~\ref{sec:restore} and~\ref{sec:repairnet}). \\
-7 & Or learn to identify incorrect structures. & The finding task, which became the main result (Section~\ref{sec:find}). \\
-8 & The defect types follow no concept of computational materials science. & The four standard point defects, made by their defining operations (Table~\ref{tab:defects}), with their relaxed states measured (Table~\ref{tab:physics}). \\
-9 & Why use AI to generate defects that can be made without it? & We no longer generate defects. The learned part finds them without a potential, and is compared with three measures that use no learning. \\
-10 & The method is too complex. & Removed: defect labels as conditions, guidance, held atoms, the comparison of architectures, hand insertion and the generalisation sweep. One network remains\ifablations, and its ablations change one setting at a time\fi. \\
-\bottomrule
-\end{tabularx}
-\end{table}
-
 \section{Details}
 \label{app:details}
 
 \textbf{Parameters.} Denoiser and repair network: 530,696 (input embedding 59,136, of which 24,832 encode the noise level; four EGNN layers of 117,890 each). Finder: 523,021 (input embedding 34,304; the same four layers; role head 17,157). The embedding still holds two inputs of the first version of the project, a flag for held atoms and a defect label; both are fixed to ``none'' in this study.
 
-\textbf{Relaxation.} Defects are relaxed with the FIRE minimiser of LAMMPS to a force tolerance of $10^{-8}$, with the box fixed; a vacancy or an interstitial therefore changes the density by 0.4\%. The repair tests use a FIRE minimiser written in PyTorch (largest force below $10^{-6}$), the same for every method, because it can start from overlapping atoms. The two reach the same minimum from a defect placed in a gap.
+\textbf{Relaxation.} Defects are relaxed with the FIRE minimiser of LAMMPS until the largest force is below $10^{-8}$, with the box fixed; a vacancy or an interstitial therefore changes the density by 0.4\%. The repair tests use a FIRE minimiser written in PyTorch (largest force below $10^{-6}$), the same for every method, because it can start from overlapping atoms. The two reach the same minimum from a defect placed in a gap.
 
-\textbf{Open points.} ``The most open point'' is the point of a grid of spacing $0.05\sigma$ that is farthest from every atom, within the stated distance range. 
+\textbf{Open points.} ``The most open point'' is the point of a grid of spacing $0.05\sigma$ that is farthest from every atom, within the stated distance range.
 
-\textbf{The two structural measures.} Nearest neighbours are atoms closer than $1.4\,\sigma_{\alpha\beta}$. In defect-free glass an A atom has $2.4\pm0.9$ unlike neighbours and a B atom $4.4\pm0.5$; cell areas are $0.88\pm0.07$ and $0.75\pm0.02\,\sigma^2$. Atoms with the same number of unlike neighbours are ranked at random. On the validation glasses we compared five rules for the cell (largest, smallest, most unusual, and two that depend on the species) and two for the neighbours (fewest, most), and kept the best for each defect; no other rule found more. In the repair of a Frenkel pair, the cell-size route moves the atom with the smallest cell to the open point whose neighbours have the largest cells, and the neighbour route moves the atom with the fewest unlike neighbours to the open point whose neighbours are shortest of them. For an antisite, each exchanges the neighbouring A--B pair that is most unusual by its own measure.
+\textbf{The two structural measures.} Nearest neighbours are atoms closer than $1.4\,\sigma_{\alpha\beta}$. In defect-free glass an A atom has $2.4\pm0.9$ unlike neighbours and a B atom $4.4\pm0.5$; cell areas are $0.88\pm0.07$ and $0.75\pm0.02\,\sigma^2$. Each atom is compared with the mean and spread for its species. Atoms with the same number of unlike neighbours are ranked at random. On the validation glasses we compared five rules for the cell (largest, smallest, most unusual, and two that depend on the species) and two for the neighbours (fewest, most), and kept the best for each defect; no other rule found more. In the repair of a Frenkel pair, the cell-size route moves the atom with the smallest cell to the open point whose neighbours have the largest cells, and the neighbour route moves the atom with the fewest unlike neighbours to the open point whose neighbours are shortest of them. For an antisite, each exchanges the neighbouring A--B pair that is most unusual by its own measure.
 
-\textbf{Intervals.} Where a rate is exactly 0\%, resampling glasses gives no spread, and the exact binomial interval is shown instead.
+\textbf{Intervals.} Where a rate is exactly 0\%, drawing the glasses again gives no spread, and the exact binomial interval is shown instead.
 
 \textbf{Reproduction.} From the repository root:
 \begin{itemize}\raggedright
 \item the test evaluation on real defects: \path{scripts/pilots/recheck_real_defects.sh}. It calls \path{scripts/eval_point_defects.py} (the finder), \path{scripts/pilots/baseline_routes.py} (the three other measures) and \path{scripts/eval_point_defect_repair.py} (true location given);
+\item the experiments on the finder: training with \path{scripts/pilots/finder_ablations.sh}, tests with \path{scripts/pilots/finder_ablations.py};
 \item Table~\ref{tab:physics}: \path{scripts/pilots/point_defect_physics.py};
 \item the cells and neighbours of the antisite atoms, and the choice of rules for the structural measures: \path{scripts/pilots/structural_signatures.py};
 \item numbers, tables and figures of this report: \path{paper/make_report_numbers.py} and \path{paper/make_report_figures.py}.
