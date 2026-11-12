@@ -1,0 +1,168 @@
+{
+ "data": "data/ka2d_256_point_defects/test.npz",
+ "models": {
+  "v1": "results/kaggle_pd_20261107-2024Z/training/pd_heal/ema.pt",
+  "v2": "results/kaggle_pd_20261108-2014Z/training/pd_heal_v2/ema.pt"
+ },
+ "kinds": {
+  "vacancy": {
+   "examples": 200,
+   "nothing": {
+    "rms": 0.0838,
+    "defect_rms": 0.2333,
+    "within_0_1": 0.8944,
+    "energy_above": 0.1612,
+    "overlap": 0.0
+   },
+   "v1, one step": {
+    "rms": 0.0823,
+    "defect_rms": 0.2164,
+    "within_0_1": 0.8942,
+    "energy_above": 0.1359,
+    "overlap": 0.18
+   },
+   "v1, 10 steps": {
+    "rms": 0.0856,
+    "defect_rms": 0.2093,
+    "within_0_1": 0.8821,
+    "energy_above": 0.128,
+    "overlap": 0.02
+   },
+   "v2, one step": {
+    "rms": 0.0772,
+    "defect_rms": 0.203,
+    "within_0_1": 0.9022,
+    "energy_above": 0.1111,
+    "overlap": 0.2
+   },
+   "v2, 10 steps": {
+    "rms": 0.1044,
+    "defect_rms": 0.2311,
+    "within_0_1": 0.8488,
+    "energy_above": 39.8025,
+    "overlap": 0.6
+   }
+  },
+  "interstitial": {
+   "examples": 200,
+   "nothing": {
+    "rms": 0.0783,
+    "defect_rms": 0.1899,
+    "within_0_1": 0.8721,
+    "energy_above": 0.0162,
+    "overlap": 0.0
+   },
+   "v1, one step": {
+    "rms": 0.077,
+    "defect_rms": 0.1742,
+    "within_0_1": 0.8718,
+    "energy_above": 0.1238,
+    "overlap": 0.0
+   },
+   "v1, 10 steps": {
+    "rms": 0.0768,
+    "defect_rms": 0.1568,
+    "within_0_1": 0.8694,
+    "energy_above": 0.1256,
+    "overlap": 0.0
+   },
+   "v2, one step": {
+    "rms": 0.0707,
+    "defect_rms": 0.1597,
+    "within_0_1": 0.89,
+    "energy_above": 0.0861,
+    "overlap": 0.01
+   },
+   "v2, 10 steps": {
+    "rms": 0.0933,
+    "defect_rms": 0.1687,
+    "within_0_1": 0.8494,
+    "energy_above": 5.3247,
+    "overlap": 0.495
+   }
+  },
+  "frenkel": {
+   "examples": 150,
+   "nothing": {
+    "rms": 0.1227,
+    "defect_rms": 0.2533,
+    "within_0_1": 0.7934,
+    "energy_above": 0.3637,
+    "overlap": 0.0
+   },
+   "v1, one step": {
+    "rms": 0.1181,
+    "defect_rms": 0.236,
+    "within_0_1": 0.7859,
+    "energy_above": 0.2135,
+    "overlap": 0.16
+   },
+   "v1, 10 steps": {
+    "rms": 0.118,
+    "defect_rms": 0.2276,
+    "within_0_1": 0.7839,
+    "energy_above": 0.1391,
+    "overlap": 0.0067
+   },
+   "v2, one step": {
+    "rms": 0.1102,
+    "defect_rms": 0.2163,
+    "within_0_1": 0.7994,
+    "energy_above": 0.8674,
+    "overlap": 0.4
+   },
+   "v2, 10 steps": {
+    "rms": 0.1361,
+    "defect_rms": 0.2401,
+    "within_0_1": 0.7411,
+    "energy_above": 208.4303,
+    "overlap": 0.7333
+   }
+  },
+  "antisite": {
+   "examples": 200,
+   "nothing": {
+    "rms": 0.0963,
+    "defect_rms": 0.2111,
+    "within_0_1": 0.829,
+    "energy_above": 0.1215,
+    "overlap": 0.0
+   },
+   "v1, one step": {
+    "rms": 0.0925,
+    "defect_rms": 0.1929,
+    "within_0_1": 0.8247,
+    "energy_above": 0.1441,
+    "overlap": 0.0
+   },
+   "v1, 10 steps": {
+    "rms": 0.0907,
+    "defect_rms": 0.176,
+    "within_0_1": 0.8206,
+    "energy_above": 0.1291,
+    "overlap": 0.0
+   },
+   "v2, one step": {
+    "rms": 0.0866,
+    "defect_rms": 0.1804,
+    "within_0_1": 0.8404,
+    "energy_above": 0.1396,
+    "overlap": 0.02
+   },
+   "v2, 10 steps": {
+    "rms": 0.1076,
+    "defect_rms": 0.1931,
+    "within_0_1": 0.799,
+    "energy_above": 21.1789,
+    "overlap": 0.595
+   }
+  }
+ },
+ "left_out_already_original": {
+  "vacancy": 0,
+  "interstitial": 0,
+  "frenkel": 50,
+  "antisite": 0
+ },
+ "seconds": 1940
+}

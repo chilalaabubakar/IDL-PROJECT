@@ -5,7 +5,7 @@
 #
 # Every piece (one defect kind, 50 test examples) writes its own file under <output>/chunks,
 # so a run that is interrupted continues where it stopped when the command is given again.
-# paper/make_report_numbers.py joins the pieces. About 75 minutes on 4 CPU cores.
+# paper/make_report_numbers.py joins the pieces. About 2 hours on 4 CPU cores.
 set -euo pipefail
 OUT=${1:-results/point_defects_recheck_20261111}
 HEALER=results/kaggle_pd_20261108-2014Z/training/pd_heal_v2/ema.pt

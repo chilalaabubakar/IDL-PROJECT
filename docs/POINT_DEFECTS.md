@@ -210,9 +210,45 @@ A longer finder run (`results/point_defects_finder_v2_20261110/README.md`):
   updates, so further gains need a change of model or input, not more training. This finder
   is the one reported from here on.
 
-Caveats: a two-dimensional model glass; one defect per glass; the Frenkel repair is given
-the region (it tests repair, not finding); "restored" asks for the exact original minimum,
-which is strict in a glass where many nearby minima are equally natural.
+The physics recheck and the report (`results/point_defects_recheck_20261111/README.md`,
+`paper/point_defects_report.pdf`):
+
+- **A quarter of the Frenkel pairs are no defects.** The moved atom took the place of a
+  neighbour of its own species, which filled the empty site, so the relaxed glass is the
+  original again (50 of 200 test pairs, 27% of the training pairs).
+  `glassdiff.data.point_defects.real_defects` leaves them out (`--real-defects-only` in the
+  evaluation scripts, `real_defects_only: true` in a training config). **Every Frenkel number
+  above this point includes them.**
+- **Two baselines without a potential or learning** (`scripts/pilots/baseline_routes.py`):
+  the size of each atom's Voronoi cell (free volume) and its number of unlike neighbours
+  (chemical order). An antisite is a defect of chemical order: after relaxation the two
+  exchanged atoms have normal cells but too few unlike neighbours.
+- **The atom energy is mostly a count of A-B bonds** (correlation −0.90 and −0.84 for A and
+  B atoms), so the bond count finds about as many defects as the energy, without the
+  potential.
+- **Final test numbers** on the 750 real defects; brackets resample whole glasses:
+
+| Defect | Found: finder | Found: best without learning | Restored: finder | Restored: best without learning | Restored: true location given |
+|---|---|---|---|---|---|
+| Vacancy | **69.5%** [62, 76] | 47.5% (cell size) | **53.5%** [46, 61] | 40.5% (cell size) | 67% |
+| Interstitial | **50%** [42, 57] | 28% (unlike neighbours, energy) | **38%** [31, 46] | 21.5% (unlike neighbours) | 80% |
+| Antisite | **49%** [42, 56] | 31.5% (unlike neighbours) | **30%** [24, 36] | 8% (energy) | 68.5% |
+| Frenkel pair (150 real) | **45.3%** [38, 53] | 32.7% (energy) | 12.7% [8, 18] | 7.3% (energy) | 42% |
+
+  The finder's lead is significant on the same defects (McNemar) in every case except
+  restoring Frenkel pairs (p = 0.17).
+
+To reproduce the test numbers and the report:
+
+```bash
+bash scripts/pilots/recheck_real_defects.sh   # ~2 h on 4 CPU cores, resumable
+python paper/make_report_numbers.py && python paper/make_report_figures.py
+```
+
+Caveats: a two-dimensional model glass; one defect per glass; the type of defect is given;
+the finder was trained with the annihilated Frenkel pairs still labelled as defects and has
+not been retrained; "restored" asks for the exact original minimum, which is strict in a
+glass where many nearby minima are equally natural.
 
 ## Next: amorphous silica
 

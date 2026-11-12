@@ -402,7 +402,7 @@ def fig_results() -> None:
     for ax, what, title in zip(
         axes, ("found", "restored"), ("Defects found", "Original glasses restored")
     ):
-        ax.set_xlim(-0.55, 3.55)
+        ax.set_xlim(-0.78, 3.55)
         ax.set_ylim(0, 100)
         ax.set_yticks([0, 25, 50, 75, 100])
         ax.set_xticks(range(4), [NAMES[k] for k in kinds])
@@ -423,8 +423,16 @@ def fig_results() -> None:
                 ax.plot([x, x], [100 * d["lo"], 100 * d["hi"]], color=INK, lw=0.6, zorder=4,
                         solid_capstyle="butt")  # fmt: skip
                 if m == "finder":  # direct label on the method the figure is about
-                    ax.text(x, 100 * d["hi"] + 1.5, f"{100 * d['rate']:.0f}", ha="center",
-                            va="bottom", fontsize=5.8, color=INK)  # fmt: skip
+                    top = 100 * d["hi"] + 1.5
+                    line = (
+                        100 * res[k]["restored"]["ceiling"]["rate"] if what == "restored" else -99
+                    )
+                    if top - 2 < line < top + 9:  # the label would sit on the reference line
+                        ax.text(x - width / 2 - 0.035, 100 * d["rate"], f"{100 * d['rate']:.0f}",
+                                ha="right", va="center", fontsize=5.8, color=INK)  # fmt: skip
+                    else:
+                        ax.text(x, top, f"{100 * d['rate']:.0f}", ha="center", va="bottom",
+                                fontsize=5.8, color=INK)  # fmt: skip
             if what == "found":
                 c = 100 * res[k]["chance"]
                 ax.plot([i - 2 * step, i + 2 * step], [c, c], color=MUTED, lw=1.1, zorder=5)
