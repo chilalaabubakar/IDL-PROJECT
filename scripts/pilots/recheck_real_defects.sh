@@ -33,7 +33,11 @@ for kind in vacancy interstitial antisite frenkel; do
   for offset in 0 50 100 150; do
     piece="--kinds $kind --offset $offset --max-examples 50 --real-defects-only"
     # cell size and atom energy
-    run "$OUT/chunks/baseline_${kind}_${offset}.json" python scripts/pilots/baseline_routes.py $piece
+    run "$OUT/chunks/baseline_${kind}_${offset}.json" python scripts/pilots/baseline_routes.py $piece \
+      --methods geometry energy
+    # number of unlike neighbours
+    run "$OUT/chunks/bonds_${kind}_${offset}.json" python scripts/pilots/baseline_routes.py $piece \
+      --methods bonds
     # the true location given
     run "$OUT/chunks/ceiling_${kind}_${offset}.json" python scripts/eval_point_defect_repair.py $piece
     # the learned finder (and, for Frenkel pairs, the energy search)

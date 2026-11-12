@@ -50,10 +50,11 @@ EXAMPLE = ROOT / "paper/data/pd_report_example.npz"
 INK, MUTED, GRID = "#272727", "#767676", "#E1E0D9"
 ATOM = ("#6DA7EC", "#EDA100")  # A (large), B (small)
 DIAMETER = (1.0, 0.88)
-METHOD = {  # fixed order: learned finder, geometry, energy
-    "finder": ("#2A78D6", "Learned finder (no potential)"),
-    "geometry": ("#1BAF7A", "Cell size (no potential, no learning)"),
-    "energy": ("#EB6834", "Atom energy (needs the potential)"),
+METHOD = {  # fixed order: learned finder, the two structural measures, energy
+    "finder": ("#2A78D6", "Learned finder"),
+    "geometry": ("#1BAF7A", "Cell size"),
+    "bonds": ("#6250D6", "Unlike neighbours"),
+    "energy": ("#EB6834", "Atom energy (uses the potential)"),
 }
 NAMES = {
     "vacancy": "Vacancy",
@@ -397,7 +398,7 @@ def fig_results() -> None:
     kinds = ("vacancy", "interstitial", "antisite", "frenkel")
     fig, axes = plt.subplots(1, 2, figsize=(5.5, 2.25))
     fig.subplots_adjust(left=0.085, right=0.995, top=0.8, bottom=0.11, wspace=0.2)
-    step, width = 0.26, 0.22
+    step, width = 0.2, 0.165
     for ax, what, title in zip(
         axes, ("found", "restored"), ("Defects found", "Original glasses restored")
     ):
@@ -417,7 +418,7 @@ def fig_results() -> None:
         for i, k in enumerate(kinds):
             for j, m in enumerate(METHOD):
                 d = res[k][what][m]
-                x = i + (j - 1) * step
+                x = i + (j - 1.5) * step
                 rounded_bar(ax, x, 100 * d["rate"], width, METHOD[m][0])
                 ax.plot([x, x], [100 * d["lo"], 100 * d["hi"]], color=INK, lw=0.6, zorder=4,
                         solid_capstyle="butt")  # fmt: skip
@@ -426,10 +427,10 @@ def fig_results() -> None:
                             va="bottom", fontsize=5.8, color=INK)  # fmt: skip
             if what == "found":
                 c = 100 * res[k]["chance"]
-                ax.plot([i - 1.5 * step, i + 1.5 * step], [c, c], color=MUTED, lw=1.1, zorder=5)
+                ax.plot([i - 2 * step, i + 2 * step], [c, c], color=MUTED, lw=1.1, zorder=5)
             else:
                 c = res[k]["restored"]["ceiling"]
-                ax.plot([i - 1.5 * step, i + 1.5 * step], [100 * c["rate"]] * 2, color=MUTED,
+                ax.plot([i - 2 * step, i + 2 * step], [100 * c["rate"]] * 2, color=MUTED,
                         lw=1.1, zorder=5)  # fmt: skip
         note = "random atom" if what == "found" else "true location given"
         ax.plot([], [], color=MUTED, lw=1.1, label=note)
@@ -438,7 +439,7 @@ def fig_results() -> None:
     for ax, letter in zip(axes, "ab"):
         panel_letter(fig, (ax.get_position().x0 - 0.035, ax.get_position().y1 + 0.035), letter)
     handles = [plt.Rectangle((0, 0), 1, 1, fc=c, ec="none") for c, _ in METHOD.values()]
-    fig.legend(handles, [label for _, label in METHOD.values()], loc="upper center", ncol=3,
+    fig.legend(handles, [label for _, label in METHOD.values()], loc="upper center", ncol=4,
                fontsize=6.2, handlelength=1.0, handleheight=0.8, columnspacing=1.6,
                bbox_to_anchor=(0.54, 1.005))  # fmt: skip
     finalize_figure(fig, FIG / "pd_fig3_results")

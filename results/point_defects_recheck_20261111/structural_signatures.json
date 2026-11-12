@@ -1,0 +1,90 @@
+{
+ "data": "data/ka2d_256_point_defects",
+ "defect_free": {
+  "A": {
+   "cell_area": {
+    "mean": 0.878,
+    "sd": 0.067
+   },
+   "unlike_neighbours": {
+    "mean": 2.37,
+    "sd": 0.86
+   },
+   "correlation_energy_with_unlike_neighbours": -0.9
+  },
+  "B": {
+   "cell_area": {
+    "mean": 0.751,
+    "sd": 0.024
+   },
+   "unlike_neighbours": {
+    "mean": 4.36,
+    "sd": 0.5
+   },
+   "correlation_energy_with_unlike_neighbours": -0.84
+  }
+ },
+ "antisite": {
+  "A atom on a B site": {
+   "atoms": 200,
+   "cell_area_z_median": 0.74,
+   "cell_area_larger_than_usual": 0.78,
+   "unlike_neighbours_mean": 1.76,
+   "unlike_neighbours_usual": 2.37,
+   "fewer_unlike_neighbours_than_usual": 0.82
+  },
+  "B atom on an A site": {
+   "atoms": 200,
+   "cell_area_z_median": -0.13,
+   "cell_area_larger_than_usual": 0.45,
+   "unlike_neighbours_mean": 3.75,
+   "unlike_neighbours_usual": 4.36,
+   "fewer_unlike_neighbours_than_usual": 0.93
+  }
+ },
+ "rules": {
+  "split": "val",
+  "found": {
+   "vacancy": {
+    "examples": 200,
+    "cell: largest": 0.42,
+    "cell: smallest": 0.025,
+    "cell: most unusual": 0.42,
+    "cell: B large or A small": 0.395,
+    "cell: A large or B small": 0.255,
+    "unlike neighbours: fewest": 0.255,
+    "unlike neighbours: most": 0.035
+   },
+   "interstitial": {
+    "examples": 200,
+    "cell: largest": 0.025,
+    "cell: smallest": 0.16,
+    "cell: most unusual": 0.035,
+    "cell: B large or A small": 0.075,
+    "cell: A large or B small": 0.015,
+    "unlike neighbours: fewest": 0.29,
+    "unlike neighbours: most": 0.08
+   },
+   "frenkel": {
+    "examples": 134,
+    "cell: largest": 0.306,
+    "cell: smallest": 0.09,
+    "cell: most unusual": 0.306,
+    "cell: B large or A small": 0.216,
+    "cell: A large or B small": 0.276,
+    "unlike neighbours: fewest": 0.313,
+    "unlike neighbours: most": 0.112
+   },
+   "antisite": {
+    "examples": 200,
+    "cell: largest": 0.12,
+    "cell: smallest": 0.075,
+    "cell: most unusual": 0.12,
+    "cell: B large or A small": 0.095,
+    "cell: A large or B small": 0.095,
+    "unlike neighbours: fewest": 0.31,
+    "unlike neighbours: most": 0.08
+   }
+  }
+ }
+}
