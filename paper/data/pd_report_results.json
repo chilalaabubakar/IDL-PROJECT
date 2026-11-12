@@ -1,0 +1,368 @@
+{
+ "kinds": {
+  "vacancy": {
+   "n": 200,
+   "chance": 0.028750000000000005,
+   "found": {
+    "finder": {
+     "rate": 0.695,
+     "lo": 0.625,
+     "hi": 0.76
+    },
+    "geometry": {
+     "rate": 0.475,
+     "lo": 0.405,
+     "hi": 0.55
+    },
+    "bonds": {
+     "rate": 0.29,
+     "lo": 0.225,
+     "hi": 0.355
+    },
+    "energy": {
+     "rate": 0.295,
+     "lo": 0.23,
+     "hi": 0.36
+    }
+   },
+   "restored": {
+    "finder": {
+     "rate": 0.535,
+     "lo": 0.46,
+     "hi": 0.61
+    },
+    "geometry": {
+     "rate": 0.405,
+     "lo": 0.34,
+     "hi": 0.475
+    },
+    "bonds": {
+     "rate": 0.22,
+     "lo": 0.16,
+     "hi": 0.28
+    },
+    "energy": {
+     "rate": 0.26,
+     "lo": 0.2,
+     "hi": 0.325
+    },
+    "ceiling": {
+     "rate": 0.67,
+     "lo": 0.6,
+     "hi": 0.735
+    }
+   },
+   "tests": {
+    "found: finder vs geometry": {
+     "only_first": 49,
+     "only_second": 5,
+     "p": 3.8913883226854296e-10
+    },
+    "restored: finder vs geometry": {
+     "only_first": 31,
+     "only_second": 5,
+     "p": 1.2913485988974571e-05
+    },
+    "found: finder vs bonds": {
+     "only_first": 87,
+     "only_second": 6,
+     "p": 1.6504649136152465e-19
+    },
+    "restored: finder vs bonds": {
+     "only_first": 65,
+     "only_second": 2,
+     "p": 3.088620938868081e-17
+    },
+    "found: finder vs energy": {
+     "only_first": 85,
+     "only_second": 5,
+     "p": 7.532842063484042e-20
+    },
+    "restored: finder vs energy": {
+     "only_first": 58,
+     "only_second": 3,
+     "p": 3.2857397358476703e-14
+    }
+   }
+  },
+  "interstitial": {
+   "n": 200,
+   "chance": 0.03025,
+   "found": {
+    "finder": {
+     "rate": 0.5,
+     "lo": 0.425,
+     "hi": 0.575
+    },
+    "geometry": {
+     "rate": 0.15,
+     "lo": 0.1,
+     "hi": 0.205
+    },
+    "bonds": {
+     "rate": 0.28,
+     "lo": 0.22,
+     "hi": 0.34
+    },
+    "energy": {
+     "rate": 0.28,
+     "lo": 0.22,
+     "hi": 0.345
+    }
+   },
+   "restored": {
+    "finder": {
+     "rate": 0.38,
+     "lo": 0.31,
+     "hi": 0.455
+    },
+    "geometry": {
+     "rate": 0.085,
+     "lo": 0.045,
+     "hi": 0.13
+    },
+    "bonds": {
+     "rate": 0.215,
+     "lo": 0.16,
+     "hi": 0.27
+    },
+    "energy": {
+     "rate": 0.21,
+     "lo": 0.155,
+     "hi": 0.265
+    },
+    "ceiling": {
+     "rate": 0.8,
+     "lo": 0.735,
+     "hi": 0.86
+    }
+   },
+   "tests": {
+    "found: finder vs geometry": {
+     "only_first": 79,
+     "only_second": 9,
+     "p": 4.152441283052301e-15
+    },
+    "restored: finder vs geometry": {
+     "only_first": 62,
+     "only_second": 3,
+     "p": 2.4842324378160363e-15
+    },
+    "found: finder vs bonds": {
+     "only_first": 50,
+     "only_second": 6,
+     "p": 1.0182093779231849e-09
+    },
+    "restored: finder vs bonds": {
+     "only_first": 37,
+     "only_second": 4,
+     "p": 1.0258372640237212e-07
+    },
+    "found: finder vs energy": {
+     "only_first": 48,
+     "only_second": 4,
+     "p": 1.3065282189472782e-10
+    },
+    "restored: finder vs energy": {
+     "only_first": 36,
+     "only_second": 2,
+     "p": 5.398760549724102e-09
+    }
+   }
+  },
+  "antisite": {
+   "n": 200,
+   "chance": 0.04025,
+   "found": {
+    "finder": {
+     "rate": 0.49,
+     "lo": 0.42,
+     "hi": 0.56
+    },
+    "geometry": {
+     "rate": 0.165,
+     "lo": 0.115,
+     "hi": 0.22
+    },
+    "bonds": {
+     "rate": 0.315,
+     "lo": 0.25,
+     "hi": 0.38
+    },
+    "energy": {
+     "rate": 0.29,
+     "lo": 0.23,
+     "hi": 0.35
+    }
+   },
+   "restored": {
+    "finder": {
+     "rate": 0.3,
+     "lo": 0.24,
+     "hi": 0.36
+    },
+    "geometry": {
+     "rate": 0.015,
+     "lo": 0.0,
+     "hi": 0.035
+    },
+    "bonds": {
+     "rate": 0.075,
+     "lo": 0.04,
+     "hi": 0.11
+    },
+    "energy": {
+     "rate": 0.08,
+     "lo": 0.045,
+     "hi": 0.12
+    },
+    "ceiling": {
+     "rate": 0.685,
+     "lo": 0.62,
+     "hi": 0.745
+    }
+   },
+   "tests": {
+    "found: finder vs geometry": {
+     "only_first": 74,
+     "only_second": 9,
+     "p": 7.707195762739296e-14
+    },
+    "restored: finder vs geometry": {
+     "only_first": 57,
+     "only_second": 0,
+     "p": 1.3877787807814457e-17
+    },
+    "found: finder vs bonds": {
+     "only_first": 49,
+     "only_second": 14,
+     "p": 1.1123023000449022e-05
+    },
+    "restored: finder vs bonds": {
+     "only_first": 47,
+     "only_second": 2,
+     "p": 4.355626970209414e-12
+    },
+    "found: finder vs energy": {
+     "only_first": 55,
+     "only_second": 15,
+     "p": 1.652519847797991e-06
+    },
+    "restored: finder vs energy": {
+     "only_first": 47,
+     "only_second": 3,
+     "p": 3.708322537931963e-11
+    }
+   }
+  },
+  "frenkel": {
+   "n": 150,
+   "chance": 0.053746666666666665,
+   "found": {
+    "finder": {
+     "rate": 0.4533333333333333,
+     "lo": 0.3782051282051282,
+     "hi": 0.5277777777777778
+    },
+    "geometry": {
+     "rate": 0.26666666666666666,
+     "lo": 0.2,
+     "hi": 0.3311269028984261
+    },
+    "bonds": {
+     "rate": 0.2733333333333333,
+     "lo": 0.2052980132450331,
+     "hi": 0.34210526315789475
+    },
+    "energy": {
+     "rate": 0.32666666666666666,
+     "lo": 0.25169955399378297,
+     "hi": 0.4013605442176871
+    }
+   },
+   "restored": {
+    "finder": {
+     "rate": 0.12666666666666668,
+     "lo": 0.07792207792207792,
+     "hi": 0.17834394904458598
+    },
+    "geometry": {
+     "rate": 0.0,
+     "lo": 0.0,
+     "hi": 0.02429259716610854
+    },
+    "bonds": {
+     "rate": 0.013333333333333334,
+     "lo": 0.0,
+     "hi": 0.033783783783783786
+    },
+    "energy": {
+     "rate": 0.07333333333333333,
+     "lo": 0.034482758620689655,
+     "hi": 0.11487094108496979
+    },
+    "ceiling": {
+     "rate": 0.42,
+     "lo": 0.3401360544217687,
+     "hi": 0.5
+    }
+   },
+   "tests": {
+    "found: finder vs geometry": {
+     "only_first": 47,
+     "only_second": 19,
+     "p": 0.0007561070639613921
+    },
+    "restored: finder vs geometry": {
+     "only_first": 19,
+     "only_second": 0,
+     "p": 3.814697265625e-06
+    },
+    "found: finder vs bonds": {
+     "only_first": 38,
+     "only_second": 11,
+     "p": 0.00014197068519905542
+    },
+    "restored: finder vs bonds": {
+     "only_first": 18,
+     "only_second": 1,
+     "p": 7.62939453125e-05
+    },
+    "found: finder vs energy": {
+     "only_first": 37,
+     "only_second": 18,
+     "p": 0.014453833533827728
+    },
+    "restored: finder vs energy": {
+     "only_first": 17,
+     "only_second": 9,
+     "p": 0.16863754391670227
+    }
+   },
+   "flagged_displaced_atom": {
+    "model": 0.20651999999999998,
+    "energy": 0.06669333333333334
+   }
+  }
+ },
+ "glass_level": {
+  "raw": {
+   "defect_free_glasses": 100,
+   "defect_free_flagged": 0.68,
+   "defected_flagged": 0.895,
+   "auc": 0.753
+  },
+  "calibrated": {
+   "defect_free_glasses": 100,
+   "defect_free_flagged": 0.02,
+   "defected_flagged": 0.287,
+   "auc": 0.752
+  }
+ },
+ "left_out_already_original": {
+  "vacancy": 0,
+  "interstitial": 0,
+  "frenkel": 50,
+  "antisite": 0
+ }
+}

@@ -1,0 +1,19 @@
+% written by make_report_numbers.py
+\begin{table}[t]
+\centering
+\caption{Defects found (\%): the flagged atom lies within $1.5\sigma$ of the defect. Brackets: 95\% intervals from resampling whole test glasses. Only the atom energy uses the interatomic potential. Bold: the best method.}
+\label{tab:found}
+\footnotesize\setlength{\tabcolsep}{3.5pt}
+\begin{tabular}{@{}lcccccc@{}}
+\toprule
+ & & \multicolumn{3}{c}{No potential} & Potential & \\
+\cmidrule(lr){3-5}\cmidrule(lr){6-6}
+Defect & $n$ & Learned finder & Cell size & Unlike neighbours & Atom energy & Random atom \\
+\midrule
+Vacancy & 200 & \textbf{69.5} {\scriptsize[62, 76]} & 47.5 {\scriptsize[40, 55]} & 29 {\scriptsize[22, 36]} & 29.5 {\scriptsize[23, 36]} & 2.9 \\
+Interstitial & 200 & \textbf{50} {\scriptsize[42, 57]} & 15 {\scriptsize[10, 20]} & 28 {\scriptsize[22, 34]} & 28 {\scriptsize[22, 34]} & 3 \\
+Antisite & 200 & \textbf{49} {\scriptsize[42, 56]} & 16.5 {\scriptsize[12, 22]} & 31.5 {\scriptsize[25, 38]} & 29 {\scriptsize[23, 35]} & 4 \\
+Frenkel pair & 150 & \textbf{45.3} {\scriptsize[38, 53]} & 26.7 {\scriptsize[20, 33]} & 27.3 {\scriptsize[21, 34]} & 32.7 {\scriptsize[25, 40]} & 5.4 \\
+\bottomrule
+\end{tabular}
+\end{table}

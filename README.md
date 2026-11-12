@@ -13,8 +13,9 @@ whether its surroundings look like naturally formed ones. The work builds on DM2
 > repairing standard point defects** (vacancy, interstitial, Frenkel pair, antisite) with
 > a denoising diffusion model. His ten points, our answers and the plan:
 > [docs/DABO_RECOMMENDATIONS.md](docs/DABO_RECOMMENDATIONS.md). Method:
-> [docs/POINT_DEFECTS.md](docs/POINT_DEFECTS.md). The rest of this README describes the
-> first version, which stays on `main`.
+> [docs/POINT_DEFECTS.md](docs/POINT_DEFECTS.md). **Report on the 2D study:**
+> [paper/point_defects_report.pdf](paper/point_defects_report.pdf). The rest of this README
+> describes the first version, which stays on `main`.
 
 ## Documents
 - [Project plan](docs/PROJECT_PLAN.md): research questions, method, evaluation, stages, timeline, risks
@@ -45,6 +46,12 @@ the defect in the relaxed glass, and **repair** it, i.e. give back the original?
   [`notebooks/kaggle_point_defects.ipynb`](notebooks/kaggle_point_defects.ipynb).
 - Evaluation: `scripts/eval_point_defects.py`. Before training:
   [`results/point_defects_20261107/`](results/point_defects_20261107/README.md).
+- Report and final test numbers:
+  [`paper/point_defects_report.pdf`](paper/point_defects_report.pdf),
+  [`results/point_defects_recheck_20261111/`](results/point_defects_recheck_20261111/README.md).
+  The learned finder, which needs no potential, finds 69.5% of vacancies, 50% of
+  interstitials, 49% of antisites and 45% of Frenkel pairs; the best measure without learning
+  finds 47.5, 28, 31.5 and 33%.
 
 ## Status (first version: placing D1−, D1+ and D2)
 

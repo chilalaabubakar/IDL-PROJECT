@@ -136,6 +136,23 @@ over all defects (paired p < 0.001), after which it levels off. The finder repor
 on finds 69.5, 50, 49 and 37% of vacancies, interstitials, antisites and Frenkel pairs (the
 energy: 28-29.5%) and restores 53.5, 38, 30 and 18% of the glasses.
 
+**The physics recheck and the report** (`results/point_defects_recheck_20261111/`,
+`paper/point_defects_report.pdf`). Checking the physics for the report changed three things:
+
+- **A quarter of the Frenkel pairs were no defects.** The moved atom took the place of a
+  neighbour of its own species, which filled the empty site: the original glass again. They
+  are left out of every test now (150 real pairs remain). The Frenkel numbers above included
+  them.
+- **A fair comparison without learning.** Two structural measures that need no potential
+  were added as baselines: the size of an atom's cell (free volume) and its number of unlike
+  neighbours (chemical order, the natural signature of an antisite).
+- **Error bars over glasses** and paired tests against every baseline.
+
+Final numbers on the 750 real test defects (vacancy, interstitial, antisite, Frenkel pair):
+the finder finds 69.5, 50, 49 and 45.3%; the best measure without learning 47.5, 28, 31.5 and
+32.7%. Restored: 53.5, 38, 30 and 12.7% against 40.5, 21.5, 8 and 7.3%. The finder's lead is
+significant everywhere except for restoring Frenkel pairs.
+
 ## Plan
 
 | Step | What | Where | Suggested owner |
@@ -144,10 +161,11 @@ energy: 28-29.5%) and restores 53.5, 38, 30 and 18% of the glasses.
 | 1b | Retrain the repair model (version 2) and evaluate it, including Frenkel pairs found and repaired with nothing given. Done: the finder carries the result; the repair model adds nothing after minimisation and breaks structures without it | `notebooks/kaggle_point_defects_v2.ipynb` | Abubakar Chilala |
 | 1c | Improve finding. Done, no retraining: calibration cuts false alarms on defect-free glasses from 59% to 1% and adds 1-4 points of finding; Frenkel pairs stay hard (`results/point_defects_finder_20261109/`) | `scripts/eval_point_defects.py --calibrate` | Abubakar Chilala, Stacy Cheruto |
 | 1d | A longer finder run. Done: finding up 3.6 points over all defects (69.5, 50, 49, 37%; paired p < 0.001), restored within noise; the finder has levelled off (`results/point_defects_finder_v2_20261110/`) | `notebooks/kaggle_point_defects_finder.ipynb` | Abubakar Chilala |
-| 2 | Check the defect operations and the success tests; add error bars over glasses | `scripts/eval_point_defects.py` | Stacy Cheruto |
+| 1e | Retrain the finder without the annihilated Frenkel pairs (`real_defects_only: true` in the training config), and let it name the type of defect. Not started; needs a GPU | `configs/train/detect_point_defects_v2.yaml` | Abubakar Chilala |
+| 2 | Check the defect operations and the success tests; add error bars over glasses. Done: a quarter of the Frenkel pairs had annihilated and are now left out; intervals resample glasses; every comparison is paired (`results/point_defects_recheck_20261111/`) | `scripts/pilots/recheck_real_defects.sh`, `scripts/pilots/point_defect_physics.py` | Stacy Cheruto |
 | 3 | Repair procedure: number of denoising steps and starting noise | `scripts/eval_point_defects.py` | Gentille Uwera |
 | 4 | Physics checks: training-data generation, minimiser agreement, stability of repaired glasses in molecular dynamics | `scripts/make_point_defects.py`, `glassdiff.md` | Nicholaus Ladislaus |
-| 5 | Baselines and the final report, written by the team around the one question | `paper/` | Michel Sangwa |
+| 5 | Baselines and the final report, written by the team around the one question. Baselines done (cell size, unlike neighbours, atom energy). The report on the 2D study is drafted (`paper/point_defects_report.pdf`); the team should read it, correct it and confirm the contributions table | `paper/`, `scripts/pilots/baseline_routes.py` | Michel Sangwa |
 | 6 | The same study in amorphous silica with its standard defects. Stage 1 done: given the site, minimisation restores 76-96% of glasses, but the standard coordination analysis finds only 11-29% of defects (restored 1.5-52.5%); the energy needs the potential and is strong for two defects only (`results/silica_point_defects_20261110-1342Z/`). Stage 2, a learned 3D finder, is justified and not started | `notebooks/kaggle_silica_point_defects.ipynb`, `notebooks/colab_silica_point_defects.ipynb`, `docs/SILICA_POINT_DEFECTS.md` | team |
 
 The owners follow the roles in the midterm report; the team should confirm them.

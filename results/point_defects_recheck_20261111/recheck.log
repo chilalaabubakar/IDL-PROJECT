@@ -1,0 +1,231 @@
+23:23:15 results/point_defects_recheck_20261111/glass_level.json
+glass level {"raw": {"defect_free_glasses": 100, "defect_free_flagged": 0.68, "defected_flagged": 0.895, "auc": 0.753}, "calibrated": {"defect_free_glasses": 100, "defect_free_flagged": 0.02, "defected_flagged": 0.287, "auc": 0.752}}
+-> results/point_defects_recheck_20261111/glass_level.json.tmp
+23:27:30 results/point_defects_recheck_20261111/repair_networks.json
+vacancy {"examples": 200, "nothing": {"rms": 0.0838, "defect_rms": 0.2333, "within_0_1": 0.8944, "energy_above": 0.1612, "overlap": 0.0}, "v1, one step": {"rms": 0.0823, "defect_rms": 0.2164, "within_0_1": 0.8942, "energy_above": 0.1359, "overlap": 0.18}, "v1, 10 steps": {"rms": 0.0856, "defect_rms": 0.2093, "within_0_1": 0.8821, "energy_above": 0.128, "overlap": 0.02}, "v2, one step": {"rms": 0.0772, "defect_rms": 0.203, "within_0_1": 0.9022, "energy_above": 0.1111, "overlap": 0.2}, "v2, 10 steps": {"rms": 0.1044, "defect_rms": 0.2311, "within_0_1": 0.8488, "energy_above": 39.8025, "overlap": 0.6}} 654s
+interstitial {"examples": 200, "nothing": {"rms": 0.0783, "defect_rms": 0.1899, "within_0_1": 0.8721, "energy_above": 0.0162, "overlap": 0.0}, "v1, one step": {"rms": 0.077, "defect_rms": 0.1742, "within_0_1": 0.8718, "energy_above": 0.1238, "overlap": 0.0}, "v1, 10 steps": {"rms": 0.0768, "defect_rms": 0.1568, "within_0_1": 0.8694, "energy_above": 0.1256, "overlap": 0.0}, "v2, one step": {"rms": 0.0707, "defect_rms": 0.1597, "within_0_1": 0.89, "energy_above": 0.0861, "overlap": 0.01}, "v2, 10 steps": {"rms": 0.0933, "defect_rms": 0.1687, "within_0_1": 0.8494, "energy_above": 5.3247, "overlap": 0.495}} 1120s
+frenkel {"examples": 150, "nothing": {"rms": 0.1227, "defect_rms": 0.2533, "within_0_1": 0.7934, "energy_above": 0.3637, "overlap": 0.0}, "v1, one step": {"rms": 0.1181, "defect_rms": 0.236, "within_0_1": 0.7859, "energy_above": 0.2135, "overlap": 0.16}, "v1, 10 steps": {"rms": 0.118, "defect_rms": 0.2276, "within_0_1": 0.7839, "energy_above": 0.1391, "overlap": 0.0067}, "v2, one step": {"rms": 0.1102, "defect_rms": 0.2163, "within_0_1": 0.7994, "energy_above": 0.8674, "overlap": 0.4}, "v2, 10 steps": {"rms": 0.1361, "defect_rms": 0.2401, "within_0_1": 0.7411, "energy_above": 208.4303, "overlap": 0.7333}} 1468s
+antisite {"examples": 200, "nothing": {"rms": 0.0963, "defect_rms": 0.2111, "within_0_1": 0.829, "energy_above": 0.1215, "overlap": 0.0}, "v1, one step": {"rms": 0.0925, "defect_rms": 0.1929, "within_0_1": 0.8247, "energy_above": 0.1441, "overlap": 0.0}, "v1, 10 steps": {"rms": 0.0907, "defect_rms": 0.176, "within_0_1": 0.8206, "energy_above": 0.1291, "overlap": 0.0}, "v2, one step": {"rms": 0.0866, "defect_rms": 0.1804, "within_0_1": 0.8404, "energy_above": 0.1396, "overlap": 0.02}, "v2, 10 steps": {"rms": 0.1076, "defect_rms": 0.1931, "within_0_1": 0.799, "energy_above": 21.1789, "overlap": 0.595}} 1940s
+-> results/point_defects_recheck_20261111/repair_networks.json.tmp
+23:59:51 results/point_defects_recheck_20261111/chunks/baseline_vacancy_0.json
+vacancy 50 {"geometry": {"found": 0.48, "restored": 0.42}, "energy": {"found": 0.36, "restored": 0.32}}
+-> results/point_defects_recheck_20261111/chunks/baseline_vacancy_0.json.tmp
+00:01:56 results/point_defects_recheck_20261111/chunks/ceiling_vacancy_0.json
+vacancy {"examples": 50, "nothing": {"rms": 0.0841, "defect_rms": 0.2288, "within_0_1": 0.8909, "energy_above": 0.1612, "overlap": 0.0}, "minimise (needs the potential)": {"rms": 0.0835, "defect_rms": 0.2104, "within_0_1": 0.9154, "energy_above": 0.0, "overlap": 0.0, "restored": 0.64}} 50s
+-> results/point_defects_recheck_20261111/chunks/ceiling_vacancy_0.json.tmp
+00:02:47 results/point_defects_recheck_20261111/chunks/finder_vacancy_0.json
+glass level {"raw": {"defect_free_glasses": 25, "defect_free_flagged": 0.84, "defected_flagged": 0.898, "auc": 0.712}, "calibrated": {"defect_free_glasses": 25, "defect_free_flagged": 0.08, "defected_flagged": 0.289, "auc": 0.707}}
+vacancy {"examples": 50, "find": {"model": 0.66, "energy_needs_potential": 0.36, "chance": 0.028, "model_score": "detector"}, "repair": {"flag by model: insert, minimise": 0.58, "flag by energy: insert, minimise": 0.32}} 163s
+-> results/point_defects_recheck_20261111/chunks/finder_vacancy_0.json.tmp
+00:05:32 results/point_defects_recheck_20261111/chunks/baseline_vacancy_50.json
+vacancy 50 {"geometry": {"found": 0.44, "restored": 0.4}, "energy": {"found": 0.22, "restored": 0.2}}
+-> results/point_defects_recheck_20261111/chunks/baseline_vacancy_50.json.tmp
+00:07:39 results/point_defects_recheck_20261111/chunks/ceiling_vacancy_50.json
+vacancy {"examples": 50, "nothing": {"rms": 0.0852, "defect_rms": 0.2267, "within_0_1": 0.8816, "energy_above": 0.1535, "overlap": 0.0}, "minimise (needs the potential)": {"rms": 0.0824, "defect_rms": 0.2039, "within_0_1": 0.8962, "energy_above": 0.0, "overlap": 0.0, "restored": 0.68}} 46s
+-> results/point_defects_recheck_20261111/chunks/ceiling_vacancy_50.json.tmp
+00:08:26 results/point_defects_recheck_20261111/chunks/finder_vacancy_50.json
+glass level {"raw": {"defect_free_glasses": 25, "defect_free_flagged": 0.56, "defected_flagged": 0.883, "auc": 0.818}, "calibrated": {"defect_free_glasses": 25, "defect_free_flagged": 0.0, "defected_flagged": 0.356, "auc": 0.846}}
+vacancy {"examples": 50, "find": {"model": 0.76, "energy_needs_potential": 0.22, "chance": 0.029, "model_score": "detector"}, "repair": {"flag by model: insert, minimise": 0.6, "flag by energy: insert, minimise": 0.2}} 158s
+-> results/point_defects_recheck_20261111/chunks/finder_vacancy_50.json.tmp
+00:11:05 results/point_defects_recheck_20261111/chunks/baseline_vacancy_100.json
+vacancy 50 {"geometry": {"found": 0.5, "restored": 0.4}, "energy": {"found": 0.3, "restored": 0.24}}
+-> results/point_defects_recheck_20261111/chunks/baseline_vacancy_100.json.tmp
+00:13:11 results/point_defects_recheck_20261111/chunks/ceiling_vacancy_100.json
+vacancy {"examples": 50, "nothing": {"rms": 0.0823, "defect_rms": 0.2411, "within_0_1": 0.9049, "energy_above": 0.157, "overlap": 0.0}, "minimise (needs the potential)": {"rms": 0.0755, "defect_rms": 0.2077, "within_0_1": 0.9313, "energy_above": 0.0, "overlap": 0.0, "restored": 0.64}} 45s
+-> results/point_defects_recheck_20261111/chunks/ceiling_vacancy_100.json.tmp
+00:13:57 results/point_defects_recheck_20261111/chunks/finder_vacancy_100.json
+glass level {"raw": {"defect_free_glasses": 25, "defect_free_flagged": 0.68, "defected_flagged": 0.906, "auc": 0.753}, "calibrated": {"defect_free_glasses": 25, "defect_free_flagged": 0.0, "defected_flagged": 0.26, "auc": 0.732}}
+vacancy {"examples": 50, "find": {"model": 0.68, "energy_needs_potential": 0.3, "chance": 0.029, "model_score": "detector"}, "repair": {"flag by model: insert, minimise": 0.44, "flag by energy: insert, minimise": 0.24}} 162s
+-> results/point_defects_recheck_20261111/chunks/finder_vacancy_100.json.tmp
+00:16:40 results/point_defects_recheck_20261111/chunks/baseline_vacancy_150.json
+vacancy 50 {"geometry": {"found": 0.48, "restored": 0.4}, "energy": {"found": 0.3, "restored": 0.28}}
+-> results/point_defects_recheck_20261111/chunks/baseline_vacancy_150.json.tmp
+00:18:46 results/point_defects_recheck_20261111/chunks/ceiling_vacancy_150.json
+vacancy {"examples": 50, "nothing": {"rms": 0.0834, "defect_rms": 0.2384, "within_0_1": 0.9003, "energy_above": 0.1619, "overlap": 0.0}, "minimise (needs the potential)": {"rms": 0.0754, "defect_rms": 0.2106, "within_0_1": 0.9337, "energy_above": 0.0, "overlap": 0.0, "restored": 0.72}} 45s
+-> results/point_defects_recheck_20261111/chunks/ceiling_vacancy_150.json.tmp
+00:19:32 results/point_defects_recheck_20261111/chunks/finder_vacancy_150.json
+glass level {"raw": {"defect_free_glasses": 25, "defect_free_flagged": 0.64, "defected_flagged": 0.891, "auc": 0.729}, "calibrated": {"defect_free_glasses": 25, "defect_free_flagged": 0.0, "defected_flagged": 0.24, "auc": 0.722}}
+vacancy {"examples": 50, "find": {"model": 0.68, "energy_needs_potential": 0.3, "chance": 0.029, "model_score": "detector"}, "repair": {"flag by model: insert, minimise": 0.52, "flag by energy: insert, minimise": 0.28}} 159s
+-> results/point_defects_recheck_20261111/chunks/finder_vacancy_150.json.tmp
+00:22:13 results/point_defects_recheck_20261111/chunks/baseline_interstitial_0.json
+interstitial 50 {"geometry": {"found": 0.18, "restored": 0.06}, "energy": {"found": 0.28, "restored": 0.18}}
+-> results/point_defects_recheck_20261111/chunks/baseline_interstitial_0.json.tmp
+00:24:17 results/point_defects_recheck_20261111/chunks/ceiling_interstitial_0.json
+interstitial {"examples": 50, "nothing": {"rms": 0.0856, "defect_rms": 0.1891, "within_0_1": 0.841, "energy_above": 0.0167, "overlap": 0.0}, "minimise (needs the potential)": {"rms": 0.0422, "defect_rms": 0.099, "within_0_1": 0.9615, "energy_above": 0.0, "overlap": 0.0, "restored": 0.82}} 61s
+-> results/point_defects_recheck_20261111/chunks/ceiling_interstitial_0.json.tmp
+00:25:19 results/point_defects_recheck_20261111/chunks/finder_interstitial_0.json
+glass level {"raw": {"defect_free_glasses": 25, "defect_free_flagged": 0.84, "defected_flagged": 0.898, "auc": 0.712}, "calibrated": {"defect_free_glasses": 25, "defect_free_flagged": 0.08, "defected_flagged": 0.289, "auc": 0.707}}
+interstitial {"examples": 50, "find": {"model": 0.52, "energy_needs_potential": 0.28, "chance": 0.03, "model_score": "detector"}, "repair": {"flag by model: removed the extra atom": 0.36, "flag by model: remove, minimise": 0.34, "flag by energy: removed the extra atom": 0.2, "flag by energy: remove, minimise": 0.18}} 165s
+-> results/point_defects_recheck_20261111/chunks/finder_interstitial_0.json.tmp
+00:28:05 results/point_defects_recheck_20261111/chunks/baseline_interstitial_50.json
+interstitial 50 {"geometry": {"found": 0.12, "restored": 0.1}, "energy": {"found": 0.34, "restored": 0.24}}
+-> results/point_defects_recheck_20261111/chunks/baseline_interstitial_50.json.tmp
+00:30:10 results/point_defects_recheck_20261111/chunks/ceiling_interstitial_50.json
+interstitial {"examples": 50, "nothing": {"rms": 0.0692, "defect_rms": 0.1771, "within_0_1": 0.893, "energy_above": 0.0178, "overlap": 0.0}, "minimise (needs the potential)": {"rms": 0.0358, "defect_rms": 0.0891, "within_0_1": 0.9685, "energy_above": 0.0, "overlap": 0.0, "restored": 0.74}} 46s
+-> results/point_defects_recheck_20261111/chunks/ceiling_interstitial_50.json.tmp
+00:30:57 results/point_defects_recheck_20261111/chunks/finder_interstitial_50.json
+glass level {"raw": {"defect_free_glasses": 25, "defect_free_flagged": 0.56, "defected_flagged": 0.883, "auc": 0.818}, "calibrated": {"defect_free_glasses": 25, "defect_free_flagged": 0.0, "defected_flagged": 0.356, "auc": 0.846}}
+interstitial {"examples": 50, "find": {"model": 0.62, "energy_needs_potential": 0.34, "chance": 0.03, "model_score": "detector"}, "repair": {"flag by model: removed the extra atom": 0.58, "flag by model: remove, minimise": 0.46, "flag by energy: removed the extra atom": 0.3, "flag by energy: remove, minimise": 0.24}} 146s
+-> results/point_defects_recheck_20261111/chunks/finder_interstitial_50.json.tmp
+00:33:24 results/point_defects_recheck_20261111/chunks/baseline_interstitial_100.json
+interstitial 50 {"geometry": {"found": 0.18, "restored": 0.08}, "energy": {"found": 0.3, "restored": 0.24}}
+-> results/point_defects_recheck_20261111/chunks/baseline_interstitial_100.json.tmp
+00:35:22 results/point_defects_recheck_20261111/chunks/ceiling_interstitial_100.json
+interstitial {"examples": 50, "nothing": {"rms": 0.0724, "defect_rms": 0.1843, "within_0_1": 0.8895, "energy_above": 0.0171, "overlap": 0.0}, "minimise (needs the potential)": {"rms": 0.0325, "defect_rms": 0.089, "within_0_1": 0.9788, "energy_above": 0.0, "overlap": 0.0, "restored": 0.84}} 45s
+-> results/point_defects_recheck_20261111/chunks/ceiling_interstitial_100.json.tmp
+00:36:09 results/point_defects_recheck_20261111/chunks/finder_interstitial_100.json
+glass level {"raw": {"defect_free_glasses": 25, "defect_free_flagged": 0.68, "defected_flagged": 0.906, "auc": 0.753}, "calibrated": {"defect_free_glasses": 25, "defect_free_flagged": 0.0, "defected_flagged": 0.26, "auc": 0.732}}
+interstitial {"examples": 50, "find": {"model": 0.44, "energy_needs_potential": 0.3, "chance": 0.03, "model_score": "detector"}, "repair": {"flag by model: removed the extra atom": 0.42, "flag by model: remove, minimise": 0.36, "flag by energy: removed the extra atom": 0.26, "flag by energy: remove, minimise": 0.24}} 164s
+-> results/point_defects_recheck_20261111/chunks/finder_interstitial_100.json.tmp
+00:38:54 results/point_defects_recheck_20261111/chunks/baseline_interstitial_150.json
+interstitial 50 {"geometry": {"found": 0.12, "restored": 0.1}, "energy": {"found": 0.2, "restored": 0.18}}
+-> results/point_defects_recheck_20261111/chunks/baseline_interstitial_150.json.tmp
+00:40:45 results/point_defects_recheck_20261111/chunks/ceiling_interstitial_150.json
+interstitial {"examples": 50, "nothing": {"rms": 0.0846, "defect_rms": 0.2045, "within_0_1": 0.865, "energy_above": 0.0132, "overlap": 0.0}, "minimise (needs the potential)": {"rms": 0.0565, "defect_rms": 0.1409, "within_0_1": 0.9484, "energy_above": -0.0, "overlap": 0.0, "restored": 0.8}} 42s
+-> results/point_defects_recheck_20261111/chunks/ceiling_interstitial_150.json.tmp
+00:41:28 results/point_defects_recheck_20261111/chunks/finder_interstitial_150.json
+glass level {"raw": {"defect_free_glasses": 25, "defect_free_flagged": 0.64, "defected_flagged": 0.891, "auc": 0.729}, "calibrated": {"defect_free_glasses": 25, "defect_free_flagged": 0.0, "defected_flagged": 0.24, "auc": 0.722}}
+interstitial {"examples": 50, "find": {"model": 0.42, "energy_needs_potential": 0.2, "chance": 0.031, "model_score": "detector"}, "repair": {"flag by model: removed the extra atom": 0.38, "flag by model: remove, minimise": 0.36, "flag by energy: removed the extra atom": 0.2, "flag by energy: remove, minimise": 0.18}} 149s
+-> results/point_defects_recheck_20261111/chunks/finder_interstitial_150.json.tmp
+00:43:58 results/point_defects_recheck_20261111/chunks/baseline_antisite_0.json
+antisite 50 {"geometry": {"found": 0.18, "restored": 0.0}, "energy": {"found": 0.34, "restored": 0.08}}
+-> results/point_defects_recheck_20261111/chunks/baseline_antisite_0.json.tmp
+00:46:04 results/point_defects_recheck_20261111/chunks/ceiling_antisite_0.json
+antisite {"examples": 50, "nothing": {"rms": 0.0914, "defect_rms": 0.2039, "within_0_1": 0.8391, "energy_above": 0.1257, "overlap": 0.0}, "minimise (needs the potential)": {"rms": 0.0704, "defect_rms": 0.1523, "within_0_1": 0.9194, "energy_above": 0.0, "overlap": 0.0, "restored": 0.62}} 50s
+-> results/point_defects_recheck_20261111/chunks/ceiling_antisite_0.json.tmp
+00:46:56 results/point_defects_recheck_20261111/chunks/finder_antisite_0.json
+glass level {"raw": {"defect_free_glasses": 25, "defect_free_flagged": 0.84, "defected_flagged": 0.898, "auc": 0.712}, "calibrated": {"defect_free_glasses": 25, "defect_free_flagged": 0.08, "defected_flagged": 0.289, "auc": 0.707}}
+antisite {"examples": 50, "find": {"model": 0.54, "energy_needs_potential": 0.34, "chance": 0.04, "model_score": "detector"}, "repair": {"search near model flag, pick by model: right pair swapped back": 0.42, "search near model flag, pick by model: swap, minimise": 0.32, "search near model flag, pick by energy: right pair swapped back": 0.18, "search near model flag, pick by energy: swap, minimise": 0.12}} 168s
+-> results/point_defects_recheck_20261111/chunks/finder_antisite_0.json.tmp
+00:49:44 results/point_defects_recheck_20261111/chunks/baseline_antisite_50.json
+antisite 50 {"geometry": {"found": 0.2, "restored": 0.0}, "energy": {"found": 0.32, "restored": 0.12}}
+-> results/point_defects_recheck_20261111/chunks/baseline_antisite_50.json.tmp
+00:52:01 results/point_defects_recheck_20261111/chunks/ceiling_antisite_50.json
+antisite {"examples": 50, "nothing": {"rms": 0.1001, "defect_rms": 0.2119, "within_0_1": 0.8145, "energy_above": 0.1223, "overlap": 0.0}, "minimise (needs the potential)": {"rms": 0.0723, "defect_rms": 0.1528, "within_0_1": 0.9072, "energy_above": 0.0, "overlap": 0.0, "restored": 0.7}} 53s
+-> results/point_defects_recheck_20261111/chunks/ceiling_antisite_50.json.tmp
+00:52:55 results/point_defects_recheck_20261111/chunks/finder_antisite_50.json
+glass level {"raw": {"defect_free_glasses": 25, "defect_free_flagged": 0.56, "defected_flagged": 0.883, "auc": 0.818}, "calibrated": {"defect_free_glasses": 25, "defect_free_flagged": 0.0, "defected_flagged": 0.356, "auc": 0.846}}
+antisite {"examples": 50, "find": {"model": 0.5, "energy_needs_potential": 0.32, "chance": 0.04, "model_score": "detector"}, "repair": {"search near model flag, pick by model: right pair swapped back": 0.38, "search near model flag, pick by model: swap, minimise": 0.34, "search near model flag, pick by energy: right pair swapped back": 0.2, "search near model flag, pick by energy: swap, minimise": 0.2}} 170s
+-> results/point_defects_recheck_20261111/chunks/finder_antisite_50.json.tmp
+00:55:46 results/point_defects_recheck_20261111/chunks/baseline_antisite_100.json
+antisite 50 {"geometry": {"found": 0.06, "restored": 0.0}, "energy": {"found": 0.22, "restored": 0.04}}
+-> results/point_defects_recheck_20261111/chunks/baseline_antisite_100.json.tmp
+00:57:50 results/point_defects_recheck_20261111/chunks/ceiling_antisite_100.json
+antisite {"examples": 50, "nothing": {"rms": 0.0925, "defect_rms": 0.204, "within_0_1": 0.8341, "energy_above": 0.1185, "overlap": 0.0}, "minimise (needs the potential)": {"rms": 0.0556, "defect_rms": 0.1217, "within_0_1": 0.9463, "energy_above": 0.0, "overlap": 0.0, "restored": 0.76}} 51s
+-> results/point_defects_recheck_20261111/chunks/ceiling_antisite_100.json.tmp
+00:58:42 results/point_defects_recheck_20261111/chunks/finder_antisite_100.json
+glass level {"raw": {"defect_free_glasses": 25, "defect_free_flagged": 0.68, "defected_flagged": 0.906, "auc": 0.753}, "calibrated": {"defect_free_glasses": 25, "defect_free_flagged": 0.0, "defected_flagged": 0.26, "auc": 0.732}}
+antisite {"examples": 50, "find": {"model": 0.4, "energy_needs_potential": 0.22, "chance": 0.04, "model_score": "detector"}, "repair": {"search near model flag, pick by model: right pair swapped back": 0.28, "search near model flag, pick by model: swap, minimise": 0.26, "search near model flag, pick by energy: right pair swapped back": 0.14, "search near model flag, pick by energy: swap, minimise": 0.14}} 164s
+-> results/point_defects_recheck_20261111/chunks/finder_antisite_100.json.tmp
+01:01:28 results/point_defects_recheck_20261111/chunks/baseline_antisite_150.json
+antisite 50 {"geometry": {"found": 0.16, "restored": 0.0}, "energy": {"found": 0.28, "restored": 0.08}}
+-> results/point_defects_recheck_20261111/chunks/baseline_antisite_150.json.tmp
+01:03:43 results/point_defects_recheck_20261111/chunks/ceiling_antisite_150.json
+antisite {"examples": 50, "nothing": {"rms": 0.1007, "defect_rms": 0.2233, "within_0_1": 0.8282, "energy_above": 0.1178, "overlap": 0.0}, "minimise (needs the potential)": {"rms": 0.075, "defect_rms": 0.1673, "within_0_1": 0.9016, "energy_above": 0.0, "overlap": 0.0, "restored": 0.66}} 49s
+-> results/point_defects_recheck_20261111/chunks/ceiling_antisite_150.json.tmp
+01:04:33 results/point_defects_recheck_20261111/chunks/finder_antisite_150.json
+glass level {"raw": {"defect_free_glasses": 25, "defect_free_flagged": 0.64, "defected_flagged": 0.891, "auc": 0.729}, "calibrated": {"defect_free_glasses": 25, "defect_free_flagged": 0.0, "defected_flagged": 0.24, "auc": 0.722}}
+antisite {"examples": 50, "find": {"model": 0.52, "energy_needs_potential": 0.28, "chance": 0.041, "model_score": "detector"}, "repair": {"search near model flag, pick by model: right pair swapped back": 0.36, "search near model flag, pick by model: swap, minimise": 0.28, "search near model flag, pick by energy: right pair swapped back": 0.18, "search near model flag, pick by energy: swap, minimise": 0.12}} 160s
+-> results/point_defects_recheck_20261111/chunks/finder_antisite_150.json.tmp
+01:07:15 results/point_defects_recheck_20261111/chunks/baseline_frenkel_0.json
+frenkel 37 {"geometry": {"found": 0.216, "restored": 0.0}, "energy": {"found": 0.27}}
+-> results/point_defects_recheck_20261111/chunks/baseline_frenkel_0.json.tmp
+01:08:23 results/point_defects_recheck_20261111/chunks/ceiling_frenkel_0.json
+frenkel {"examples": 37, "nothing": {"rms": 0.1169, "defect_rms": 0.2619, "within_0_1": 0.8254, "energy_above": 0.1103, "overlap": 0.0}, "minimise (needs the potential)": {"rms": 0.0971, "defect_rms": 0.2106, "within_0_1": 0.9071, "energy_above": 0.0, "overlap": 0.0, "restored": 0.5946}} 35s
+-> results/point_defects_recheck_20261111/chunks/ceiling_frenkel_0.json.tmp
+01:09:00 results/point_defects_recheck_20261111/chunks/finder_frenkel_0.json
+glass level {"raw": {"defect_free_glasses": 25, "defect_free_flagged": 0.84, "defected_flagged": 0.898, "auc": 0.712}, "calibrated": {"defect_free_glasses": 25, "defect_free_flagged": 0.08, "defected_flagged": 0.289, "auc": 0.707}}
+frenkel {"examples": 37, "find": {"model": 0.432, "energy_needs_potential": 0.27, "chance": 0.055, "model_score": "detector"}, "repair": {"shake, minimise": {"restored": 0.0, "atoms_within_0_1": 0.416, "energy_above_original": 0.0322}, "flag by model: the displaced atom": 0.243, "flag by model, pick by model: the right gap": 0.351, "flag by model, pick by model: move, minimise": 0.216, "flag by energy: the displaced atom": 0.027, "flag by energy, pick by model: the right gap": 0.081, "flag by energy, pick by model: move, minimise": 0.0, "flag by energy, pick by energy: the right gap": 0.081, "flag by energy, pick by energy: lowest of all minimised tries": 0.054}} 559s
+-> results/point_defects_recheck_20261111/chunks/finder_frenkel_0.json.tmp
+01:18:20 results/point_defects_recheck_20261111/chunks/baseline_frenkel_50.json
+frenkel 38 {"geometry": {"found": 0.289, "restored": 0.0}, "energy": {"found": 0.342}}
+-> results/point_defects_recheck_20261111/chunks/baseline_frenkel_50.json.tmp
+01:19:41 results/point_defects_recheck_20261111/chunks/ceiling_frenkel_50.json
+frenkel {"examples": 38, "nothing": {"rms": 0.1342, "defect_rms": 0.2512, "within_0_1": 0.7433, "energy_above": 0.4674, "overlap": 0.0}, "minimise (needs the potential)": {"rms": 0.1259, "defect_rms": 0.226, "within_0_1": 0.8077, "energy_above": 0.0, "overlap": 0.0, "restored": 0.3947}} 35s
+-> results/point_defects_recheck_20261111/chunks/ceiling_frenkel_50.json.tmp
+01:20:17 results/point_defects_recheck_20261111/chunks/finder_frenkel_50.json
+glass level {"raw": {"defect_free_glasses": 25, "defect_free_flagged": 0.56, "defected_flagged": 0.883, "auc": 0.818}, "calibrated": {"defect_free_glasses": 25, "defect_free_flagged": 0.0, "defected_flagged": 0.356, "auc": 0.846}}
+frenkel {"examples": 38, "find": {"model": 0.421, "energy_needs_potential": 0.342, "chance": 0.054, "model_score": "detector"}, "repair": {"shake, minimise": {"restored": 0.0, "atoms_within_0_1": 0.417, "energy_above_original": 0.0332}, "flag by model: the displaced atom": 0.237, "flag by model, pick by model: the right gap": 0.263, "flag by model, pick by model: move, minimise": 0.105, "flag by energy: the displaced atom": 0.079, "flag by energy, pick by model: the right gap": 0.184, "flag by energy, pick by model: move, minimise": 0.0, "flag by energy, pick by energy: the right gap": 0.079, "flag by energy, pick by energy: lowest of all minimised tries": 0.053}} 580s
+-> results/point_defects_recheck_20261111/chunks/finder_frenkel_50.json.tmp
+01:29:58 results/point_defects_recheck_20261111/chunks/baseline_frenkel_100.json
+frenkel 42 {"geometry": {"found": 0.262, "restored": 0.0}, "energy": {"found": 0.405}}
+-> results/point_defects_recheck_20261111/chunks/baseline_frenkel_100.json.tmp
+01:31:01 results/point_defects_recheck_20261111/chunks/ceiling_frenkel_100.json
+frenkel {"examples": 42, "nothing": {"rms": 0.1154, "defect_rms": 0.2339, "within_0_1": 0.7896, "energy_above": 0.1941, "overlap": 0.0}, "minimise (needs the potential)": {"rms": 0.0978, "defect_rms": 0.1972, "within_0_1": 0.8812, "energy_above": 0.0, "overlap": 0.0, "restored": 0.4048}} 43s
+-> results/point_defects_recheck_20261111/chunks/ceiling_frenkel_100.json.tmp
+01:31:45 results/point_defects_recheck_20261111/chunks/finder_frenkel_100.json
+glass level {"raw": {"defect_free_glasses": 25, "defect_free_flagged": 0.68, "defected_flagged": 0.906, "auc": 0.753}, "calibrated": {"defect_free_glasses": 25, "defect_free_flagged": 0.0, "defected_flagged": 0.26, "auc": 0.732}}
+frenkel {"examples": 42, "find": {"model": 0.595, "energy_needs_potential": 0.405, "chance": 0.053, "model_score": "detector"}, "repair": {"shake, minimise": {"restored": 0.0, "atoms_within_0_1": 0.495, "energy_above_original": 0.0271}, "flag by model: the displaced atom": 0.214, "flag by model, pick by model: the right gap": 0.452, "flag by model, pick by model: move, minimise": 0.095, "flag by energy: the displaced atom": 0.095, "flag by energy, pick by model: the right gap": 0.262, "flag by energy, pick by model: move, minimise": 0.048, "flag by energy, pick by energy: the right gap": 0.119, "flag by energy, pick by energy: lowest of all minimised tries": 0.119}} 607s
+-> results/point_defects_recheck_20261111/chunks/finder_frenkel_100.json.tmp
+01:41:54 results/point_defects_recheck_20261111/chunks/baseline_frenkel_150.json
+06:16:31 results/point_defects_recheck_20261111/chunks/bonds_vacancy_0.json
+vacancy 50 {"bonds": {"found": 0.34, "restored": 0.26}}
+-> results/point_defects_recheck_20261111/chunks/bonds_vacancy_0.json.tmp
+06:18:09 results/point_defects_recheck_20261111/chunks/bonds_vacancy_50.json
+vacancy 50 {"bonds": {"found": 0.24, "restored": 0.22}}
+-> results/point_defects_recheck_20261111/chunks/bonds_vacancy_50.json.tmp
+06:19:35 results/point_defects_recheck_20261111/chunks/bonds_vacancy_100.json
+vacancy 50 {"bonds": {"found": 0.26, "restored": 0.16}}
+-> results/point_defects_recheck_20261111/chunks/bonds_vacancy_100.json.tmp
+06:21:00 results/point_defects_recheck_20261111/chunks/bonds_vacancy_150.json
+vacancy 50 {"bonds": {"found": 0.32, "restored": 0.24}}
+-> results/point_defects_recheck_20261111/chunks/bonds_vacancy_150.json.tmp
+06:22:14 results/point_defects_recheck_20261111/chunks/bonds_interstitial_0.json
+interstitial 50 {"bonds": {"found": 0.32, "restored": 0.22}}
+-> results/point_defects_recheck_20261111/chunks/bonds_interstitial_0.json.tmp
+06:23:29 results/point_defects_recheck_20261111/chunks/bonds_interstitial_50.json
+interstitial 50 {"bonds": {"found": 0.34, "restored": 0.26}}
+-> results/point_defects_recheck_20261111/chunks/bonds_interstitial_50.json.tmp
+06:25:09 results/point_defects_recheck_20261111/chunks/bonds_interstitial_100.json
+interstitial 50 {"bonds": {"found": 0.22, "restored": 0.2}}
+-> results/point_defects_recheck_20261111/chunks/bonds_interstitial_100.json.tmp
+06:26:52 results/point_defects_recheck_20261111/chunks/bonds_interstitial_150.json
+interstitial 50 {"bonds": {"found": 0.24, "restored": 0.18}}
+-> results/point_defects_recheck_20261111/chunks/bonds_interstitial_150.json.tmp
+06:28:05 results/point_defects_recheck_20261111/chunks/baseline_antisite_0.json
+antisite 50 {"geometry": {"found": 0.18, "restored": 0.0}, "energy": {"found": 0.34, "restored": 0.08}}
+-> results/point_defects_recheck_20261111/chunks/baseline_antisite_0.json.tmp
+06:30:26 results/point_defects_recheck_20261111/chunks/bonds_antisite_0.json
+antisite 50 {"bonds": {"found": 0.32, "restored": 0.06}}
+-> results/point_defects_recheck_20261111/chunks/bonds_antisite_0.json.tmp
+06:31:43 results/point_defects_recheck_20261111/chunks/baseline_antisite_50.json
+antisite 50 {"geometry": {"found": 0.22, "restored": 0.04}, "energy": {"found": 0.32, "restored": 0.12}}
+-> results/point_defects_recheck_20261111/chunks/baseline_antisite_50.json.tmp
+06:35:24 results/point_defects_recheck_20261111/chunks/bonds_antisite_50.json
+antisite 50 {"bonds": {"found": 0.38, "restored": 0.08}}
+-> results/point_defects_recheck_20261111/chunks/bonds_antisite_50.json.tmp
+06:37:14 results/point_defects_recheck_20261111/chunks/baseline_antisite_100.json
+antisite 50 {"geometry": {"found": 0.08, "restored": 0.0}, "energy": {"found": 0.22, "restored": 0.04}}
+-> results/point_defects_recheck_20261111/chunks/baseline_antisite_100.json.tmp
+06:39:43 results/point_defects_recheck_20261111/chunks/bonds_antisite_100.json
+antisite 50 {"bonds": {"found": 0.28, "restored": 0.08}}
+-> results/point_defects_recheck_20261111/chunks/bonds_antisite_100.json.tmp
+06:41:08 results/point_defects_recheck_20261111/chunks/baseline_antisite_150.json
+antisite 50 {"geometry": {"found": 0.18, "restored": 0.02}, "energy": {"found": 0.28, "restored": 0.08}}
+-> results/point_defects_recheck_20261111/chunks/baseline_antisite_150.json.tmp
+06:43:43 results/point_defects_recheck_20261111/chunks/bonds_antisite_150.json
+antisite 50 {"bonds": {"found": 0.28, "restored": 0.08}}
+-> results/point_defects_recheck_20261111/chunks/bonds_antisite_150.json.tmp
+06:45:04 results/point_defects_recheck_20261111/chunks/bonds_frenkel_0.json
+frenkel 37 {"bonds": {"found": 0.162, "restored": 0.0}}
+-> results/point_defects_recheck_20261111/chunks/bonds_frenkel_0.json.tmp
+06:46:16 results/point_defects_recheck_20261111/chunks/bonds_frenkel_50.json
+frenkel 38 {"bonds": {"found": 0.395, "restored": 0.026}}
+-> results/point_defects_recheck_20261111/chunks/bonds_frenkel_50.json.tmp
+06:47:26 results/point_defects_recheck_20261111/chunks/bonds_frenkel_100.json
+frenkel 42 {"bonds": {"found": 0.333, "restored": 0.0}}
+-> results/point_defects_recheck_20261111/chunks/bonds_frenkel_100.json.tmp
+06:48:37 results/point_defects_recheck_20261111/chunks/baseline_frenkel_150.json
+frenkel 33 {"geometry": {"found": 0.303, "restored": 0.0}, "energy": {"found": 0.273}}
+-> results/point_defects_recheck_20261111/chunks/baseline_frenkel_150.json.tmp
+06:49:41 results/point_defects_recheck_20261111/chunks/bonds_frenkel_150.json
+frenkel 33 {"bonds": {"found": 0.182, "restored": 0.03}}
+-> results/point_defects_recheck_20261111/chunks/bonds_frenkel_150.json.tmp
+06:50:37 results/point_defects_recheck_20261111/chunks/ceiling_frenkel_150.json
+frenkel {"examples": 33, "nothing": {"rms": 0.1244, "defect_rms": 0.2743, "within_0_1": 0.8198, "energy_above": 0.3083, "overlap": 0.0}, "minimise (needs the potential)": {"rms": 0.1316, "defect_rms": 0.2727, "within_0_1": 0.8333, "energy_above": 0.0006, "overlap": 0.0, "restored": 0.2727}} 42s
+-> results/point_defects_recheck_20261111/chunks/ceiling_frenkel_150.json.tmp
+06:51:20 results/point_defects_recheck_20261111/chunks/finder_frenkel_150.json
+glass level {"raw": {"defect_free_glasses": 25, "defect_free_flagged": 0.64, "defected_flagged": 0.891, "auc": 0.729}, "calibrated": {"defect_free_glasses": 25, "defect_free_flagged": 0.0, "defected_flagged": 0.24, "auc": 0.722}}
+frenkel {"examples": 33, "find": {"model": 0.333, "energy_needs_potential": 0.273, "chance": 0.053, "model_score": "detector"}, "repair": {"shake, minimise": {"restored": 0.0, "atoms_within_0_1": 0.466, "energy_above_original": 0.0268}, "flag by model: the displaced atom": 0.121, "flag by model, pick by model: the right gap": 0.242, "flag by model, pick by model: move, minimise": 0.091, "flag by energy: the displaced atom": 0.061, "flag by energy, pick by model: the right gap": 0.091, "flag by energy, pick by model: move, minimise": 0.03, "flag by energy, pick by energy: the right gap": 0.03, "flag by energy, pick by energy: lowest of all minimised tries": 0.061}} 566s
+-> results/point_defects_recheck_20261111/chunks/finder_frenkel_150.json.tmp
+07:00:48 all pieces done
