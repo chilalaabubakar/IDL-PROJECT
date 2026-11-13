@@ -1,5 +1,9 @@
 # Point defects: finding and repairing standard defects with a denoising diffusion model
 
+A summary of the whole study in plain language, for readers without a background in
+materials science or deep learning: [Point_Defects_Study_Summary.docx](Point_Defects_Study_Summary.docx).
+The report: [paper/point_defects_report.pdf](../paper/point_defects_report.pdf).
+
 ## Why this study
 
 The first version of the project asked a diffusion model to *place* defects (D1−, D1+, D2)

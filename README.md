@@ -23,6 +23,7 @@ whether its surroundings look like naturally formed ones. The work builds on DM2
 - [Dataset plan](docs/DATASET.md): the 2D KA dataset we generate, defect definitions, external datasets
 - [Feasibility pilot](docs/pilot/): LAMMPS script and measured outputs
 - [Team summary](docs/Project_Summary.docx) (Word): plain-language summary of what was done, the data, models, training runs, results, next steps and compute
+- [Point-defect study summary](docs/Point_Defects_Study_Summary.docx) (Word): the whole revised study in plain language, in three parts: the materials science, the deep learning, and what it shows. Goes with the report [paper/point_defects_report.pdf](paper/point_defects_report.pdf)
 - [Workshop paper](paper/main.pdf) (about 8.5 pages, plain language; LaTeX source in `paper/`)
 - [3D silica extension plan](docs/SILICA_3D_PLAN.md): the next step toward a materials-journal paper (defects in amorphous SiO₂, physical validation)
 - [3D silica quickstart](docs/SILICA_QUICKSTART.md): data, defect labels, the conditional 3D model and how to start training it (Kaggle or PSC Bridges-2)
