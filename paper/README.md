@@ -18,8 +18,9 @@ A number in the text is a macro (`\pd{found-finder-vacancy}`) defined in `pd_num
 the text cannot drift from the results; an undefined one prints in red. The pipeline figure
 uses one test vacancy stored in `data/pd_report_example.npz` (remade if the file is deleted).
 `figures/pd_fig4_network` is the deep learning model (network, one layer, training order).
-The ablation table and its text appear once `pd_table_ablations.tex` exists, which
-`make_report_numbers.py` writes when all six ablation runs are finished.
+The ablation table (`pd_table_ablations.tex`, written by `make_report_numbers.py` when all
+six ablation runs are finished) and its text (`pd_section_ablations.tex`) are read only when
+the table exists.
 
 `midterm_report.tex` / `midterm_report.pdf`: the 11-785 midterm report (5 pages plus team
 contributions and references), organised by the midterm rubric and including the follow-up

@@ -44,7 +44,7 @@ ABLATION_ROWS = (  # run, what changed, compared with
     ("layers2", "Random starting weights, 2 layers (reach $5\\sigma$)", "scratch"),
     ("layers1", "Random starting weights, 1 layer (reach $2.5\\sigma$)", "scratch"),
     ("no_weights", "No class weights", "reference"),
-    ("real_only", "Trained without the annihilated Frenkel pairs", "reference"),
+    ("real_only", "Trained without the Frenkel pairs that undid themselves", "reference"),
 )
 KINDS = ("vacancy", "interstitial", "antisite", "frenkel")  # the order of the tables
 LABEL = {
@@ -204,18 +204,30 @@ def experiments(K: dict) -> dict[str, str]:
     rows = []
     for name, what, base in ABLATION_ROWS:
         f = runs[name]["found"]
+        key = name.replace("_", "-")  # no underscore in the name of a number in the text
         cells = [pct(f[k]["rate"]) for k in order]
         lo, hi = 100 * f["all"]["lo"], 100 * f["all"]["hi"]
         cells[-1] += f" {{\\scriptsize[{lo:.0f}, {hi:.0f}]}}"
         if base:
             p = abl["ablation_tests"][f"{name} against {base}"]["all"]["p"]
-            num[f"abl-p-{name}"] = p_text(p)
-            cells.append(p_text(p))
+            num[f"abl-p-{key}"] = p_text(p)
+            cells.append(
+                p_text(p).replace("$p=", "").replace("$p<", "$<").removesuffix("$")
+                if p >= 0.001
+                else "$<0.001$"
+            )
         else:
             cells.append("--")
         for k in order:
-            num[f"abl-{name}-{k}"] = pct(f[k]["rate"])
-        num[f"abl-{name}-size"] = f"{runs[name]['parameters'] / 1e6:.2f}"
+            num[f"abl-{key}-{k}"] = pct(f[k]["rate"])
+        # the same run scored with the moving average of its weights
+        num[f"abl-avg-{key}"] = pct(abl["moving_average"][name]["all"]["rate"])
+        # validation glasses: atoms of a defect role that are given that role
+        val = runs[name]["validation"]
+        num[f"abl-label-{key}-vacancy"] = f"{100 * val['vacancy_recall_near_vacancy']:.0f}"
+        num[f"abl-label-{key}-interstitial"] = (
+            f"{100 * val['interstitial_recall_interstitial']:.0f}"
+        )
         size = f"{runs[name]['parameters'] / 1e6:.2f}"
         rows.append(f"{what} & {size} & " + " & ".join(cells) + " \\\\")
         if name in ("reference", "layers1"):

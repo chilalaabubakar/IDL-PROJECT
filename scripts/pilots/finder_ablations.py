@@ -20,7 +20,8 @@ The average is scored as well and stored (key "moving_average").
 
 Intervals are 95% and resample whole test glasses (10,000 bootstrap samples).
 Writes <out>/ablations.json, <out>/summary.md and, for each finished ablation run,
-<out>/<name>.pt (model settings and trained weights, readable by load_denoiser).
+<out>/<name>.pt (model settings and trained weights, readable by load_denoiser),
+<out>/<name>.log.jsonl (its training log) and <out>/<name>.config.yaml (its settings).
 """
 
 from __future__ import annotations
@@ -129,12 +130,18 @@ def slim(run: Path, out: Path) -> tuple[Path, Path, dict] | None:
     torch.save(dict(keep, ema=ckpt["model"], weights="trained weights"), trained)
     average = out / "runs" / run.name / "average.pt"
     torch.save(dict(keep, ema=ckpt["ema"], weights="moving average"), average)
+    # the training log and settings go next to the small checkpoint (the run folder is not kept)
+    for src, dst in (("log.jsonl", ".log.jsonl"), ("config.yaml", ".config.yaml")):
+        (out / (trained.stem + dst)).write_text((run / src).read_text())
     log = [json.loads(line) for line in (run / "log.jsonl").read_text().splitlines()]
     info = dict(
         updates=int(ckpt["step"]),
         seconds=round(float(ckpt.get("seconds", 0))),
         parameters=sum(v.numel() for v in ckpt["model"].values()),
         train_loss=round(log[-1]["train_loss"], 4) if log else None,
+        # validation glasses, moving average, not calibrated: how often an atom of a defect
+        # role is given that role, and how often a defect-free glass is flagged
+        validation={k: round(v, 3) for k, v in log[-1].items() if "recall" in k or "alarm" in k},
     )
     return trained, average, info
 

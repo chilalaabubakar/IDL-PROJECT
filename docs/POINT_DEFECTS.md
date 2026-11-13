@@ -238,10 +238,22 @@ The physics recheck and the report (`results/point_defects_recheck_20261111/READ
   The finder's lead is significant on the same defects (McNemar) in every case except
   restoring Frenkel pairs (p = 0.17).
 
+Ablations of the finder (`results/point_defects_ablations_20261112/README.md`): six runs of
+2,000 updates, one setting changed per run, scored on the same 750 defects.
+
+- **Starting from the denoiser matters most:** 44.7% of the defects found, against 23.7% from
+  random starting weights at the same number of updates.
+- **Reach:** one message-passing layer (2.5σ) is clearly worse than two or four.
+- **Class weights** change how readily atoms are labelled defective, not which atom is ranked
+  first.
+- **Training without the annihilated Frenkel pairs** brought no gain.
+
 To reproduce the test numbers and the report:
 
 ```bash
 bash scripts/pilots/recheck_real_defects.sh   # ~2 h on 4 CPU cores, resumable
+bash scripts/pilots/finder_ablations.sh       # the six ablation runs, ~4.5 h on 4 CPU cores
+python scripts/pilots/finder_ablations.py     # experiments on the finder
 python paper/make_report_numbers.py && python paper/make_report_figures.py
 ```
 

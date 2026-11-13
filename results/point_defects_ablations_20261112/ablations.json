@@ -145,7 +145,583 @@
    }
   }
  },
- "ablations": {},
- "ablation_tests": {},
- "moving_average": {}
+ "ablations": {
+  "reference": {
+   "what": "starts from the denoiser, 4 layers, class weights",
+   "updates": 2000,
+   "seconds": 3359,
+   "parameters": 523037,
+   "train_loss": 0.4483,
+   "validation": {
+    "vacancy_recall_intact": 0.998,
+    "vacancy_recall_near_vacancy": 0.271,
+    "interstitial_recall_intact": 0.999,
+    "interstitial_recall_interstitial": 0.175,
+    "frenkel_recall_intact": 0.999,
+    "frenkel_recall_near_vacancy": 0.088,
+    "frenkel_recall_displaced": 0.0,
+    "antisite_recall_intact": 0.998,
+    "antisite_recall_wrong_species": 0.043,
+    "clean_false_alarm": 0.32
+   },
+   "found": {
+    "vacancy": {
+     "rate": 0.64,
+     "lo": 0.565,
+     "hi": 0.715
+    },
+    "interstitial": {
+     "rate": 0.295,
+     "lo": 0.235,
+     "hi": 0.36
+    },
+    "frenkel": {
+     "rate": 0.42,
+     "lo": 0.3448275862068966,
+     "hi": 0.49673308032890573
+    },
+    "antisite": {
+     "rate": 0.425,
+     "lo": 0.355,
+     "hi": 0.495
+    },
+    "all": {
+     "rate": 0.44666666666666666,
+     "lo": 0.4042830898060326,
+     "hi": 0.4900398406374502
+    }
+   }
+  },
+  "scratch": {
+   "what": "random starting weights",
+   "updates": 2000,
+   "seconds": 3056,
+   "parameters": 523037,
+   "train_loss": 0.5448,
+   "validation": {
+    "vacancy_recall_intact": 1.0,
+    "vacancy_recall_near_vacancy": 0.0,
+    "interstitial_recall_intact": 1.0,
+    "interstitial_recall_interstitial": 0.0,
+    "frenkel_recall_intact": 1.0,
+    "frenkel_recall_near_vacancy": 0.0,
+    "frenkel_recall_displaced": 0.0,
+    "antisite_recall_intact": 1.0,
+    "antisite_recall_wrong_species": 0.0,
+    "clean_false_alarm": 0.0
+   },
+   "found": {
+    "vacancy": {
+     "rate": 0.17,
+     "lo": 0.12,
+     "hi": 0.22
+    },
+    "interstitial": {
+     "rate": 0.275,
+     "lo": 0.215,
+     "hi": 0.335
+    },
+    "frenkel": {
+     "rate": 0.24,
+     "lo": 0.16129032258064516,
+     "hi": 0.32450331125827814
+    },
+    "antisite": {
+     "rate": 0.265,
+     "lo": 0.205,
+     "hi": 0.33
+    },
+    "all": {
+     "rate": 0.23733333333333334,
+     "lo": 0.20130988529014845,
+     "hi": 0.27430151689639043
+    }
+   }
+  },
+  "layers2": {
+   "what": "random starting weights, 2 layers",
+   "updates": 2000,
+   "seconds": 1726,
+   "parameters": 287257,
+   "train_loss": 0.5425,
+   "validation": {
+    "vacancy_recall_intact": 1.0,
+    "vacancy_recall_near_vacancy": 0.0,
+    "interstitial_recall_intact": 1.0,
+    "interstitial_recall_interstitial": 0.0,
+    "frenkel_recall_intact": 1.0,
+    "frenkel_recall_near_vacancy": 0.0,
+    "frenkel_recall_displaced": 0.0,
+    "antisite_recall_intact": 1.0,
+    "antisite_recall_wrong_species": 0.0,
+    "clean_false_alarm": 0.0
+   },
+   "found": {
+    "vacancy": {
+     "rate": 0.155,
+     "lo": 0.11,
+     "hi": 0.205
+    },
+    "interstitial": {
+     "rate": 0.275,
+     "lo": 0.21,
+     "hi": 0.34
+    },
+    "frenkel": {
+     "rate": 0.24666666666666667,
+     "lo": 0.17105263157894737,
+     "hi": 0.32857392607392605
+    },
+    "antisite": {
+     "rate": 0.25,
+     "lo": 0.19,
+     "hi": 0.31
+    },
+    "all": {
+     "rate": 0.23066666666666666,
+     "lo": 0.19573901464713714,
+     "hi": 0.2656875834445928
+    }
+   }
+  },
+  "layers1": {
+   "what": "random starting weights, 1 layer",
+   "updates": 2000,
+   "seconds": 722,
+   "parameters": 169367,
+   "train_loss": 0.5491,
+   "validation": {
+    "vacancy_recall_intact": 1.0,
+    "vacancy_recall_near_vacancy": 0.0,
+    "interstitial_recall_intact": 1.0,
+    "interstitial_recall_interstitial": 0.0,
+    "frenkel_recall_intact": 1.0,
+    "frenkel_recall_near_vacancy": 0.0,
+    "frenkel_recall_displaced": 0.0,
+    "antisite_recall_intact": 1.0,
+    "antisite_recall_wrong_species": 0.0,
+    "clean_false_alarm": 0.0
+   },
+   "found": {
+    "vacancy": {
+     "rate": 0.135,
+     "lo": 0.095,
+     "hi": 0.18
+    },
+    "interstitial": {
+     "rate": 0.23,
+     "lo": 0.17,
+     "hi": 0.295
+    },
+    "frenkel": {
+     "rate": 0.17333333333333334,
+     "lo": 0.11409395973154363,
+     "hi": 0.23973287671232865
+    },
+    "antisite": {
+     "rate": 0.155,
+     "lo": 0.105,
+     "hi": 0.21
+    },
+    "all": {
+     "rate": 0.17333333333333334,
+     "lo": 0.143808036075031,
+     "hi": 0.20451527224435592
+    }
+   }
+  },
+  "no_weights": {
+   "what": "no class weights",
+   "updates": 2000,
+   "seconds": 3406,
+   "parameters": 523037,
+   "train_loss": 0.0583,
+   "validation": {
+    "vacancy_recall_intact": 1.0,
+    "vacancy_recall_near_vacancy": 0.072,
+    "interstitial_recall_intact": 1.0,
+    "interstitial_recall_interstitial": 0.0,
+    "frenkel_recall_intact": 1.0,
+    "frenkel_recall_near_vacancy": 0.004,
+    "frenkel_recall_displaced": 0.0,
+    "antisite_recall_intact": 1.0,
+    "antisite_recall_wrong_species": 0.0,
+    "clean_false_alarm": 0.0
+   },
+   "found": {
+    "vacancy": {
+     "rate": 0.61,
+     "lo": 0.535,
+     "hi": 0.685
+    },
+    "interstitial": {
+     "rate": 0.315,
+     "lo": 0.25,
+     "hi": 0.38
+    },
+    "frenkel": {
+     "rate": 0.36666666666666664,
+     "lo": 0.28378138777074946,
+     "hi": 0.4527027027027027
+    },
+    "antisite": {
+     "rate": 0.41,
+     "lo": 0.335,
+     "hi": 0.485
+    },
+    "all": {
+     "rate": 0.42933333333333334,
+     "lo": 0.38513513513513514,
+     "hi": 0.47333687002652514
+    }
+   }
+  },
+  "real_only": {
+   "what": "trained without the annihilated Frenkel pairs",
+   "updates": 2000,
+   "seconds": 2624,
+   "parameters": 523037,
+   "train_loss": 0.4424,
+   "validation": {
+    "vacancy_recall_intact": 0.998,
+    "vacancy_recall_near_vacancy": 0.322,
+    "interstitial_recall_intact": 0.999,
+    "interstitial_recall_interstitial": 0.17,
+    "frenkel_recall_intact": 0.999,
+    "frenkel_recall_near_vacancy": 0.176,
+    "frenkel_recall_displaced": 0.0,
+    "antisite_recall_intact": 0.997,
+    "antisite_recall_wrong_species": 0.062,
+    "clean_false_alarm": 0.37
+   },
+   "found": {
+    "vacancy": {
+     "rate": 0.64,
+     "lo": 0.57,
+     "hi": 0.71
+    },
+    "interstitial": {
+     "rate": 0.295,
+     "lo": 0.235,
+     "hi": 0.36
+    },
+    "frenkel": {
+     "rate": 0.35333333333333333,
+     "lo": 0.27702702702702703,
+     "hi": 0.43125306372549016
+    },
+    "antisite": {
+     "rate": 0.38,
+     "lo": 0.32,
+     "hi": 0.445
+    },
+    "all": {
+     "rate": 0.42133333333333334,
+     "lo": 0.38227513227513227,
+     "hi": 0.4611354917461055
+    }
+   }
+  }
+ },
+ "ablation_tests": {
+  "scratch against reference": {
+   "vacancy": {
+    "only_new": 5,
+    "only_base": 99,
+    "p": 9.540110163496681e-24
+   },
+   "interstitial": {
+    "only_new": 6,
+    "only_base": 10,
+    "p": 0.454498291015625
+   },
+   "frenkel": {
+    "only_new": 7,
+    "only_base": 34,
+    "p": 2.532080361561384e-05
+   },
+   "antisite": {
+    "only_new": 8,
+    "only_base": 40,
+    "p": 3.3052667092192682e-06
+   },
+   "all": {
+    "only_new": 26,
+    "only_base": 183,
+    "p": 2.9173563197193858e-30
+   }
+  },
+  "layers2 against scratch": {
+   "vacancy": {
+    "only_new": 5,
+    "only_base": 8,
+    "p": 0.5810546875
+   },
+   "interstitial": {
+    "only_new": 3,
+    "only_base": 3,
+    "p": 1.0
+   },
+   "frenkel": {
+    "only_new": 4,
+    "only_base": 3,
+    "p": 1.0
+   },
+   "antisite": {
+    "only_new": 0,
+    "only_base": 3,
+    "p": 0.25
+   },
+   "all": {
+    "only_new": 12,
+    "only_base": 17,
+    "p": 0.45825831964612007
+   }
+  },
+  "layers1 against scratch": {
+   "vacancy": {
+    "only_new": 5,
+    "only_base": 12,
+    "p": 0.143463134765625
+   },
+   "interstitial": {
+    "only_new": 9,
+    "only_base": 18,
+    "p": 0.12207812070846558
+   },
+   "frenkel": {
+    "only_new": 4,
+    "only_base": 14,
+    "p": 0.0308837890625
+   },
+   "antisite": {
+    "only_new": 2,
+    "only_base": 24,
+    "p": 1.049041748046875e-05
+   },
+   "all": {
+    "only_new": 20,
+    "only_base": 68,
+    "p": 2.770265657008098e-07
+   }
+  },
+  "no_weights against reference": {
+   "vacancy": {
+    "only_new": 3,
+    "only_base": 9,
+    "p": 0.14599609375
+   },
+   "interstitial": {
+    "only_new": 6,
+    "only_base": 2,
+    "p": 0.2890625
+   },
+   "frenkel": {
+    "only_new": 5,
+    "only_base": 13,
+    "p": 0.09625244140625
+   },
+   "antisite": {
+    "only_new": 9,
+    "only_base": 12,
+    "p": 0.6636238098144531
+   },
+   "all": {
+    "only_new": 23,
+    "only_base": 36,
+    "p": 0.11747735024505848
+   }
+  },
+  "real_only against reference": {
+   "vacancy": {
+    "only_new": 7,
+    "only_base": 7,
+    "p": 1.0
+   },
+   "interstitial": {
+    "only_new": 3,
+    "only_base": 3,
+    "p": 1.0
+   },
+   "frenkel": {
+    "only_new": 7,
+    "only_base": 17,
+    "p": 0.06391465663909912
+   },
+   "antisite": {
+    "only_new": 7,
+    "only_base": 16,
+    "p": 0.0931396484375
+   },
+   "all": {
+    "only_new": 24,
+    "only_base": 43,
+    "p": 0.027119992403126333
+   }
+  }
+ },
+ "moving_average": {
+  "reference": {
+   "vacancy": {
+    "rate": 0.61,
+    "lo": 0.54,
+    "hi": 0.68
+   },
+   "interstitial": {
+    "rate": 0.305,
+    "lo": 0.24,
+    "hi": 0.37
+   },
+   "frenkel": {
+    "rate": 0.4533333333333333,
+    "lo": 0.3783783783783784,
+    "hi": 0.5298013245033113
+   },
+   "antisite": {
+    "rate": 0.425,
+    "lo": 0.35,
+    "hi": 0.5
+   },
+   "all": {
+    "rate": 0.448,
+    "lo": 0.4042830898060326,
+    "hi": 0.49191429006173376
+   }
+  },
+  "scratch": {
+   "vacancy": {
+    "rate": 0.07,
+    "lo": 0.04,
+    "hi": 0.105
+   },
+   "interstitial": {
+    "rate": 0.22,
+    "lo": 0.16,
+    "hi": 0.285
+   },
+   "frenkel": {
+    "rate": 0.09333333333333334,
+    "lo": 0.0472972972972973,
+    "hi": 0.14379196884233142
+   },
+   "antisite": {
+    "rate": 0.14,
+    "lo": 0.09,
+    "hi": 0.19
+   },
+   "all": {
+    "rate": 0.13333333333333333,
+    "lo": 0.10947930574098798,
+    "hi": 0.15740896515627334
+   }
+  },
+  "layers2": {
+   "vacancy": {
+    "rate": 0.06,
+    "lo": 0.03,
+    "hi": 0.095
+   },
+   "interstitial": {
+    "rate": 0.22,
+    "lo": 0.16,
+    "hi": 0.28
+   },
+   "frenkel": {
+    "rate": 0.09333333333333334,
+    "lo": 0.0472972972972973,
+    "hi": 0.1437908496732026
+   },
+   "antisite": {
+    "rate": 0.145,
+    "lo": 0.095,
+    "hi": 0.2
+   },
+   "all": {
+    "rate": 0.132,
+    "lo": 0.10843373493975904,
+    "hi": 0.1566265060240964
+   }
+  },
+  "layers1": {
+   "vacancy": {
+    "rate": 0.205,
+    "lo": 0.155,
+    "hi": 0.26
+   },
+   "interstitial": {
+    "rate": 0.205,
+    "lo": 0.145,
+    "hi": 0.27
+   },
+   "frenkel": {
+    "rate": 0.15333333333333332,
+    "lo": 0.09868421052631579,
+    "hi": 0.21428571428571427
+   },
+   "antisite": {
+    "rate": 0.135,
+    "lo": 0.085,
+    "hi": 0.185
+   },
+   "all": {
+    "rate": 0.176,
+    "lo": 0.1499330655957162,
+    "hi": 0.2026671140939597
+   }
+  },
+  "no_weights": {
+   "vacancy": {
+    "rate": 0.6,
+    "lo": 0.525,
+    "hi": 0.675
+   },
+   "interstitial": {
+    "rate": 0.31,
+    "lo": 0.245,
+    "hi": 0.375
+   },
+   "frenkel": {
+    "rate": 0.43333333333333335,
+    "lo": 0.35714285714285715,
+    "hi": 0.5098039215686274
+   },
+   "antisite": {
+    "rate": 0.425,
+    "lo": 0.35,
+    "hi": 0.5
+   },
+   "all": {
+    "rate": 0.44266666666666665,
+    "lo": 0.39866666666666667,
+    "hi": 0.4880644499178982
+   }
+  },
+  "real_only": {
+   "vacancy": {
+    "rate": 0.625,
+    "lo": 0.55,
+    "hi": 0.7
+   },
+   "interstitial": {
+    "rate": 0.305,
+    "lo": 0.24,
+    "hi": 0.37
+   },
+   "frenkel": {
+    "rate": 0.4266666666666667,
+    "lo": 0.35172413793103446,
+    "hi": 0.5034013605442177
+   },
+   "antisite": {
+    "rate": 0.42,
+    "lo": 0.345,
+    "hi": 0.49
+   },
+   "all": {
+    "rate": 0.44533333333333336,
+    "lo": 0.4,
+    "hi": 0.4905920284528237
+   }
+  }
+ }
 }
