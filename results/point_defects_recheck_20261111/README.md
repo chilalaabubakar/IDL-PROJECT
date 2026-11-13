@@ -85,9 +85,10 @@ Consequences:
   easily comes back to it: of the 50, about 17 counted as restored by the finder route and
   26 by the energy route (finder 18% before, 12.7% now; energy route 18.5% before, 7.3% now).
 - **Training.** The finder was trained with 27% of its Frenkel examples labelled "displaced
-  atom" and "next to an empty site" in a glass that had neither. This explains part of its
-  weakness on Frenkel pairs, for example that it called most "displaced" atoms intact: in a
-  third of the validation pairs they were.
+  atom" and "next to an empty site" in a glass that had neither. We expected this to explain
+  part of its weakness on Frenkel pairs. A short training run without these examples found
+  no more defects, however (`../point_defects_ablations_20261112/README.md`), so the wrong
+  labels do not seem to be what holds the finder back.
 
 **The fix.** `glassdiff.data.point_defects.already_original` detects these cases (the relaxed
 glass matches the original one to one within 0.05σ, identical atoms allowed to trade places),

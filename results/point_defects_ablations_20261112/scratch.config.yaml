@@ -1,0 +1,39 @@
+name: scratch
+task: detect
+seed: 0
+data: data/ka2d_256_point_defects
+model:
+  name: egnn_classifier
+  hidden: 128
+  n_layers: 4
+  cutoff: 2.5
+  k_max: 32
+  n_classes: 5
+init_from: null
+kind_probs:
+  vacancy: 0.25
+  interstitial: 0.25
+  frenkel: 0.25
+  antisite: 0.25
+p_clean: 0.2
+class_weight_power: 0.5
+optim:
+  lr: 0.0002
+  weight_decay: 0.0
+  batch_size: 16
+  n_updates: 2000
+  grad_clip: 1.0
+  ema: 0.999
+n_val: 200
+log_every: 50
+val_every: 500
+ckpt_every: 250
+runs_root: results/point_defects_ablations_20261112/runs
+threads: 4
+resolved_model:
+  name: egnn_classifier
+  hidden: 128
+  n_layers: 4
+  cutoff: 2.5
+  k_max: 32
+  n_classes: 5

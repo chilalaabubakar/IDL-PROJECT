@@ -1,0 +1,21 @@
+% written by make_report_numbers.py
+\begin{table}[t]
+\centering
+\caption{Ablations of the finder: defects found (\%) on the real test defects after 2,000 updates, one setting changed per run. Size in millions of parameters. Brackets: the range that holds the true rate with 95\% confidence. $p$: the probability that the difference from the run it is compared with is chance; that run is the reference, or, for the two runs with fewer layers, the run with random starting weights and 4 layers.}
+\label{tab:ablations}
+\footnotesize\setlength{\tabcolsep}{3.5pt}
+\begin{tabularx}{\linewidth}{@{}>{\raggedright\arraybackslash}Xcccccll@{}}
+\toprule
+Run & Size & Vacancy & Interst. & Antisite & Frenkel & All & $p$ \\
+\midrule
+Reference: starts from the denoiser, 4 layers, class weights & 0.52 & 64 & 29.5 & 42.5 & 42 & 44.7 {\scriptsize[40, 49]} & -- \\
+\addlinespace
+Random starting weights & 0.52 & 17 & 27.5 & 26.5 & 24 & 23.7 {\scriptsize[20, 27]} & $<0.001$ \\
+Random starting weights, 2 layers (reach $5\sigma$) & 0.29 & 15.5 & 27.5 & 25 & 24.7 & 23.1 {\scriptsize[20, 27]} & 0.46 \\
+Random starting weights, 1 layer (reach $2.5\sigma$) & 0.17 & 13.5 & 23 & 15.5 & 17.3 & 17.3 {\scriptsize[14, 20]} & $<0.001$ \\
+\addlinespace
+No class weights & 0.52 & 61 & 31.5 & 41 & 36.7 & 42.9 {\scriptsize[39, 47]} & 0.12 \\
+Trained without the Frenkel pairs that undid themselves & 0.52 & 64 & 29.5 & 38 & 35.3 & 42.1 {\scriptsize[38, 46]} & 0.027 \\
+\bottomrule
+\end{tabularx}
+\end{table}
