@@ -190,6 +190,7 @@ The owners follow the roles in the midterm report; the team should confirm them.
 
 ## Where the first version lives
 
-The first version (placing D1−, D1+ and D2) stays on `main` with its results, the midterm
-report (`paper/midterm_report.tex`) and the generalisation study (`docs/GAP2_*.md`). This
-branch is for the new study.
+The first version (placing D1−, D1+ and D2) is on the branch `main` with its results, the
+midterm report, the workshop paper and the generalisation study. This branch holds the new
+study only, plus the code and data the two share (see the README). The two branches are not
+merged into each other.
