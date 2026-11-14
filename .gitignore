@@ -18,9 +18,6 @@ runs/*
 data/**/.cache/
 slurm/logs/
 data/*_dry/
-# point-defect training split: regenerate with scripts/make_point_defects.py (~20 min)
-data/ka2d_256_point_defects/train.npz
-data/ka2d_256_point_defects/*.tmp.npz
 
 # LAMMPS / visualisation scratch
 log.lammps

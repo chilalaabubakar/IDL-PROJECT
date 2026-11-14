@@ -45,8 +45,6 @@ real samples, not illustrations.
 - **Official style file:** the layout imitates the NeurIPS / AI4Mat format (5.5 × 9 in text,
   Times). To use the official `.sty`, drop it into this folder, delete the `geometry` and
   `mathptmx` lines, and add `\usepackage[preprint]{neurips_2025}` (or the venue's name).
-- **AI-use statement:** many venues now ask for one. There is a marked place in the
-  acknowledgements.
 - **Numbers:** every number comes from `results/`:
   - `round3_ANALYSIS.md`, round 2's `ANALYSIS.md`;
   - `results/sensitivity/README.md`, `results/seeds/README.md`, `results/stage0/`.

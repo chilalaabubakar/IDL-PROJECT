@@ -221,7 +221,7 @@ Option B goes in the paper whatever we pick; option A or C is the showcase.
 | 4–8 | **M2 Model.** 3D code (structures, minimum image, neighbour lists, batched silica potential + FIRE, detectors); conditional NequIP, seed 0; unconditional sanity (g(r), S(q), rings) and step-count calibration | Generated glass within 2× the natural floor on global metrics, or a documented fictive-temperature offset |
 | 7–11 | **M3 Main results.** Task B table for the three classes against all baselines; guidance and R_out sweeps; seeds 1–2; sensitivity | C1 holds for ≥ 2 classes across seeds |
 | 10–13 | **M4 Physics.** Machine-learned-potential re-relaxation; VDOS; DFT spot check (stretch); the chosen application | C3 holds; application results |
-| 12–16 | **M5 Paper.** Figures, writing, code and data release (Zenodo), AI-use statement | — |
+| 12–16 | **M5 Paper.** Figures, writing, code and data release (Zenodo) | — |
 
 **Workstreams** (same five as in 2D):
 - **WS1** data and MD (LAMMPS, baselines B2/B6);
