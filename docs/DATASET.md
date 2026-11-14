@@ -1,5 +1,11 @@
 # Dataset plan: 2D Kob–Andersen glasses for controlled defect generation
 
+> Written for the first study (branch `main`). The point-defect study on this branch uses
+> the `ka2d_256` glasses described here and makes its defects in them
+> ([POINT_DEFECTS.md](POINT_DEFECTS.md)). The other data sets (`ka2d_64`, `ka2d_1024`,
+> `ka2d_256_slow`), the pilot outputs in `docs/pilot/` and the defect labels D1 and D2 belong
+> to the first study and are on `main`.
+
 ## Bottom line
 
 1. **No public dataset matches the proposal.** The proposal needs about 1,000 independent,

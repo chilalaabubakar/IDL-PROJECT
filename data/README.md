@@ -1,16 +1,14 @@
 # data/
 
-The generated datasets are committed here (~20 MB in total), so you can start without
-regenerating them:
+The datasets of the point-defect study are committed here, so you can start without
+regenerating them. The other data sets of the first study (`ka2d_64`, `ka2d_1024`,
+`ka2d_256_slow`) are on the branch `main`.
 
 | Directory | Contents |
 |---|---|
 | `ka2d_256/` | 800 / 100 / 100 glasses, N = 256, quench 1e-2/τ; `patches_train.npz` (10,545 patches) |
-| `ka2d_64/` | 1600 / 200 / 200 glasses, N = 64 (MLP baseline, matched-N symmetry ladder); patches |
-| `ka2d_1024/` | 100 test glasses, N = 1024 (size transfer) |
-| `ka2d_256_slow/` | 200 test glasses, N = 256, quench 1e-3/τ (better annealed, out of distribution) |
 | `ka2d_256_point_defects/` | Vacancy, interstitial, Frenkel pair and antisite examples made in the `ka2d_256` glasses and relaxed (docs/POINT_DEFECTS.md): `val.npz` and `test.npz` (200 per defect each); `train.npz` (6,400 per defect, 95 MB) is not committed: `python scripts/make_point_defects.py --config configs/data/ka2d_256_point_defects.yaml splits=[train]` (~30-45 min on 4 cores; check it against the SHA256 in `meta.json`) |
-| `sio2_dm2/` | 3D silica: DM2's 24 published glasses (3,000 atoms; 0.1, 1, 10, 100 K/ps), split 16 / 4 / 4 and labelled (`scripts/silica/import_dm2.py`; DM2, MIT licence). Our 576-atom glasses will go in `sio2_576/` (`docs/SILICA_QUICKSTART.md`) |
+| `sio2_dm2/` | 3D silica: DM2's 24 published glasses (3,000 atoms; 0.1, 1, 10, 100 K/ps), split 16 / 4 / 4 and labelled (`scripts/silica/import_dm2.py`; DM2, MIT licence). Our 576-atom glasses would go in `sio2_576/` |
 
 Every directory has `meta.json` with the protocol, LAMMPS version, rejection log and
 the frozen defect thresholds (`"defects"`). File format: docs/DATASET.md §1.7.
