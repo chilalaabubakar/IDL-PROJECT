@@ -266,6 +266,37 @@ the finder was trained with the annihilated Frenkel pairs still labelled as defe
 not been retrained; "restored" asks for the exact original minimum, which is strict in a
 glass where many nearby minima are equally natural.
 
+## Other finders: a transformer and a CNN
+
+Prof. Dabo pointed out that EGNNs can be unstable. Two questions follow: does the EGNN finder
+train stably and give the same result for every seed (the seed study,
+`scripts/pilots/finder_seeds.sh`, `results/point_defects_seeds_20261114/`), and would another
+architecture do better? For the second, two finders with the same interface as the EGNN
+finder (per-atom logits of the five roles) are trained and tested exactly like it:
+
+| Finder | Code | Idea | What it is built to respect |
+|---|---|---|---|
+| Transformer | `src/glassdiff/models/attention.py` (0.58 M parameters) | every atom attends to every other atom from the first layer; the distance across the periodic box enters as an attention bias per head (as in Graphormer's 3D variant) | no atom-number encoding (renumbering), distances only (shifts, turns, box vectors): exact |
+| CNN | `src/glassdiff/models/cnn.py` (0.50 M) | the glass drawn as a 2-channel image (one per species, a Gaussian blob per atom, 128 x 128 pixels); a U-Net with circular padding; features read at each atom | the 8 turns and reflections of the square box: exact at test time (averaged); shifts: by whole coarse pixels (1.8σ) exact, otherwise learned from random shifts in training |
+| EGNN, the control | `src/glassdiff/models/egnn_pbc.py` (0.52 M) | messages between atoms within 2.5σ, reach 10σ after four layers | exact |
+
+**A fair comparison.** Starting from the denoiser nearly doubles what the EGNN finds (ablation
+table), so all three start from random weights here and the EGNN trained the same way is the
+control (`configs/train/detect_egnn_scratch.yaml`, `detect_attention.yaml`,
+`detect_cnn.yaml`). Same data, loss, class weights, optimiser, batch size, 20,000 updates, three
+seeds each; the transformer's learning rate warms up over the first 1,000 updates
+(`optim.warmup`). All are scored on the same 750 real test defects with the same calibration,
+and the finder of the report after the same 20,000 updates (from the denoiser) is the
+reference.
+
+**Running it** (GPU): `notebooks/kaggle_attention_finder.ipynb` and
+`notebooks/kaggle_cnn_finder.ipynb`, on Kaggle (T4 x2) or Colab. Both use
+`scripts/pilots/finder_architectures.py` (train, export, evaluate), which reports, besides the
+found rates, the comparison with the control on the same seed, how often the flagged atom
+stays the same when the glass is turned, shifted or renumbered, and the training stability
+from the per-update log (gradient norm before clipping, clipped share, spikes). Both notebooks
+were run end to end on CPU in their quick-test mode (`QUICK_TEST = True`).
+
 ## Next: amorphous silica
 
 The same study in amorphous SiO₂, with oxygen vacancies, oxygen interstitials, oxygen Frenkel

@@ -306,6 +306,9 @@ def main() -> None:
     defect_weight = float(cfg.get("defect_weight", 0.0))  # extra loss weight, defect atoms
     defect_tol = float(cfg.get("defect_tol", 0.1))  # moved more than this by the defect
     bs, n_updates = int(opt_cfg["batch_size"]), int(opt_cfg["n_updates"])
+    # optim.warmup: the learning rate rises linearly over this many updates (0: none). Set
+    # from the update count every step, so it is the same after a resume.
+    base_lr, warmup = float(opt_cfg["lr"]), int(opt_cfg.get("warmup", 0))
     ema_decay = float(opt_cfg["ema"])
     max_seconds = float(cfg.get("max_minutes", 0)) * 60 or float("inf")
     log_path = run_dir / "log.jsonl"
@@ -353,6 +356,9 @@ def main() -> None:
         loss.backward()
         # the norm before clipping: clipping hides a large gradient from the weights, not from here
         grad_norm = torch.nn.utils.clip_grad_norm_(model.parameters(), float(opt_cfg["grad_clip"]))
+        if warmup:
+            for group in opt.param_groups:
+                group["lr"] = base_lr * min(1.0, (step + 1) / warmup)
         opt.step()
         with torch.no_grad():
             for p_ema, p in zip(ema.parameters(), model.parameters()):

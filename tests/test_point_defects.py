@@ -310,10 +310,11 @@ def test_spike_detection_ignores_differences_between_batch_types(tmp_path):
     assert set(s["loss_last_1000_by_batch"]) == {*kinds, "defect-free"}
 
 
-def _train(tmp_path, monkeypatch, pd, task, config=None):
+def _train(tmp_path, monkeypatch, pd, task, config=None, model_args=None):
     config = config or f"{task}_point_defects"
     cfg = yaml.safe_load((ROOT / f"configs/train/{config}.yaml").read_text())
     model_cfg = cfg["model"] if isinstance(cfg["model"], dict) else str(ROOT / cfg["model"])
+    model_args = model_args or dict(hidden=16, n_layers=1, k_max=48)
     cfg.update(
         data=str(pd),
         model=model_cfg,
@@ -323,7 +324,7 @@ def _train(tmp_path, monkeypatch, pd, task, config=None):
         n_val=2,
         val_every=2,
         val_sigma=[0.001],
-        model_args=dict(hidden=16, n_layers=1, k_max=48),
+        model_args=model_args,
     )
     cfg["optim"].update(n_updates=2, batch_size=2)
     path = tmp_path / f"{config}.yaml"
@@ -333,6 +334,36 @@ def _train(tmp_path, monkeypatch, pd, task, config=None):
     (run,) = [p for p in (tmp_path / "runs").iterdir() if p.name.endswith(cfg["name"])]
     rows = [json.loads(x) for x in (run / "log.jsonl").read_text().splitlines()]
     return run, rows
+
+
+@pytest.mark.slow
+@pytest.mark.parametrize(
+    "config, model_args",
+    [
+        ("detect_attention", dict(hidden=16, n_layers=1, n_heads=2, ffn=32, pair_dim=8)),
+        ("detect_cnn", dict(grid=32, channels=[8, 8, 8], hidden=8)),
+    ],
+)
+def test_other_finders_train_and_are_scored(
+    tmp_path, monkeypatch, make_lattice, config, model_args
+):
+    """The transformer and the CNN finder go through the same training and scoring as the EGNN."""
+    pd = _write_dataset(tmp_path, make_lattice)
+    run, rows = _train(tmp_path, monkeypatch, pd, "detect", config, model_args)
+    assert rows[-1]["step"] == 2 and "vacancy_hit" in rows[-1]
+    assert len((run / "steps.csv").read_text().splitlines()) == 3
+    ckpt = torch.load(run / "ckpt.pt", weights_only=False)
+    assert len(ckpt["class_weights"]) == 5 and ckpt["cfg"]["init_from"] is None
+    model = load_denoiser(run / "ckpt.pt")
+    assert model.n_classes == 5 and not model.training
+    ev = _script("eval_point_defects")
+    prior = ev.finder_log_prior(str(run / "ckpt.pt"), pd)[0]
+    models = ev.Models(
+        str(run / "ckpt.pt"), str(run / "ckpt.pt"), threads=1, log_prior=prior, do_heal=False
+    )
+    d = load_point_defects(pd / "test.npz")["antisite"]
+    prob = models.role_prob(d.pos.numpy(), d.types.numpy(), d.box.numpy())
+    assert prob.shape == (*d.pos.shape[:2], 5) and np.allclose(prob.sum(-1), 1)
 
 
 @pytest.mark.slow

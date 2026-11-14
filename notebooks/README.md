@@ -15,6 +15,13 @@ secrets, never in the notebook). The notebooks of the first study are on the bra
 - `kaggle_point_defects_finder.ipynb`: continues the finder for 40,000 updates at half the
   learning rate and evaluates it with calibrated probabilities (~4.5 h on one GPU). Run on
   10 November 2026: `results/point_defects_finder_v2_20261110/`.
+- `kaggle_attention_finder.ipynb`, `kaggle_cnn_finder.ipynb`: other finders against the EGNN
+  (`docs/POINT_DEFECTS.md`, "Other finders"). Each trains its finder and the EGNN control from
+  random weights with seeds 0, 1 and 2 (one run per GPU at a time; 3-5 h on T4 x2), tests them
+  on the 750 real test defects and pushes `results/<platform>_arch_<date>/`. Runs on Kaggle or
+  Colab; a session that runs out of time pushes checkpoints and the next run continues. Run the
+  two one after the other: the second skips the control runs the first pushed.
+  `QUICK_TEST = True` runs everything in a few minutes on a CPU, without pushing.
 - `kaggle_silica_point_defects.ipynb`: the same question in amorphous silica, stage 1
   (`docs/SILICA_POINT_DEFECTS.md`): oxygen vacancy, oxygen interstitial, oxygen Frenkel pair
   and silicon vacancy in DM2's test glasses, found by the standard coordination analysis or
