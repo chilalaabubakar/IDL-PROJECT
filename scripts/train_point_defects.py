@@ -34,7 +34,10 @@ Each batch holds one defect kind, drawn with kind_probs (vacancy and interstitia
 have 255 and 257 atoms). init_from loads matching weights from another checkpoint, e.g. the
 trained unconditional denoiser (the classifier takes its trunk). Run directory: config.yaml,
 git.txt, log.jsonl (train loss and validation metrics of the EMA model on fixed val
-examples), ckpt.pt (load with glassdiff.models.registry.load_denoiser). Validation:
+examples), steps.csv (every update: its defect kind, whether the batch was defect-free, the
+loss, the gradient norm before clipping and, for heal, the mean noise level; log_steps:
+false turns it off), ckpt.pt (load with glassdiff.models.registry.load_denoiser).
+Validation:
     heal:   per kind, one repair step at each val_sigma, x - model(x): RMS distance to the
             original over all atoms, over the defect atoms (defect_rms) and the mean
             worst-atom distance; "none_*" is the same for leaving the input as it is.
@@ -70,6 +73,7 @@ from glassdiff.utils.config import cli_config, load_config
 from glassdiff.utils.runs import make_run_dir, pick_device, seed_everything
 
 SESSION_KEYS = ("max_minutes", "device", "threads", "log_every", "val_every", "ckpt_every")
+STEP_HEADER = "step,kind,clean,loss,grad_norm,sigma\n"
 HIT_RADIUS = 1.5
 
 
@@ -90,6 +94,18 @@ def detection_hits(
     top = pos[torch.arange(len(pos)), score.argmax(-1)]
     d = torch.stack([wrap(top - sites[:, k], box).norm(dim=-1) for k in range(2)]).amin(0)
     return d < HIT_RADIUS
+
+
+def open_step_log(path: Path, start_step: int):
+    """steps.csv, opened for appending. A resumed run repeats the updates after its last
+    checkpoint, so rows beyond start_step (written before an interruption) are dropped."""
+    rows = []
+    if path.exists():
+        rows = [
+            r for r in path.read_text().splitlines()[1:] if int(r.split(",", 1)[0]) <= start_step
+        ]
+    path.write_text(STEP_HEADER + "".join(r + "\n" for r in rows))
+    return path.open("a")
 
 
 def make_batch(task, d: PointDefectSet, idx, clean: bool, sigma, gen, device):
@@ -293,8 +309,13 @@ def main() -> None:
     ema_decay = float(opt_cfg["ema"])
     max_seconds = float(cfg.get("max_minutes", 0)) * 60 or float("inf")
     log_path = run_dir / "log.jsonl"
+    steps_file = (
+        open_step_log(run_dir / "steps.csv", start_step) if cfg.get("log_steps", True) else None
+    )
 
     def save(step: int, seconds: float) -> None:
+        if steps_file is not None:
+            steps_file.flush()
         tmp = run_dir / "ckpt.pt.tmp"
         state = dict(
             model_cfg=model_cfg,
@@ -330,13 +351,20 @@ def main() -> None:
             loss = F.cross_entropy(logits.reshape(-1, logits.shape[-1]), target.flatten(), weights)
         opt.zero_grad(set_to_none=True)
         loss.backward()
-        torch.nn.utils.clip_grad_norm_(model.parameters(), float(opt_cfg["grad_clip"]))
+        # the norm before clipping: clipping hides a large gradient from the weights, not from here
+        grad_norm = torch.nn.utils.clip_grad_norm_(model.parameters(), float(opt_cfg["grad_clip"]))
         opt.step()
         with torch.no_grad():
             for p_ema, p in zip(ema.parameters(), model.parameters()):
                 p_ema.lerp_(p, 1 - ema_decay)
         step += 1
-        running, n_running = running + loss.item(), n_running + 1
+        loss_value = loss.item()
+        running, n_running = running + loss_value, n_running + 1
+        if steps_file is not None:
+            mean_sigma = f"{float(sigma.mean()):.4g}" if sigma is not None else ""
+            steps_file.write(
+                f"{step},{kind},{int(clean)},{loss_value:.6g},{float(grad_norm):.6g},{mean_sigma}\n"
+            )
         session_seconds = time.time() - t0
         elapsed = seconds_before + session_seconds
         done = step >= n_updates or session_seconds > max_seconds
@@ -353,6 +381,8 @@ def main() -> None:
             save(step, elapsed)
         if done:
             break
+    if steps_file is not None:
+        steps_file.close()
     print(f"finished {step} updates -> {run_dir / 'ckpt.pt'}", flush=True)
 
 
