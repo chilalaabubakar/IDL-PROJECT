@@ -1,0 +1,34 @@
+# Point-defect finder, other architectures (docs/POINT_DEFECTS.md, "Other finders"):
+# a periodic U-Net on the glass drawn as an image (src/glassdiff/models/cnn.py).
+# Everything but the model is the recipe of detect_point_defects.yaml, from random starting
+# weights and for 20,000 updates, so that the three finders are compared on equal terms:
+#   detect_egnn_scratch.yaml, detect_attention.yaml, detect_cnn.yaml
+# The finder of the report (from the denoiser, detect_point_defects.yaml) is the reference.
+name: pd_detect_cnn
+task: detect
+seed: 0
+data: data/ka2d_256_point_defects
+model:
+  name: grid_unet
+  grid: 128                  # 0.11 sigma per pixel
+  blob: 0.15
+  channels: [16, 32, 48, 64, 96]
+  n_classes: 5               # 0.50 M parameters
+  augment: true              # one of the 8 symmetries of the box and a random shift per glass
+  tta: true                  # evaluation averages over the 8 symmetries
+init_from: null              # random starting weights
+kind_probs: {vacancy: 0.25, interstitial: 0.25, frenkel: 0.25, antisite: 0.25}
+p_clean: 0.2
+class_weight_power: 0.5
+optim:
+  lr: 2.0e-4
+  weight_decay: 0.0
+  batch_size: 16
+  n_updates: 20000
+  grad_clip: 1.0
+  ema: 0.999
+n_val: 200
+log_every: 100
+val_every: 1000
+ckpt_every: 1000
+log_steps: true

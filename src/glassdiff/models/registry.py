@@ -22,6 +22,14 @@ def build_model(model_cfg: dict[str, Any]) -> Denoiser:
         from glassdiff.models.egnn_pbc import EGNNAtomClassifier
 
         return EGNNAtomClassifier(**cfg)
+    if name == "atom_transformer":
+        from glassdiff.models.attention import AtomTransformerClassifier
+
+        return AtomTransformerClassifier(**cfg)
+    if name == "grid_unet":
+        from glassdiff.models.cnn import GridUNetClassifier
+
+        return GridUNetClassifier(**cfg)
     if name == "mpnn":
         from glassdiff.models.mpnn import MPNN
 
