@@ -70,10 +70,9 @@ class EGNNPBC(Denoiser):
         self.rbf = GaussianRBF(cutoff, n_rbf)
         self.layers = nn.ModuleList(EGNNLayer(hidden, n_rbf) for _ in range(n_layers))
 
-    def trunk(
+    def forward(
         self, s: Structures, sigma: Tensor, pin: Tensor | None = None, label: Tensor | None = None
-    ) -> tuple[Tensor, Tensor]:
-        """(final per-atom features [B, N, hidden], summed vector output [B, N, 2])."""
+    ) -> Tensor:
         nl = neighbor_list(s.pos, s.box, self.cutoff, self.k_max)
         env = cosine_envelope(nl.dist, self.cutoff) * nl.mask
         rbf = self.rbf(nl.dist)
@@ -82,41 +81,6 @@ class EGNNPBC(Denoiser):
         for layer in self.layers:
             h, vec = layer(h, nl, rbf, env, self.inv_k0)
             out = out + vec
-        return h, out
-
-    def forward(
-        self, s: Structures, sigma: Tensor, pin: Tensor | None = None, label: Tensor | None = None
-    ) -> Tensor:
-        _, out = self.trunk(s, sigma, pin, label)
         if pin is not None:
             out = out * (~pin)[..., None]
         return out
-
-
-class EGNNAtomClassifier(EGNNPBC):
-    """The same periodic EGNN with a per-atom classification head (docs/POINT_DEFECTS.md).
-
-    The logits come from the final rotation-invariant atom features, so they do not change
-    when the glass is shifted or rotated and follow any renumbering of the atoms. Used to find
-    point defects: one class per glassdiff.data.point_defects.AtomRole. Noise-level blind by
-    default (it reads relaxed glasses); ``sigma`` is then ignored.
-    """
-
-    def __init__(self, n_classes: int = 5, sigma_aware: bool = False, **kwargs) -> None:
-        super().__init__(sigma_aware=sigma_aware, **kwargs)
-        hidden = self.embed.species.embedding_dim
-        self.n_classes = n_classes
-        self.head = mlp([hidden, hidden, n_classes])
-
-    def forward(
-        self,
-        s: Structures,
-        sigma: Tensor | None = None,
-        pin: Tensor | None = None,
-        label: Tensor | None = None,
-    ) -> Tensor:
-        """Logits [B, N, n_classes]."""
-        if sigma is None:
-            sigma = torch.ones(s.batch_size, dtype=s.pos.dtype, device=s.pos.device)
-        h, _ = self.trunk(s, sigma, pin, label)
-        return self.head(h)
