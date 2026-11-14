@@ -285,6 +285,31 @@ def test_step_log_drops_updates_repeated_after_a_resume(tmp_path):
     assert rows[-1].split(",")[1] == "antisite"
 
 
+def test_spike_detection_ignores_differences_between_batch_types(tmp_path):
+    """scripts/pilots/finder_seeds.py: a loss three times its usual level for the same batch
+    type is a spike; defect-free batches with a far lower loss than defected ones are not."""
+    stability = _script("pilots/finder_seeds").stability
+    rng = np.random.default_rng(0)
+    kinds = ["vacancy", "interstitial", "frenkel", "antisite"]
+    rows = ["step,kind,clean,loss,grad_norm,sigma"]
+    for step in range(1, 601):
+        clean = step % 5 == 0
+        loss = (0.02 if clean else 0.5) * (1 + 0.1 * rng.standard_normal())
+        grad = 2.0 * (1 + 0.1 * rng.standard_normal())
+        if step == 400:
+            loss *= 4  # a real spike
+        if step == 450:
+            grad *= 8
+        rows.append(f"{step},{kinds[step % 4]},{int(clean)},{loss:.5f},{grad:.5f},")
+    path = tmp_path / "steps.csv"
+    path.write_text("\n".join(rows) + "\n")
+    s = stability(path)
+    assert [x["step"] for x in s["loss_spikes"]] == [400]
+    assert [x["step"] for x in s["grad_spikes"]] == [450]
+    assert s["updates"] == 600 and s["not_finite"] == 0 and s["clipped"] == 1.0
+    assert set(s["loss_last_1000_by_batch"]) == {*kinds, "defect-free"}
+
+
 def _train(tmp_path, monkeypatch, pd, task, config=None):
     config = config or f"{task}_point_defects"
     cfg = yaml.safe_load((ROOT / f"configs/train/{config}.yaml").read_text())
