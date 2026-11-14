@@ -272,6 +272,19 @@ def test_real_defects_leaves_out_exchanged_frenkel_pairs(tmp_path, make_lattice)
     assert all(len(kept[k]) == len(data[k]) for k in data if k != "frenkel")
 
 
+def test_step_log_drops_updates_repeated_after_a_resume(tmp_path):
+    """A run resumed from its checkpoint at update 2 repeats updates 3 and 4."""
+    open_step_log = _script("train_point_defects").open_step_log
+    path = tmp_path / "steps.csv"
+    with open_step_log(path, 0) as f:
+        f.write("".join(f"{k},vacancy,0,0.5,1.2,\n" for k in range(1, 5)))
+    with open_step_log(path, 2) as f:
+        f.write("3,antisite,1,0.4,0.9,\n")
+    rows = path.read_text().splitlines()
+    assert rows[0].startswith("step,") and [r.split(",")[0] for r in rows[1:]] == ["1", "2", "3"]
+    assert rows[-1].split(",")[1] == "antisite"
+
+
 def _train(tmp_path, monkeypatch, pd, task, config=None):
     config = config or f"{task}_point_defects"
     cfg = yaml.safe_load((ROOT / f"configs/train/{config}.yaml").read_text())
@@ -308,6 +321,14 @@ def test_training_and_evaluation_smoke(tmp_path, monkeypatch, make_lattice):
     detect_run, rows = _train(tmp_path, monkeypatch, pd, "detect")
     assert "vacancy_hit" in rows[-1] and "clean_false_alarm" in rows[-1]
     assert load_denoiser(detect_run / "ckpt.pt").n_classes == 5
+    for run, task in ((heal_run, "heal"), (detect_run, "detect")):  # one row per update
+        steps = (run / "steps.csv").read_text().splitlines()
+        assert steps[0] == "step,kind,clean,loss,grad_norm,sigma" and len(steps) == 3
+        step, kind, clean, loss, grad_norm, sigma = steps[-1].split(",")
+        assert step == "2" and kind in NAMES.values() and clean in ("0", "1")
+        assert (
+            np.isfinite(float(loss)) and float(grad_norm) > 0 and (sigma != "") == (task == "heal")
+        )
 
     out = tmp_path / "eval.json"
     argv = ["eval", "--data", str(pd / "test.npz"), "--healer", str(heal_run / "ckpt.pt")]
