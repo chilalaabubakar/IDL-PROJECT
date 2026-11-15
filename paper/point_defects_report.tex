@@ -33,6 +33,8 @@
 \IfFileExists{pd_numbers.tex}{\input{pd_numbers}}{}% numbers pending: shown in red
 \newif\ifablations
 \IfFileExists{pd_table_ablations.tex}{\ablationstrue}{\ablationsfalse}% the ablation runs
+\newif\iffinders
+\IfFileExists{pd_table_finders.tex}{\finderstrue}{\findersfalse}% stability, transformer and CNN
 
 \title{Finding and Repairing Point Defects in a Model Glass\\ with a Denoising Network\\[4pt] \large Report on the two-dimensional study}
 
@@ -48,7 +50,7 @@
 \maketitle
 
 \begin{abstract}
-Solids are never perfect. Here and there an atom is missing, an extra atom is squeezed in, or two atoms sit in each other's places. Such \emph{point defects} are easy to spot in a crystal, where the atoms form a regular pattern and anything out of pattern stands out. A glass has no pattern: its atoms are frozen in disorder, and once a defect is made, the neighbouring atoms shift and largely hide it. We ask whether a neural network can find the defect from the positions and kinds of the atoms alone, and whether the glass can then be returned to the defect-free structure it came from. We work with a simulated two-dimensional glass, make the four standard point defects ourselves (vacancy, interstitial, Frenkel pair and antisite) and let the glass settle, so the right answer is always known. A graph neural network that is first trained to remove random noise from glasses, and then to label atoms, finds \pd{found-finder-vacancy}\% of vacancies, \pd{found-finder-interstitial}\% of interstitials, \pd{found-finder-antisite}\% of antisites and \pd{found-finder-frenkel}\% of Frenkel pairs. It does not need the formula for the forces between atoms (the interatomic potential). Three measures that involve no learning find fewer: the energy of each atom, which does need the potential (\pd{found-energy-min}--\pd{found-energy-max}\%), the number of unlike neighbours of each atom (\pd{found-bonds-min}--\pd{found-bonds-max}\%) and the room each atom has (\pd{found-geometry-min}--\pd{found-geometry-max}\%). Correcting the number or kind of atoms where the network points, and then letting the atoms settle, restores \pd{restored-finder-vacancy}\%, \pd{restored-finder-interstitial}\%, \pd{restored-finder-antisite}\% and \pd{restored-finder-frenkel}\% of the original glasses. A second network, trained to undo the defect directly, adds nothing to this. \ifablations In short training runs, starting from the noise-removal network instead of from random weights nearly doubles the defects found. \fi Finding is what limits the result: when the true location is given, settling alone restores \pd{restored-ceiling-min}--\pd{restored-ceiling-max}\%.
+Solids are never perfect. Here and there an atom is missing, an extra atom is squeezed in, or two atoms sit in each other's places. Such \emph{point defects} are easy to spot in a crystal, where the atoms form a regular pattern and anything out of pattern stands out. A glass has no pattern: its atoms are frozen in disorder, and once a defect is made, the neighbouring atoms shift and largely hide it. We ask whether a neural network can find the defect from the positions and kinds of the atoms alone, and whether the glass can then be returned to the defect-free structure it came from. We work with a simulated two-dimensional glass, make the four standard point defects ourselves (vacancy, interstitial, Frenkel pair and antisite) and let the glass settle, so the right answer is always known. A graph neural network that is first trained to remove random noise from glasses, and then to label atoms, finds \pd{found-finder-vacancy}\% of vacancies, \pd{found-finder-interstitial}\% of interstitials, \pd{found-finder-antisite}\% of antisites and \pd{found-finder-frenkel}\% of Frenkel pairs. It does not need the formula for the forces between atoms (the interatomic potential). Three measures that involve no learning find fewer: the energy of each atom, which does need the potential (\pd{found-energy-min}--\pd{found-energy-max}\%), the number of unlike neighbours of each atom (\pd{found-bonds-min}--\pd{found-bonds-max}\%) and the room each atom has (\pd{found-geometry-min}--\pd{found-geometry-max}\%). Correcting the number or kind of atoms where the network points, and then letting the atoms settle, restores \pd{restored-finder-vacancy}\%, \pd{restored-finder-interstitial}\%, \pd{restored-finder-antisite}\% and \pd{restored-finder-frenkel}\% of the original glasses. A second network, trained to undo the defect directly, adds nothing to this. \ifablations In short training runs, starting from the noise-removal network instead of from random weights doubles the defects found. \fi \iffinders Training the graph network shows sudden jumps of the gradient, but with the gradient limited its results repeat to within one point between runs. A transformer and a convolutional network, trained in the same way from random weights, show no such jumps and each find ten points more defects than the graph network; they match our finder with a third of its training. \fi Finding is what limits the result: when the true location is given, settling alone restores \pd{restored-ceiling-min}--\pd{restored-ceiling-max}\%.
 \end{abstract}
 
 \section{Introduction}
@@ -95,7 +97,11 @@ This report gives the complete study in a two-dimensional model glass. It replac
 \item Once the defect is found, ordinary energy minimisation does the repair. A network trained to undo the defect learns to move the right atoms, but adds nothing after minimisation and damages the structure without it (Sections~\ref{sec:restore} and~\ref{sec:repairnet}).
 \item A quarter of our Frenkel pairs undid themselves while the glass relaxed, and left no defect. We found this while checking the physics for this report, removed them from the test, and report the consequences openly (Sections~\ref{sec:defects} and~\ref{sec:limits}).
 \ifablations
-\item The noise-removal training is what makes the finder learn quickly. In short training runs that change one setting at a time, a finder that starts from the denoiser finds \pd{abl-reference-all}\% of the defects, and one that starts from random weights \pd{abl-scratch-all}\% (Section~\ref{sec:ablations}).
+\item The noise-removal training is what makes the finder learn quickly. In short training runs that change one setting at a time, each repeated three times, a finder that starts from the denoiser finds \pd{abl-reference-all}\% of the defects, and one that starts from random weights \pd{abl-scratch-all}\% (Section~\ref{sec:ablations}).
+\fi
+\iffinders
+\item Training is stable. The graph network shows sudden jumps of the gradient, as Prof.\ Dabo warned, but with the gradient limited no run failed, and three runs that differ only in their random numbers find the same share of the defects to within one point (Section~\ref{sec:stability}).
+\item The graph network is not the only choice, and not the best one for finding. A transformer and a convolutional network, trained in the same way, find \pd{fin-tr-all}\% and \pd{fin-cnn-all}\% of the defects, and the graph network \pd{fin-egnn-all}\% (Section~\ref{sec:finders}).
 \fi
 \end{itemize}
 
@@ -248,6 +254,11 @@ Denoiser & $1\times$\{input embedding\}, $4\times$\{EGNN layer\}, vector head & 
 Finder & $1\times$\{input embedding\}, $4\times$\{EGNN layer\}\ifablations{} (1, 2)\fi, role head \{Dense 128, Dense 5\} & relaxed defected glasses; cross-entropy with class weights\ifablations{} (none)\fi; start: denoiser\ifablations{} (random)\fi; 20,000 updates, then 40,000 at half the learning rate\ifablations{} (2,000)\fi\ifablations; Frenkel pairs: all (real only)\fi & 0.523\,M \\
 Repair network, version 1 & as the denoiser & corrected defected glasses with noise, $\sigma_n\sim\mathcal{U}(0.001,0.5)$; squared error; start: denoiser; 20,000 updates & 0.531\,M \\
 Repair network, version 2 & as the denoiser & the same with the displaced atoms weighted 11 times and $\sigma_n$ log-uniform in $(0.001,0.3)$; start: version 1; 20,000 updates & 0.531\,M \\
+\iffinders
+\addlinespace
+Transformer finder (Section~\ref{sec:baselines}) & $1\times$\{input embedding\}, $4\times$\{attention layer, 8 heads\}, role head & as the finder; start: random; 20,000 updates & 0.577\,M \\
+CNN finder (Section~\ref{sec:baselines}) & picture of $128\times128$ pixels, U-Net with 5 levels, role head & as the finder; start: random; 20,000 updates & 0.498\,M \\
+\fi
 \bottomrule
 \end{tabularx}
 \end{table}
@@ -276,7 +287,7 @@ More than 98\% of the atoms are intact, so a network could score well by calling
 \end{equation}
 In version 1 every atom counts the same ($\omega_i=1$). In version 2 the atoms that the defect displaced by more than $0.1\sigma$ count 11 times, and most examples have little noise.
 
-\textbf{Training.} The glasses are split 800/100/100 into training, validation and test. Validation glasses are used to choose settings and to watch for over-fitting, test glasses only for the results. The denoiser is trained first, on defect-free glasses only. The finder and the repair network start from its weights (Figure~\ref{fig:network}c). We use PyTorch and the AdamW optimiser with learning rate $2\times10^{-4}$. One \emph{update} is one learning step on a batch of 16 glasses. We keep an exponential moving average of the weights (0.999) and use it for the tests. One batch in five contains defect-free glasses only, so that the networks learn to leave intact glass alone. Each run takes between one and two and a half hours on one T4 GPU.
+\textbf{Training.} The glasses are split 800/100/100 into training, validation and test. Validation glasses are used to choose settings and to watch for over-fitting, test glasses only for the results. The denoiser is trained first, on defect-free glasses only. The finder and the repair network start from its weights (Figure~\ref{fig:network}c). We use PyTorch and the AdamW optimiser with learning rate $2\times10^{-4}$. One \emph{update} is one learning step on a batch of 16 glasses. Before each update the gradient of the loss is limited: if its size (norm) is larger than 1, it is scaled down to 1. This standard step, gradient clipping~\citep{pascanu2013}, keeps a single unusual batch from changing the weights too much; we call it the \emph{cut}. We keep an exponential moving average of the weights (0.999) and use it for the tests. One batch in five contains defect-free glasses only, so that the networks learn to leave intact glass alone. Each run takes between one and two and a half hours on one T4 GPU.
 
 \subsection{Evaluation metrics}
 \label{sec:test}
@@ -294,7 +305,7 @@ The type of defect is taken as known in these tests; only its location is not. A
 \subsection{Experimental iterations}
 \label{sec:iterations}
 
-The main results took five training runs (the denoiser, the finder in two stages and two versions of the repair network; Table~\ref{tab:models})\ifablations, and the ablations six short ones\fi. Each step answered one question; Table~\ref{tab:experiments} gives the numbers.
+The main results took five training runs (the denoiser, the finder in two stages and two versions of the repair network; Table~\ref{tab:models})\ifablations, the ablations 18 short ones\fi\iffinders, and the comparison of three kinds of network nine\fi. Each step answered one question; Table~\ref{tab:experiments} gives the numbers.
 \begin{enumerate}
 \item \emph{Is training on defects needed?} The denoiser alone, which has never seen a defect, already finds 44\% of the vacancies by the size of its correction, but few interstitials and antisites. So we trained the finder on labelled defects, starting from the denoiser.
 \item \emph{Is the finder trained long enough?} Continuing for 40,000 updates at half the learning rate found a few more defects. Over the last 20,000 updates the validation scores moved by two points or less, so we stopped.
@@ -302,7 +313,11 @@ The main results took five training runs (the denoiser, the finder in two stages
 \item \emph{Why did the first repair network not learn the defect?} A defect displaces a few tens of the 256 atoms, so the random noise on all atoms filled the loss. Version 2 weights the displaced atoms up and trains mostly at small noise.
 \item \emph{Are the labels right?} The physics check found the Frenkel pairs that had undone themselves (Section~\ref{sec:defects}). All tests were repeated without them.
 \ifablations
-\item \emph{Which design choices matter?} Six short runs change one setting at a time: the starting weights, the number of layers, the class weights and the cleaned training set (Section~\ref{sec:ablations}).
+\item \emph{Which design choices matter?} Short runs change one setting at a time: the starting weights, the number of layers, the class weights and the cleaned training set. Each of the six settings was trained three times with different random numbers (Section~\ref{sec:ablations}).
+\fi
+\iffinders
+\item \emph{Is the training stable?} Prof.\ Dabo warned that networks of the EGNN kind can be unstable in training. We recorded the loss and the gradient at every update of the repeated runs (Section~\ref{sec:stability}).
+\item \emph{Is a graph network the right kind of network?} We trained a transformer and a CNN as finders, in exactly the same way as the EGNN (Section~\ref{sec:finders}).
 \fi
 \end{enumerate}
 
@@ -322,6 +337,14 @@ The rules for the two structural measures (largest, smallest, fewest) were chose
 \textbf{Reproduction evidence.} Every number comes from our own runs on the same \pd{n-test} defects. The atom-energy baseline was computed by two separate programs, which agree on every single defect. The evaluation of the finder, repeated on a different machine (CPU in place of GPU), gave the same finding rates. The denoiser is our implementation of the DM2 training~\citep{yang2026dm2} for the two-dimensional glass.
 
 \textbf{Extensions beyond DM2.} DM2 is a denoiser used to generate glasses. We add: (i)~the role head and its class-weighted loss, which turn the denoiser into a finder; (ii)~calibration of the finder's probabilities; (iii)~a defect, and not only noise, as the disturbance to remove, with the displaced atoms weighted up; (iv)~tests against measures without learning, on the same defects, with paired statistics.
+
+\iffinders
+\textbf{Two other kinds of network as finder.} To test whether the graph network is the right choice, we also built the finder from two other standard kinds of network. Both have about half a million parameters, like the EGNN, and give the same output: a score for each of the five roles, for every atom. They are trained with the finder's loss (Equation~\ref{eq:find}) and tested in the same way.
+\begin{itemize}
+\item \emph{Transformer}~\citep{vaswani2017} (0.577\,M parameters). Every atom starts from its species and a short description of its surroundings: how many atoms of each species lie at each distance up to $2.5\sigma$. Four \emph{attention} layers follow. In an attention layer every atom looks at every other atom of the box and decides how much weight to give to each. A number computed from the distance between the two atoms across the periodic box is added to this weight, as in Graphormer~\citep{ying2021graphormer}, so that near and far atoms can be treated differently. Only distances enter. The answer therefore does not change when the glass is shifted, turned or its atoms renumbered, exactly as for the EGNN.
+\item \emph{CNN} (0.498\,M parameters). The glass is drawn as a picture of $128\times128$ pixels with one layer per species; every atom is a small soft dot centred on its exact position. A U-Net~\citep{ronneberger2015unet}, a convolutional network that looks at the picture at five levels of detail, processes it. The edges of the picture are joined up in the same way as the periodic box. The scores of an atom are read from the output at the position of that atom. This is the kind of network one would apply to microscope images of a two-dimensional glass~\citep{huang2012}, which come as pictures and not as lists of atoms. A CNN is not unchanged when the picture is turned. The square box keeps its shape only under quarter turns and mirror images, eight in all, so we train with all eight and average over them in the tests.
+\end{itemize}
+\fi
 
 \begin{figure}[t]
 \centering
@@ -367,6 +390,10 @@ Two things stand out. First, restoring follows finding. With the finder, the res
 \input{pd_section_ablations}
 \fi
 
+\iffinders
+\input{pd_section_finders}
+\fi
+
 \subsection{The repair network}
 \label{sec:repairnet}
 
@@ -384,28 +411,35 @@ The finder ranks the atoms of a glass that is known to contain a defect. Decidin
 
 \textbf{What the network adds, physically.} The denoising loss gives the network a model of the forces in normal glass (Section~\ref{sec:equations}), and the finder is built on those features. Each simple measure sees one side of a defect, empty space or chemical order, on one atom at a time. A relaxed defect is not marked by one atom with too much room or too few unlike neighbours, but by a pattern over many atoms (Table~\ref{tab:physics}). A network that passes messages four times, so that each atom's label depends on the structure up to ten atom diameters away, can read such a pattern, and both sides of it at once.
 
+\iffinders
+\textbf{Which kind of network.} What matters for finding is that the model sees many atoms around each atom, not that it passes messages between them. A transformer and a CNN of the same size find more defects than the graph network when all three are trained alike, and as many as the graph network finds with the denoising start and three times the training (Section~\ref{sec:finders}). The choice between them is then a practical one. The transformer keeps the exact symmetries of the EGNN and trained most smoothly, but its cost grows with the square of the number of atoms. The CNN works on pictures, which is how measurements on two-dimensional glasses arrive, but its answer depends slightly on where the edge of the box lies. The EGNN is the only one of the three that also gives a vector for every atom, which the denoiser and the repair network need. All three miss the same third of the defects, so the kind of network is no longer what limits finding.
+
+\fi
 \textbf{Repair is a job for physics.} Once the right atom is added, removed or exchanged, energy minimisation is fast, exact and free of the overlaps that the repair network produces. We see no reason to replace it when a potential is available. When none is available, a repair network would need at least a built-in rule that atoms cannot overlap.
 
 \subsection{Limits}
 \label{sec:limits}
 
 \begin{itemize}
-\item \textbf{The Frenkel labels used in training were partly wrong.} 27\% of the training Frenkel pairs had undone themselves (Section~\ref{sec:defects}) but were still labelled as defects, so the finder was taught to call some intact atoms displaced. All test numbers here exclude such cases. \ifablations A short training run without them found no more defects (Section~\ref{sec:ablations}), so this does not seem to hold the finder back; the finder of the main results has not been retrained without them.\else The finder has not yet been retrained without them.\fi
+\item \textbf{The Frenkel labels used in training were partly wrong.} 27\% of the training Frenkel pairs had undone themselves (Section~\ref{sec:defects}) but were still labelled as defects, so the finder was taught to call some intact atoms displaced. All test numbers here exclude such cases. \ifablations Short training runs without them, three with different random numbers, found as many defects as the runs with them (Section~\ref{sec:ablations}), so this does not seem to hold the finder back; the finder of the main results has not been retrained without them.\else The finder has not yet been retrained without them.\fi
 \item \textbf{The type of defect is given.} The finder is asked for a vacancy, an interstitial, a Frenkel pair or an antisite. A count of the atoms separates the first two from the others, but not a Frenkel pair from an antisite.
 \item \textbf{One defect per glass,} in a small box (256 atoms). Real damage produces many defects that interact.
 \item \textbf{A model glass in two dimensions,} at zero temperature (the atoms do not vibrate). Its atoms are simple spheres without the directed chemical bonds or electric charges of real materials. The defects that matter in a real glass such as silica are of a different kind (broken or extra bonds), which is why we started a study there (Section~\ref{sec:next}).
 \item \textbf{``Restored'' is strict.} It asks for the exact original valley of the energy. In a glass, other valleys close by are equally natural, and for 11\% of the antisites the defected glass is the more stable one.
-\item \textbf{Uncertainty.} With 150--200 defects per type from 100 glasses, the rates are known to about $\pm 7$ points.
+\item \textbf{Uncertainty.} With 150--200 defects per type from 100 glasses, the rates are known to about $\pm 7$ points. \iffinders Repeating the training changes the share of all defects found by less than one point (Sections~\ref{sec:stability} and~\ref{sec:finders}), so it is the number of test defects, not the training, that limits the precision. The finder of the main results itself was trained once.\fi
+\iffinders
+\item \textbf{The transformer and the CNN were compared on finding only.} They were trained from random weights for 20,000 updates. They were not started from a denoiser, and the repair was not repeated with them.
+\fi
 \end{itemize}
 
 \section{Conclusion and next steps}
 \label{sec:next}
 
-In a model glass, a graph neural network that starts from a denoising diffusion model and is trained on relaxed defects finds point defects without an interatomic potential, more often than the potential's own atom energies and more often than two simple structural measures. Correcting the atoms where it points and minimising the energy then restores more vacancy, interstitial and antisite glasses than any of the other routes; for Frenkel pairs every route restores few. A network trained to undo the defect directly is not needed. \ifablations The denoising stage earns its place: in short runs, a finder that starts from the denoiser finds nearly twice as many defects as one that starts from random weights. \fi The room for improvement is in finding: given the true location, minimisation restores \pd{restored-ceiling-min}--\pd{restored-ceiling-max}\% of the glasses.
+In a model glass, a graph neural network that starts from a denoising diffusion model and is trained on relaxed defects finds point defects without an interatomic potential, more often than the potential's own atom energies and more often than two simple structural measures. Correcting the atoms where it points and minimising the energy then restores more vacancy, interstitial and antisite glasses than any of the other routes; for Frenkel pairs every route restores few. A network trained to undo the defect directly is not needed. \ifablations The denoising stage earns its place: in short runs, a finder that starts from the denoiser finds twice as many defects as one that starts from random weights. \fi \iffinders Training the graph network is stable once the gradient is limited, and repeated runs agree to within one point. For finding alone, however, the graph network is not the best choice: a transformer and a CNN trained in the same way find ten points more, and as many as our finder with a third of its training. \fi The room for improvement is in finding: given the true location, minimisation restores \pd{restored-ceiling-min}--\pd{restored-ceiling-max}\% of the glasses.
 
 Next steps, in order:
 \begin{enumerate}
-\item Let the finder name the type of defect, and repeat the training with several random starts to measure how much the results vary from run to run.
+\item \iffinders Start the transformer from a denoising stage, as was done for the EGNN, and repeat the full repair with the transformer and the CNN as finders. \fi Let the finder name the type of defect.
 \item Test whether repaired glasses stay stable when the atoms are set in motion (molecular dynamics), and repeat the study with several defects per glass.
 \item Silica glass (amorphous SiO$_2$, the main component of window glass). A first stage without any learned model is complete: with the true location given, minimisation restores 76--96\% of four standard silica defects, but the standard method there, counting the neighbours of each atom, finds only 11--29\% of them. As in two dimensions, finding is the bottleneck, which justifies training a three-dimensional finder.
 \end{enumerate}
@@ -418,7 +452,7 @@ Workstream & What it covers & Member \\
 \midrule
 Data and physics & glass generation, potential, relaxation, physical checks of the defects & Nicholaus Ladislaus \\
 Defects and evaluation & defect operations, success tests, baselines, statistics & Stacy Cheruto \\
-Models and training & EGNN denoiser, finder and repair network; training runs & Abubakar Chilala \\
+Models and training & EGNN denoiser, finder and repair network; transformer and CNN finders; training runs & Abubakar Chilala \\
 Repair procedure & correction steps, choice of gap and pair, repair without a potential & Gentille Uwera \\
 Baselines and writing & figures, reports & Michel Sangwa \\
 Supervision & course teaching assistant; supervised the project & Boniface Godwin \\
@@ -428,7 +462,7 @@ Supervision & course teaching assistant; supervised the project & Boniface Godwi
 
 \paragraph{Acknowledgements.} We thank Prof.\ Ismaila Dabo (Materials Science and Engineering, Carnegie Mellon University) for the discussion that redirected this project.
 
-\paragraph{Code and data.} {\raggedright Code, datasets, trained models and every result in this report: \repo{} (branch \path{dabo-point-defects}). The numbers of this report are in \path{results/point_defects_recheck_20261111/} and \path{results/point_defects_ablations_20261112/}.\par}
+\paragraph{Code and data.} {\raggedright Code, datasets, trained models and every result in this report: \repo{} (branch \path{dabo-point-defects}). The numbers of this report are in \path{results/point_defects_recheck_20261111/}, \path{results/point_defects_ablations_20261112/}, \path{results/point_defects_seeds_20261114/} and \path{results/point_defects_architectures_20261115/}.\par}
 
 \bibliographystyle{abbrvnat}
 {\small\bibliography{refs}}
@@ -441,6 +475,10 @@ Supervision & course teaching assistant; supervised the project & Boniface Godwi
 
 \textbf{Parameters.} Denoiser and repair network: 530,696 (input embedding 59,136, of which 24,832 encode the noise level; four EGNN layers of 117,890 each). Finder: 523,021 (input embedding 34,304; the same four layers; role head 17,157). The embedding still holds two inputs of the first version of the project, a flag for held atoms and a defect label; both are fixed to ``none'' in this study.
 
+\iffinders
+\textbf{The two other finders.} \emph{Transformer} (576,677 parameters): 128 features, four layers with 8 attention heads and a feed-forward part of 256, each normalised before attention. The distance between two atoms (up to $10.5\sigma$, the largest in the box) is expanded in 32 radial basis functions and turned into 64 pair features, from which every layer computes one number per head that is added to the attention weight. The input adds to the species the number of neighbours of each species in 16 radial basis functions up to $2.5\sigma$. \emph{CNN} (498,309 parameters): dots of width $0.15\sigma$ on $128\times128$ pixels ($0.11\sigma$ per pixel); U-Net with 16, 32, 48, 64 and 96 channels at its five levels, two $3\times3$ convolutions per level with group normalisation and SiLU, and circular padding. The coarsest pixel is $1.8\sigma$ wide, and the network sees about $10\sigma$ around each atom. Both networks and the EGNN control use the settings of the finder (learning rate $2\times10^{-4}$, batches of 16, cut at 1, moving average 0.999) for 20,000 updates. The transformer's learning rate rises linearly over the first 1,000 updates. In the symmetry test the glass is turned by $90^\circ$, shifted by a random vector, or its atoms are renumbered, and we count how often the flagged atom stays the same.
+
+\fi
 \textbf{Relaxation.} Defects are relaxed with the FIRE minimiser of LAMMPS until the largest force is below $10^{-8}$, with the box fixed; a vacancy or an interstitial therefore changes the density by 0.4\%. The repair tests use a FIRE minimiser written in PyTorch (largest force below $10^{-6}$), the same for every method, because it can start from overlapping atoms. The two reach the same minimum from a defect placed in a gap.
 
 \textbf{Open points.} ``The most open point'' is the point of a grid of spacing $0.05\sigma$ that is farthest from every atom, within the stated distance range.
@@ -453,6 +491,8 @@ Supervision & course teaching assistant; supervised the project & Boniface Godwi
 \begin{itemize}\raggedright
 \item the test evaluation on real defects: \path{scripts/pilots/recheck_real_defects.sh}. It calls \path{scripts/eval_point_defects.py} (the finder), \path{scripts/pilots/baseline_routes.py} (the three other measures) and \path{scripts/eval_point_defect_repair.py} (true location given);
 \item the experiments on the finder: training with \path{scripts/pilots/finder_ablations.sh}, tests with \path{scripts/pilots/finder_ablations.py};
+\item the repeated runs and the record of every update: \path{scripts/pilots/finder_seeds.sh} and \path{scripts/pilots/finder_seeds.py};
+\item the transformer and the CNN: \path{notebooks/kaggle_attention_finder.ipynb} and \path{notebooks/kaggle_cnn_finder.ipynb} for the training, \path{scripts/pilots/finder_architectures.py} for the tests;
 \item Table~\ref{tab:physics}: \path{scripts/pilots/point_defect_physics.py};
 \item the cells and neighbours of the antisite atoms, and the choice of rules for the structural measures: \path{scripts/pilots/structural_signatures.py};
 \item numbers, tables and figures of this report: \path{paper/make_report_numbers.py} and \path{paper/make_report_figures.py}.

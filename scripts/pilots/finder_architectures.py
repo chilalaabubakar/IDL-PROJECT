@@ -23,15 +23,17 @@ export  copies each run of --runs to <dest>/training/<model>_s<seed>/: config, t
         per-update log (steps.csv), and the weights (ema.pt when finished, else the full
         checkpoint so that a later session can continue; --finished-only leaves those out).
         Runs pushed already and unchanged are skipped. Prints what is new, as JSON.
-evaluate scores every finished run (here or pushed) and the finder of the report after the
-        same 20,000 updates (from the denoiser) on the 750 real test defects, calibrated as
+evaluate scores every finished run (here or pushed) and the finder of the report (from the
+        denoiser, after 20,000 and 60,000 updates) on the 750 real test defects, calibrated as
         everywhere in the study, and writes <out>/architectures.json and summary.md:
           found per defect type and seed; mean and spread over seeds; each model against the
             EGNN control with the same seed (McNemar's exact test);
           symmetry: how often the flagged atom stays the same when the glass is turned by
             90 degrees, shifted by a random vector, or its atoms renumbered (1.0 = always);
           training stability from steps.csv (scripts/pilots/finder_seeds.py): gradient norm
-            before clipping, share of updates clipped, gradient and loss spikes.
+            before clipping, share of updates clipped, gradient and loss spikes;
+          finder against finder with the same seed, how far they find the same defects, and
+            finders used together (the mean of their calibrated probabilities).
 """
 
 from __future__ import annotations
@@ -62,8 +64,28 @@ MODELS = {
     "cnn": "CNN: periodic U-Net on the glass drawn as an image",
     "egnn_scratch": "EGNN (control): message passing, reach 10 sigma",
 }
-REFERENCE = {  # the finder of the report after 20,000 updates, started from the denoiser
-    "egnn_pretrained": ROOT / "results/kaggle_pd_20261107-2024Z/training/pd_detect/ema.pt",
+REFERENCE = {  # the finder of the report, started from the denoiser: weights, what it is
+    "egnn_pretrained": (
+        ROOT / "results/kaggle_pd_20261107-2024Z/training/pd_detect/ema.pt",
+        "the finder of the report after 20,000 updates (from the denoiser)",
+    ),
+    "egnn_pretrained_60k": (
+        ROOT / "results/kaggle_pd_20261110-1042Z/training/pd_detect_v2/ema.pt",
+        "the finder of the report, 60,000 updates (from the denoiser)",
+    ),
+}
+TOGETHER = {  # finders used together: the mean of their calibrated probabilities
+    "transformer, 3 seeds": [("attention", s) for s in range(3)],
+    "CNN, 3 seeds": [("cnn", s) for s in range(3)],
+    "EGNN control, 3 seeds": [("egnn_scratch", s) for s in range(3)],
+    "transformer + CNN, seed 0": [("attention", 0), ("cnn", 0)],
+    "transformer + CNN + EGNN control, seed 0": [("attention", 0), ("cnn", 0), ("egnn_scratch", 0)],
+    "transformer + CNN, 3 seeds each": [(m, s) for m in ("attention", "cnn") for s in range(3)],
+    "transformer + CNN (seed 0) + the finder of the report": [
+        ("attention", 0),
+        ("cnn", 0),
+        ("egnn_pretrained_60k", 0),
+    ],
 }
 ROT90 = np.array([[0.0, -1.0], [1.0, 0.0]])
 
@@ -210,10 +232,10 @@ def flagged(models, data) -> dict[str, np.ndarray]:
     }
 
 
-def symmetry(path: Path, data: dict, device: str, rng) -> dict:
+def symmetry(path: Path, data: dict, device: str, rng, threads: int = 2) -> dict:
     """How often the flagged atom stays the same under a turn, a shift and a renumbering."""
     log_prior = ev.finder_log_prior(str(path), ROOT / "data/ka2d_256_point_defects")[0]
-    models = ev.Models(str(path), str(path), threads=2, device=device, log_prior=log_prior, do_heal=False)  # fmt: skip
+    models = ev.Models(str(path), str(path), threads=threads, device=device, log_prior=log_prior, do_heal=False)  # fmt: skip
     base = flagged(models, data)
     out = {}
     for what in ("turn by 90 degrees", "random shift", "renumbering"):
@@ -240,6 +262,7 @@ def evaluate(args) -> None:
     out_dir.mkdir(parents=True, exist_ok=True)
     device = args.device or ("cuda" if torch.cuda.is_available() else "cpu")
     rng = np.random.default_rng(0)
+    threads = args.threads
     data = ev.real_defects(
         ev.load_point_defects(str(ROOT / "data/ka2d_256_point_defects/test.npz"))
     )
@@ -257,20 +280,20 @@ def evaluate(args) -> None:
             elif pushed(name, "ema.pt"):
                 found[(model, seed)] = pushed(name, "ema.pt")
                 steps[(model, seed)] = found[(model, seed)].parent / "steps.csv"
-    for name, path in REFERENCE.items():
+    for name, (path, _) in REFERENCE.items():
         if path.exists():
             found[(name, 0)] = path
     if not found:
         raise SystemExit("no finished run to evaluate")
-    hits, info = {}, {}
+    hits, info, scores = {}, {}, {}
     for key, path in sorted(found.items()):
         log_prior = ev.finder_log_prior(str(path), ROOT / "data/ka2d_256_point_defects")[0]
-        models = ev.Models(str(path), str(path), threads=2, device=device, log_prior=log_prior, do_heal=False)  # fmt: skip
+        models = ev.Models(str(path), str(path), threads=threads, device=device, log_prior=log_prior, do_heal=False)  # fmt: skip
         score = {
             name: models.role_prob(d.pos.numpy(), d.types.numpy(), d.box.numpy())[..., int(ev.REPAIR_ROLE[d.kind])]
             for name, d in data.items()
         }  # fmt: skip
-        hits[key] = fs.hits(score, data)
+        hits[key], scores[key] = fs.hits(score, data), score
         ckpt = torch.load(path, map_location="cpu", weights_only=False)
         info[key] = dict(
             parameters=sum(v.numel() for v in ckpt["ema"].values()),
@@ -287,9 +310,7 @@ def evaluate(args) -> None:
             continue
         per = {s: fa.rates(hits[(model, s)], glass, rng) for s in seeds}
         entry = dict(
-            what=MODELS.get(
-                model, "the finder of the report after 20,000 updates (from the denoiser)"
-            ),
+            what=MODELS.get(model) or REFERENCE[model][1],
             seeds=seeds,
             parameters=info[(model, seeds[0])]["parameters"],
             hours_per_run=[info[(model, s)]["hours"] for s in seeds],
@@ -301,13 +322,49 @@ def evaluate(args) -> None:
             entry["against_egnn_control"] = {
                 s: fa.paired(hits[("egnn_scratch", s)], hits[(model, s)])["all"] for s in both
             }
-        entry["symmetry"] = symmetry(found[(model, seeds[0])], data, device, rng)
+        entry["symmetry"] = symmetry(found[(model, seeds[0])], data, device, rng, threads)
         entry["stability"] = {
             s: fs.stability(steps[(model, s)])
             for s in seeds
             if (model, s) in steps and steps[(model, s)].exists()
         }
         out["models"][model] = entry
+    # finder against finder with the same seed, and how far they find the same defects
+    out["between"], out["agreement"] = {}, {}
+    names = [m for m in MODELS if (m, 0) in hits]
+    for i, a in enumerate(names):
+        for b in names[i + 1 :]:
+            both = [s for s in range(10) if (a, s) in hits and (b, s) in hits]
+            out["between"][f"{a} vs {b}"] = {
+                s: {
+                    k: dict(only_first=v["only_new"], only_second=v["only_base"], p=v["p"])
+                    for k, v in fa.paired(hits[(b, s)], hits[(a, s)]).items()
+                }
+                for s in both
+            }
+    for s in range(10):
+        if not all((m, s) in hits for m in names) or len(names) < 2:
+            continue
+        each = np.stack([np.concatenate(list(hits[(m, s)].values())) for m in names])
+        out["agreement"][s] = dict(
+            finders=names,
+            by_all=round(float(each.all(0).mean()), 4),
+            by_none=round(float((~each.any(0)).mean()), 4),
+            by_at_least_one=round(float(each.any(0).mean()), 4),
+        )
+    out["together"] = {}
+    for name, members in TOGETHER.items():
+        if not all(key in scores for key in members):
+            continue
+        mean = {k: np.mean([scores[key][k] for key in members], 0) for k in data}
+        joint = fs.hits(mean, data)
+        best = max(members, key=lambda key: np.concatenate(list(hits[key].values())).mean())
+        out["together"][name] = dict(
+            members=[f"{m}_s{s}" for m, s in members],
+            found={k: v for k, v in fa.rates(joint, glass, rng).items()},
+            best_member=f"{best[0]}_s{best[1]}",
+            against_best_member=fa.paired(hits[best], joint)["all"],
+        )
     (out_dir / "architectures.json").write_text(json.dumps(out, indent=1) + "\n")
     md = summary(out, kinds)
     (out_dir / "summary.md").write_text(md)
@@ -333,6 +390,30 @@ def summary(out: dict, kinds: list[str]) -> str:
     for model, e in out["models"].items():
         for s, t in e.get("against_egnn_control", {}).items():
             md.append(f"- {model}, seed {s}: {t['only_new']} / {t['only_base']}, p = {t['p']:.3g}")
+    if out.get("between"):
+        md += ["", "Finder against finder with the same seed (defects found only by the first / "
+               "only by the second, McNemar p; all defects, then each type):", ""]  # fmt: skip
+        for pair, per in out["between"].items():
+            for s, t in per.items():
+                cells = [f"{label[k]} {t[k]['only_first']} / {t[k]['only_second']} (p = {t[k]['p']:.2g})" for k in kinds if k != "all"]  # fmt: skip
+                md.append(f"- {pair}, seed {s}: {t['all']['only_first']} / {t['all']['only_second']}, "
+                          f"p = {t['all']['p']:.3g}; " + ", ".join(cells))  # fmt: skip
+    if out.get("agreement"):
+        md += ["", "Do the finders find the same defects (same seed)?", "",
+               "| Seed | Found by all | By none | By at least one |", "|---|---|---|---|"]  # fmt: skip
+        for s, a in out["agreement"].items():
+            md.append(f"| {s} | {pct(a['by_all'])}% | {pct(a['by_none'])}% | {pct(a['by_at_least_one'])}% |")  # fmt: skip
+    if out.get("together"):
+        md += ["", "Finders used together (the mean of their calibrated probabilities; 95% interval "
+               "over glasses; against its best single member: found only together / only by the "
+               "member, McNemar p):", "",
+               "| Together | " + " | ".join(label[k] for k in kinds) + " | Against best member |",
+               "|---|" + "---|" * (len(kinds) + 1)]  # fmt: skip
+        for name, e in out["together"].items():
+            cells = [pct(e["found"][k]["rate"]) for k in kinds]
+            cells[-1] += f" [{pct(e['found']['all']['lo'])}, {pct(e['found']['all']['hi'])}]"
+            t = e["against_best_member"]
+            md.append(f"| {name} | " + " | ".join(cells) + f" | {t['only_new']} / {t['only_base']}, p = {t['p']:.2g} ({e['best_member']}) |")  # fmt: skip
     md += ["", "| Finder | Same flagged atom: turn by 90 degrees | random shift | renumbering |",
            "|---|---|---|---|"]  # fmt: skip
     for model, e in out["models"].items():
@@ -389,6 +470,7 @@ def main() -> None:
     e.add_argument("--out", required=True)
     e.add_argument("--device", default=None)
     e.add_argument("--max-examples", type=int, default=None, help="per defect kind (quick checks)")
+    e.add_argument("--threads", type=int, default=2)
     st = sub.add_parser("status")
     st.add_argument("--models", nargs="+", choices=list(MODELS), required=True)
     st.add_argument("--seeds", nargs="+", type=int, default=[0, 1, 2])

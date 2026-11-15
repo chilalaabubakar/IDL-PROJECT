@@ -633,9 +633,96 @@ def fig_network() -> None:
     finalize_figure(fig, FIG / "pd_fig4_network")
 
 
+# ----------------------------------------------------------------- the three kinds of finder
+ARCH = ROOT / "results/point_defects_architectures_20261115/architectures.json"
+FINDERS = {  # fixed order and colours; blue is the EGNN, as the learned finder of Figure 3
+    "egnn_scratch": ("#2A78D6", "EGNN"),
+    "attention": ("#E87BA4", "Transformer"),
+    "cnn": ("#008300", "CNN"),
+}
+
+
+def fig_finders() -> None:
+    """Gradients during training and defects found, for the three kinds of finder."""
+    arch = json.loads(ARCH.read_text())["models"]
+    fig = plt.figure(figsize=(5.5, 2.5))
+    left = fig.add_gridspec(3, 1, left=0.075, right=0.47, top=0.86, bottom=0.14, hspace=0.16)
+    right = fig.add_gridspec(1, 1, left=0.575, right=0.995, top=0.86, bottom=0.14)
+    axes = [fig.add_subplot(left[i]) for i in range(3)]
+    for ax, (model, (colour, name)) in zip(axes, FINDERS.items()):
+        runs = arch[model]["stability"]
+        for seed in sorted(runs):
+            steps = sorted(ROOT.glob(f"results/*/training/{model}_s{seed}/steps.csv"))[-1]
+            step, grad = np.loadtxt(steps, delimiter=",", skiprows=1, usecols=(0, 4)).T
+            ax.plot(step, grad, color=colour, lw=0.3, alpha=0.75, rasterized=True)
+        ax.axhline(1.0, color=INK, lw=0.5, ls=(0, (3, 2)), zorder=4)
+        ax.set_yscale("log")
+        ax.set_ylim(0.2, 150)
+        ax.set_yticks([1, 10, 100], ["1", "10", "100"])
+        ax.minorticks_off()
+        ax.set_xlim(0, 20000)
+        ax.set_xticks([0, 5000, 10000, 15000, 20000], ["0", "5,000", "10,000", "15,000", "20,000"])
+        ax.tick_params(axis="both", length=2, pad=2)
+        ax.grid(axis="y", color=GRID, lw=0.5, zorder=0)
+        ax.set_axisbelow(True)
+        spikes = [len(r["grad_spikes"]) for r in runs.values()]
+        count = str(spikes[0]) if min(spikes) == max(spikes) else f"{min(spikes)}--{max(spikes)}"
+        ax.plot([0.022, 0.06], [0.84, 0.84], color=colour, lw=2.0, transform=ax.transAxes,
+                solid_capstyle="round", clip_on=False)  # fmt: skip
+        ax.text(0.075, 0.84, f"{name}: {count.replace('--', ' to ')} spikes", transform=ax.transAxes,
+                ha="left", va="center", fontsize=6.2, color=INK, zorder=6,
+                bbox=dict(fc="white", ec="none", pad=0.6, alpha=0.85))  # fmt: skip
+        if ax is not axes[-1]:
+            ax.tick_params(axis="x", labelbottom=False)
+    axes[0].plot([0.745, 0.80], [0.84, 0.84], color=INK, lw=0.5, ls=(0, (3, 2)),
+                 transform=axes[0].transAxes)  # fmt: skip
+    axes[0].text(0.815, 0.84, "cut to 1", transform=axes[0].transAxes, ha="left", va="center",
+                 fontsize=5.8, color=INK)  # fmt: skip
+    axes[-1].set_xlabel("update", fontsize=6.5, labelpad=2)
+    axes[1].set_ylabel("size of the gradient", fontsize=6.5, labelpad=2)
+    axes[0].set_title("Gradient in every update, three runs each", fontsize=7.5, pad=4, loc="left")
+
+    ax = fig.add_subplot(right[0])
+    kinds = ("vacancy", "interstitial", "antisite", "frenkel", "all")
+    labels = ("Vacancy", "Interst.", "Antisite", "Frenkel", "All")
+    step, width = 0.26, 0.215
+    ax.set_xlim(-0.55, 4.55)
+    ax.set_ylim(0, 80)
+    ax.set_yticks([0, 20, 40, 60, 80])
+    ax.set_xticks(range(5), labels)
+    ax.tick_params(axis="x", length=0, pad=3)
+    ax.tick_params(axis="y", length=0, pad=2)
+    ax.grid(axis="y", color=GRID, lw=0.5, zorder=0)
+    ax.set_axisbelow(True)
+    ax.spines["left"].set_visible(False)
+    ax.spines["bottom"].set_color("#C3C2B7")
+    ax.set_title("Defects found", fontsize=7.5, pad=4, loc="left")
+    ax.set_ylabel("% of test defects", fontsize=6.5, labelpad=2)
+    fig.canvas.draw()
+    for i, k in enumerate(kinds):
+        for j, (model, (colour, _)) in enumerate(FINDERS.items()):
+            e = arch[model]
+            x = i + (j - 1) * step
+            rounded_bar(ax, x, 100 * e["found"][k]["mean"], width, colour)
+            seeds = [100 * e["per_seed"][s][k] for s in sorted(e["per_seed"])]
+            ax.scatter(x + np.linspace(-0.06, 0.06, len(seeds)), seeds, s=2.2, color=INK,
+                       linewidths=0, zorder=5)  # fmt: skip
+            if k == "all":
+                ax.text(x, max(seeds) + 1.5, f"{100 * e['found'][k]['mean']:.0f}", ha="center",
+                        va="bottom", fontsize=5.8, color=INK)  # fmt: skip
+    handles = [plt.Rectangle((0, 0), 1, 1, fc=c, ec="none") for c, _ in FINDERS.values()]
+    handles.append(plt.Line2D([], [], marker="o", ls="", ms=1.8, color=INK))
+    ax.legend(handles, [n for _, n in FINDERS.values()] + ["one run"], loc="upper right", ncol=4,
+              fontsize=5.8, handlelength=0.9, handleheight=0.8, columnspacing=1.0,
+              handletextpad=0.4, borderaxespad=0.1, bbox_to_anchor=(1.0, 1.02))  # fmt: skip
+    panel_letter(fig, (axes[0].get_position().x0 - 0.06, axes[0].get_position().y1 + 0.045), "a")
+    panel_letter(fig, (ax.get_position().x0 - 0.06, ax.get_position().y1 + 0.045), "b")
+    finalize_figure(fig, FIG / "pd_fig5_finders")
+
+
 def main() -> None:
     apply_publication_style()
-    which = set(sys.argv[1:]) or {"1", "2", "3", "4"}
+    which = set(sys.argv[1:]) or {"1", "2", "3", "4", "5"}
     if "1" in which:
         fig_defects()
     if "2" in which:
@@ -644,6 +731,8 @@ def main() -> None:
         fig_results()
     if "4" in which:
         fig_network()
+    if "5" in which and ARCH.exists():
+        fig_finders()
     print("figures in", FIG)
 
 

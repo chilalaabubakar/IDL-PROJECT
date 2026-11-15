@@ -61,18 +61,18 @@ Defects found, mean over seeds 0, 1 and 2, with the spread between seeds (sd):
   0.3 and almost never clipped.
 - **Random starts are smooth over 2,000 updates**, but this is too early to tell. The
   20,000-update GPU runs of the EGNN from random weights in
-  `../kaggle_arch_20261115-0247Z/` (seeds 0, 1, 2) are smooth for the first 6,000-8,000
-  updates; then they pass through a phase of frequent spikes (71, 131 and 96 in all; largest
-  55-82; most between updates 8,000 and 16,000) that eases towards the end. Their loss keeps
+  `../kaggle_arch_20261115-0247Z/` (seeds 0, 1, 2) are smooth for the first 8,000-10,000
+  updates (first spike at update 7,818, 8,641 and 9,704); then they pass through a phase of
+  frequent spikes (71, 131 and 96 in all; largest 55-82) that eases towards the end. Their loss keeps
   falling throughout and the three seeds find 42.9-43.9%.
-- **The transformer trained alongside them has no spike at all** in 20,000 updates (largest
-  gradient 4.9-5.5, at the very start; clipped in 40-50% of updates), and finds 53.6%
-  (`docs/POINT_DEFECTS.md`, "Other finders").
+- **The transformer and the CNN trained the same way have no spike at all** in 20,000
+  updates (largest gradient 4.9-5.5 and 6.3-8.1), and find 53.6% and 54.0%
+  (`../point_defects_architectures_20261115/README.md`).
 
 **Answer to the question.** The EGNN finder trains with recurring gradient spikes, both from
 the denoiser and, after some thousands of updates, from random weights. Gradient clipping
 contains them: no run diverged, and the result varies by less than one point between seeds.
-A transformer trained the same way has none, and finds more.
+A transformer and a CNN trained the same way have none, and find more.
 
 ## Files
 

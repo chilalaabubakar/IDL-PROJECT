@@ -21,7 +21,9 @@ secrets, never in the notebook). The notebooks of the first study are on the bra
   on the 750 real test defects and pushes `results/<platform>_arch_<date>/`. Runs on Kaggle or
   Colab; a session that runs out of time pushes checkpoints and the next run continues. Run the
   two one after the other: the second skips the control runs the first pushed.
-  `QUICK_TEST = True` runs everything in a few minutes on a CPU, without pushing.
+  `QUICK_TEST = True` runs everything in a few minutes on a CPU, without pushing. Both were
+  run on 15 November 2026: `results/kaggle_arch_20261115-*/`, evaluated together in
+  `results/point_defects_architectures_20261115/`.
 - `kaggle_silica_point_defects.ipynb`: the same question in amorphous silica, stage 1
   (`docs/SILICA_POINT_DEFECTS.md`): oxygen vacancy, oxygen interstitial, oxygen Frenkel pair
   and silicon vacancy in DM2's test glasses, found by the standard coordination analysis or

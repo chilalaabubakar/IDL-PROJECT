@@ -1,0 +1,3061 @@
+{
+ "n": {
+  "vacancy": 200,
+  "interstitial": 200,
+  "frenkel": 150,
+  "antisite": 200
+ },
+ "device": "cpu",
+ "models": {
+  "attention": {
+   "what": "Transformer: attention over all atoms, distances as bias",
+   "seeds": [
+    0,
+    1,
+    2
+   ],
+   "parameters": 576725,
+   "hours_per_run": [
+    0.58,
+    0.58,
+    0.58
+   ],
+   "found": {
+    "vacancy": {
+     "mean": 0.6717,
+     "sd": 0.0076,
+     "low": 0.665,
+     "high": 0.68,
+     "n": 3
+    },
+    "interstitial": {
+     "mean": 0.4833,
+     "sd": 0.0161,
+     "low": 0.465,
+     "high": 0.495,
+     "n": 3
+    },
+    "frenkel": {
+     "mean": 0.42,
+     "sd": 0.024,
+     "low": 0.4,
+     "high": 0.4467,
+     "n": 3
+    },
+    "antisite": {
+     "mean": 0.5417,
+     "sd": 0.0104,
+     "low": 0.53,
+     "high": 0.55,
+     "n": 3
+    },
+    "all": {
+     "mean": 0.5364,
+     "sd": 0.0028,
+     "low": 0.5333,
+     "high": 0.5387,
+     "n": 3
+    }
+   },
+   "per_seed": {
+    "0": {
+     "vacancy": 0.68,
+     "interstitial": 0.49,
+     "frenkel": 0.4,
+     "antisite": 0.545,
+     "all": 0.5373
+    },
+    "1": {
+     "vacancy": 0.665,
+     "interstitial": 0.495,
+     "frenkel": 0.4133,
+     "antisite": 0.55,
+     "all": 0.5387
+    },
+    "2": {
+     "vacancy": 0.67,
+     "interstitial": 0.465,
+     "frenkel": 0.4467,
+     "antisite": 0.53,
+     "all": 0.5333
+    }
+   },
+   "against_egnn_control": {
+    "0": {
+     "only_new": 110,
+     "only_base": 36,
+     "p": 6.54725587913841e-10
+    },
+    "1": {
+     "only_new": 116,
+     "only_base": 34,
+     "p": 1.1198515999607739e-11
+    },
+    "2": {
+     "only_new": 113,
+     "only_base": 41,
+     "p": 5.607104085256979e-09
+    }
+   },
+   "symmetry": {
+    "turn by 90 degrees": 1.0,
+    "random shift": 1.0,
+    "renumbering": 1.0
+   },
+   "stability": {
+    "0": {
+     "updates": 20000,
+     "not_finite": 0,
+     "grad_norm": {
+      "median": 0.928,
+      "p99": 2.355,
+      "largest": 4.907,
+      "largest_at": 3,
+      "largest_batch": "defect-free",
+      "median_first_100": 3.572,
+      "median_last_1000": 0.845
+     },
+     "clipped": 0.404,
+     "clipped_last_1000": 0.288,
+     "grad_spikes": [],
+     "loss_spikes": [],
+     "loss_last_1000_by_batch": {
+      "antisite": 0.3497,
+      "defect-free": 0.104,
+      "frenkel": 0.7674,
+      "interstitial": 0.2371,
+      "vacancy": 0.2709
+     }
+    },
+    "1": {
+     "updates": 20000,
+     "not_finite": 0,
+     "grad_norm": {
+      "median": 0.968,
+      "p99": 2.396,
+      "largest": 4.863,
+      "largest_at": 2,
+      "largest_batch": "defect-free",
+      "median_first_100": 3.455,
+      "median_last_1000": 0.879
+     },
+     "clipped": 0.458,
+     "clipped_last_1000": 0.321,
+     "grad_spikes": [],
+     "loss_spikes": [],
+     "loss_last_1000_by_batch": {
+      "antisite": 0.346,
+      "defect-free": 0.1018,
+      "frenkel": 0.7743,
+      "interstitial": 0.2361,
+      "vacancy": 0.2623
+     }
+    },
+    "2": {
+     "updates": 20000,
+     "not_finite": 0,
+     "grad_norm": {
+      "median": 1.002,
+      "p99": 2.666,
+      "largest": 5.532,
+      "largest_at": 5,
+      "largest_batch": "defect-free",
+      "median_first_100": 3.891,
+      "median_last_1000": 0.887
+     },
+     "clipped": 0.502,
+     "clipped_last_1000": 0.344,
+     "grad_spikes": [],
+     "loss_spikes": [
+      {
+       "step": 1346,
+       "batch": "defect-free",
+       "ratio": 3.08
+      }
+     ],
+     "loss_last_1000_by_batch": {
+      "antisite": 0.3441,
+      "defect-free": 0.094,
+      "frenkel": 0.8509,
+      "interstitial": 0.2308,
+      "vacancy": 0.285
+     }
+    }
+   }
+  },
+  "cnn": {
+   "what": "CNN: periodic U-Net on the glass drawn as an image",
+   "seeds": [
+    0,
+    1,
+    2
+   ],
+   "parameters": 498309,
+   "hours_per_run": [
+    0.62,
+    0.62,
+    0.61
+   ],
+   "found": {
+    "vacancy": {
+     "mean": 0.6967,
+     "sd": 0.0058,
+     "low": 0.69,
+     "high": 0.7,
+     "n": 3
+    },
+    "interstitial": {
+     "mean": 0.5117,
+     "sd": 0.0076,
+     "low": 0.505,
+     "high": 0.52,
+     "n": 3
+    },
+    "frenkel": {
+     "mean": 0.3844,
+     "sd": 0.0301,
+     "low": 0.3533,
+     "high": 0.4133,
+     "n": 3
+    },
+    "antisite": {
+     "mean": 0.5283,
+     "sd": 0.0076,
+     "low": 0.52,
+     "high": 0.535,
+     "n": 3
+    },
+    "all": {
+     "mean": 0.54,
+     "sd": 0.0048,
+     "low": 0.5347,
+     "high": 0.544,
+     "n": 3
+    }
+   },
+   "per_seed": {
+    "0": {
+     "vacancy": 0.7,
+     "interstitial": 0.505,
+     "frenkel": 0.3533,
+     "antisite": 0.535,
+     "all": 0.5347
+    },
+    "1": {
+     "vacancy": 0.7,
+     "interstitial": 0.52,
+     "frenkel": 0.3867,
+     "antisite": 0.52,
+     "all": 0.5413
+    },
+    "2": {
+     "vacancy": 0.69,
+     "interstitial": 0.51,
+     "frenkel": 0.4133,
+     "antisite": 0.53,
+     "all": 0.544
+    }
+   },
+   "against_egnn_control": {
+    "0": {
+     "only_new": 114,
+     "only_base": 42,
+     "p": 7.139319451743965e-09
+    },
+    "1": {
+     "only_new": 122,
+     "only_base": 38,
+     "p": 1.795956230322765e-11
+    },
+    "2": {
+     "only_new": 122,
+     "only_base": 42,
+     "p": 3.0524644530566556e-10
+    }
+   },
+   "symmetry": {
+    "turn by 90 degrees": 1.0,
+    "random shift": 0.8827,
+    "renumbering": 1.0
+   },
+   "stability": {
+    "0": {
+     "updates": 20000,
+     "not_finite": 0,
+     "grad_norm": {
+      "median": 1.784,
+      "p99": 3.513,
+      "largest": 7.236,
+      "largest_at": 6070,
+      "largest_batch": "antisite",
+      "median_first_100": 2.074,
+      "median_last_1000": 1.605
+     },
+     "clipped": 0.847,
+     "clipped_last_1000": 0.703,
+     "grad_spikes": [],
+     "loss_spikes": [],
+     "loss_last_1000_by_batch": {
+      "antisite": 0.4,
+      "defect-free": 0.099,
+      "frenkel": 0.7506,
+      "interstitial": 0.2823,
+      "vacancy": 0.2601
+     }
+    },
+    "1": {
+     "updates": 20000,
+     "not_finite": 0,
+     "grad_norm": {
+      "median": 1.65,
+      "p99": 3.351,
+      "largest": 8.077,
+      "largest_at": 257,
+      "largest_batch": "interstitial",
+      "median_first_100": 2.68,
+      "median_last_1000": 1.55
+     },
+     "clipped": 0.851,
+     "clipped_last_1000": 0.729,
+     "grad_spikes": [],
+     "loss_spikes": [],
+     "loss_last_1000_by_batch": {
+      "antisite": 0.4071,
+      "defect-free": 0.0993,
+      "frenkel": 0.7618,
+      "interstitial": 0.2798,
+      "vacancy": 0.2549
+     }
+    },
+    "2": {
+     "updates": 20000,
+     "not_finite": 0,
+     "grad_norm": {
+      "median": 1.67,
+      "p99": 3.421,
+      "largest": 6.279,
+      "largest_at": 162,
+      "largest_batch": "interstitial",
+      "median_first_100": 2.711,
+      "median_last_1000": 1.47
+     },
+     "clipped": 0.852,
+     "clipped_last_1000": 0.717,
+     "grad_spikes": [],
+     "loss_spikes": [],
+     "loss_last_1000_by_batch": {
+      "antisite": 0.3926,
+      "defect-free": 0.0887,
+      "frenkel": 0.8131,
+      "interstitial": 0.2716,
+      "vacancy": 0.273
+     }
+    }
+   }
+  },
+  "egnn_scratch": {
+   "what": "EGNN (control): message passing, reach 10 sigma",
+   "seeds": [
+    0,
+    1,
+    2
+   ],
+   "parameters": 523037,
+   "hours_per_run": [
+    0.77,
+    0.78,
+    0.77
+   ],
+   "found": {
+    "vacancy": {
+     "mean": 0.6317,
+     "sd": 0.0058,
+     "low": 0.625,
+     "high": 0.635,
+     "n": 3
+    },
+    "interstitial": {
+     "mean": 0.2967,
+     "sd": 0.0058,
+     "low": 0.29,
+     "high": 0.3,
+     "n": 3
+    },
+    "frenkel": {
+     "mean": 0.3511,
+     "sd": 0.0102,
+     "low": 0.34,
+     "high": 0.36,
+     "n": 3
+    },
+    "antisite": {
+     "mean": 0.44,
+     "sd": 0.02,
+     "low": 0.42,
+     "high": 0.46,
+     "n": 3
+    },
+    "all": {
+     "mean": 0.4351,
+     "sd": 0.005,
+     "low": 0.4293,
+     "high": 0.4387,
+     "n": 3
+    }
+   },
+   "per_seed": {
+    "0": {
+     "vacancy": 0.635,
+     "interstitial": 0.3,
+     "frenkel": 0.36,
+     "antisite": 0.44,
+     "all": 0.4387
+    },
+    "1": {
+     "vacancy": 0.635,
+     "interstitial": 0.29,
+     "frenkel": 0.3533,
+     "antisite": 0.42,
+     "all": 0.4293
+    },
+    "2": {
+     "vacancy": 0.625,
+     "interstitial": 0.3,
+     "frenkel": 0.34,
+     "antisite": 0.46,
+     "all": 0.4373
+    }
+   },
+   "symmetry": {
+    "turn by 90 degrees": 1.0,
+    "random shift": 1.0,
+    "renumbering": 1.0
+   },
+   "stability": {
+    "0": {
+     "updates": 20000,
+     "not_finite": 0,
+     "grad_norm": {
+      "median": 1.475,
+      "p99": 5.335,
+      "largest": 55.282,
+      "largest_at": 13241,
+      "largest_batch": "interstitial",
+      "median_first_100": 1.57,
+      "median_last_1000": 1.476
+     },
+     "clipped": 0.847,
+     "clipped_last_1000": 0.785,
+     "grad_spikes": [
+      {
+       "step": 7818,
+       "batch": "defect-free",
+       "ratio": 6.62
+      },
+      {
+       "step": 8651,
+       "batch": "interstitial",
+       "ratio": 7.67
+      },
+      {
+       "step": 8928,
+       "batch": "interstitial",
+       "ratio": 6.27
+      },
+      {
+       "step": 8929,
+       "batch": "defect-free",
+       "ratio": 6.51
+      },
+      {
+       "step": 10449,
+       "batch": "antisite",
+       "ratio": 9.62
+      },
+      {
+       "step": 10450,
+       "batch": "defect-free",
+       "ratio": 9.85
+      },
+      {
+       "step": 10732,
+       "batch": "defect-free",
+       "ratio": 5.05
+      },
+      {
+       "step": 11076,
+       "batch": "defect-free",
+       "ratio": 6.86
+      },
+      {
+       "step": 11077,
+       "batch": "defect-free",
+       "ratio": 8.13
+      },
+      {
+       "step": 11108,
+       "batch": "interstitial",
+       "ratio": 6.49
+      },
+      {
+       "step": 11109,
+       "batch": "antisite",
+       "ratio": 5.77
+      },
+      {
+       "step": 11412,
+       "batch": "antisite",
+       "ratio": 6.78
+      },
+      {
+       "step": 11413,
+       "batch": "interstitial",
+       "ratio": 7.78
+      },
+      {
+       "step": 11845,
+       "batch": "interstitial",
+       "ratio": 8.17
+      },
+      {
+       "step": 12007,
+       "batch": "interstitial",
+       "ratio": 5.07
+      },
+      {
+       "step": 12071,
+       "batch": "antisite",
+       "ratio": 5.49
+      },
+      {
+       "step": 12072,
+       "batch": "antisite",
+       "ratio": 5.86
+      },
+      {
+       "step": 12517,
+       "batch": "defect-free",
+       "ratio": 6.03
+      },
+      {
+       "step": 12518,
+       "batch": "interstitial",
+       "ratio": 5.3
+      },
+      {
+       "step": 12520,
+       "batch": "defect-free",
+       "ratio": 5.03
+      },
+      {
+       "step": 12616,
+       "batch": "defect-free",
+       "ratio": 5.12
+      },
+      {
+       "step": 12756,
+       "batch": "interstitial",
+       "ratio": 8.47
+      },
+      {
+       "step": 12757,
+       "batch": "antisite",
+       "ratio": 5.4
+      },
+      {
+       "step": 12898,
+       "batch": "vacancy",
+       "ratio": 5.85
+      },
+      {
+       "step": 12899,
+       "batch": "interstitial",
+       "ratio": 22.17
+      },
+      {
+       "step": 12900,
+       "batch": "defect-free",
+       "ratio": 23.56
+      },
+      {
+       "step": 12901,
+       "batch": "interstitial",
+       "ratio": 18.47
+      },
+      {
+       "step": 12902,
+       "batch": "vacancy",
+       "ratio": 6.24
+      },
+      {
+       "step": 13043,
+       "batch": "interstitial",
+       "ratio": 6.64
+      },
+      {
+       "step": 13045,
+       "batch": "vacancy",
+       "ratio": 5.37
+      },
+      {
+       "step": 13046,
+       "batch": "antisite",
+       "ratio": 7.05
+      },
+      {
+       "step": 13168,
+       "batch": "defect-free",
+       "ratio": 5.28
+      },
+      {
+       "step": 13239,
+       "batch": "interstitial",
+       "ratio": 19.08
+      },
+      {
+       "step": 13240,
+       "batch": "interstitial",
+       "ratio": 29.5
+      },
+      {
+       "step": 13241,
+       "batch": "interstitial",
+       "ratio": 29.58
+      },
+      {
+       "step": 13242,
+       "batch": "defect-free",
+       "ratio": 20.29
+      },
+      {
+       "step": 13243,
+       "batch": "vacancy",
+       "ratio": 7.05
+      },
+      {
+       "step": 13761,
+       "batch": "vacancy",
+       "ratio": 5.13
+      },
+      {
+       "step": 13763,
+       "batch": "antisite",
+       "ratio": 7.99
+      },
+      {
+       "step": 13764,
+       "batch": "antisite",
+       "ratio": 5.76
+      },
+      {
+       "step": 14285,
+       "batch": "interstitial",
+       "ratio": 6.64
+      },
+      {
+       "step": 14287,
+       "batch": "antisite",
+       "ratio": 8.15
+      },
+      {
+       "step": 14288,
+       "batch": "antisite",
+       "ratio": 6.03
+      },
+      {
+       "step": 14289,
+       "batch": "antisite",
+       "ratio": 5.45
+      },
+      {
+       "step": 14323,
+       "batch": "interstitial",
+       "ratio": 5.73
+      },
+      {
+       "step": 14324,
+       "batch": "defect-free",
+       "ratio": 6.62
+      },
+      {
+       "step": 14325,
+       "batch": "interstitial",
+       "ratio": 5.62
+      },
+      {
+       "step": 14682,
+       "batch": "antisite",
+       "ratio": 5.26
+      },
+      {
+       "step": 15083,
+       "batch": "interstitial",
+       "ratio": 5.5
+      },
+      {
+       "step": 15253,
+       "batch": "vacancy",
+       "ratio": 8.19
+      },
+      {
+       "step": 15254,
+       "batch": "vacancy",
+       "ratio": 11.98
+      },
+      {
+       "step": 15255,
+       "batch": "interstitial",
+       "ratio": 14.04
+      },
+      {
+       "step": 15256,
+       "batch": "antisite",
+       "ratio": 12.13
+      },
+      {
+       "step": 15257,
+       "batch": "antisite",
+       "ratio": 5.64
+      },
+      {
+       "step": 15348,
+       "batch": "interstitial",
+       "ratio": 8.23
+      },
+      {
+       "step": 15349,
+       "batch": "vacancy",
+       "ratio": 6.82
+      },
+      {
+       "step": 15350,
+       "batch": "antisite",
+       "ratio": 5.49
+      },
+      {
+       "step": 15426,
+       "batch": "interstitial",
+       "ratio": 6.17
+      },
+      {
+       "step": 15939,
+       "batch": "antisite",
+       "ratio": 6.27
+      },
+      {
+       "step": 15940,
+       "batch": "antisite",
+       "ratio": 5.14
+      },
+      {
+       "step": 16302,
+       "batch": "interstitial",
+       "ratio": 14.72
+      },
+      {
+       "step": 16303,
+       "batch": "vacancy",
+       "ratio": 11.91
+      },
+      {
+       "step": 16304,
+       "batch": "antisite",
+       "ratio": 11.8
+      },
+      {
+       "step": 16785,
+       "batch": "vacancy",
+       "ratio": 5.07
+      },
+      {
+       "step": 18347,
+       "batch": "defect-free",
+       "ratio": 5.26
+      },
+      {
+       "step": 18674,
+       "batch": "antisite",
+       "ratio": 9.69
+      },
+      {
+       "step": 18675,
+       "batch": "antisite",
+       "ratio": 8.14
+      },
+      {
+       "step": 19597,
+       "batch": "interstitial",
+       "ratio": 6.27
+      },
+      {
+       "step": 19598,
+       "batch": "antisite",
+       "ratio": 7.31
+      },
+      {
+       "step": 19599,
+       "batch": "antisite",
+       "ratio": 8.27
+      },
+      {
+       "step": 19600,
+       "batch": "defect-free",
+       "ratio": 6.06
+      }
+     ],
+     "loss_spikes": [
+      {
+       "step": 5777,
+       "batch": "defect-free",
+       "ratio": 3.09
+      },
+      {
+       "step": 7818,
+       "batch": "defect-free",
+       "ratio": 3.83
+      },
+      {
+       "step": 8396,
+       "batch": "defect-free",
+       "ratio": 3.28
+      },
+      {
+       "step": 8929,
+       "batch": "defect-free",
+       "ratio": 3.09
+      },
+      {
+       "step": 10450,
+       "batch": "defect-free",
+       "ratio": 3.2
+      },
+      {
+       "step": 12834,
+       "batch": "defect-free",
+       "ratio": 3.71
+      },
+      {
+       "step": 12900,
+       "batch": "defect-free",
+       "ratio": 5.37
+      },
+      {
+       "step": 13240,
+       "batch": "interstitial",
+       "ratio": 3.47
+      },
+      {
+       "step": 13241,
+       "batch": "interstitial",
+       "ratio": 3.64
+      },
+      {
+       "step": 13242,
+       "batch": "defect-free",
+       "ratio": 6.09
+      },
+      {
+       "step": 14099,
+       "batch": "defect-free",
+       "ratio": 3.02
+      },
+      {
+       "step": 14324,
+       "batch": "defect-free",
+       "ratio": 3.32
+      },
+      {
+       "step": 19600,
+       "batch": "defect-free",
+       "ratio": 3.17
+      },
+      {
+       "step": 19671,
+       "batch": "defect-free",
+       "ratio": 3.44
+      }
+     ],
+     "loss_last_1000_by_batch": {
+      "antisite": 0.4384,
+      "defect-free": 0.0895,
+      "frenkel": 0.8874,
+      "interstitial": 0.333,
+      "vacancy": 0.355
+     }
+    },
+    "1": {
+     "updates": 20000,
+     "not_finite": 0,
+     "grad_norm": {
+      "median": 1.573,
+      "p99": 6.749,
+      "largest": 82.026,
+      "largest_at": 10620,
+      "largest_batch": "interstitial",
+      "median_first_100": 1.71,
+      "median_last_1000": 1.378
+     },
+     "clipped": 0.884,
+     "clipped_last_1000": 0.799,
+     "grad_spikes": [
+      {
+       "step": 8641,
+       "batch": "antisite",
+       "ratio": 5.03
+      },
+      {
+       "step": 9420,
+       "batch": "interstitial",
+       "ratio": 5.48
+      },
+      {
+       "step": 9769,
+       "batch": "antisite",
+       "ratio": 7.85
+      },
+      {
+       "step": 9770,
+       "batch": "interstitial",
+       "ratio": 16.48
+      },
+      {
+       "step": 9771,
+       "batch": "interstitial",
+       "ratio": 16.73
+      },
+      {
+       "step": 9772,
+       "batch": "defect-free",
+       "ratio": 9.99
+      },
+      {
+       "step": 9890,
+       "batch": "interstitial",
+       "ratio": 6.88
+      },
+      {
+       "step": 9891,
+       "batch": "antisite",
+       "ratio": 11.58
+      },
+      {
+       "step": 9892,
+       "batch": "antisite",
+       "ratio": 9.96
+      },
+      {
+       "step": 9988,
+       "batch": "interstitial",
+       "ratio": 6.25
+      },
+      {
+       "step": 9990,
+       "batch": "interstitial",
+       "ratio": 7.14
+      },
+      {
+       "step": 10176,
+       "batch": "antisite",
+       "ratio": 15.36
+      },
+      {
+       "step": 10177,
+       "batch": "interstitial",
+       "ratio": 26.61
+      },
+      {
+       "step": 10178,
+       "batch": "defect-free",
+       "ratio": 27.41
+      },
+      {
+       "step": 10179,
+       "batch": "interstitial",
+       "ratio": 14.16
+      },
+      {
+       "step": 10180,
+       "batch": "antisite",
+       "ratio": 7.5
+      },
+      {
+       "step": 10268,
+       "batch": "antisite",
+       "ratio": 10.64
+      },
+      {
+       "step": 10269,
+       "batch": "interstitial",
+       "ratio": 23.17
+      },
+      {
+       "step": 10270,
+       "batch": "interstitial",
+       "ratio": 21.04
+      },
+      {
+       "step": 10271,
+       "batch": "interstitial",
+       "ratio": 10.22
+      },
+      {
+       "step": 10283,
+       "batch": "defect-free",
+       "ratio": 20.34
+      },
+      {
+       "step": 10284,
+       "batch": "interstitial",
+       "ratio": 38.97
+      },
+      {
+       "step": 10285,
+       "batch": "defect-free",
+       "ratio": 44.63
+      },
+      {
+       "step": 10286,
+       "batch": "vacancy",
+       "ratio": 26.55
+      },
+      {
+       "step": 10287,
+       "batch": "vacancy",
+       "ratio": 9.45
+      },
+      {
+       "step": 10441,
+       "batch": "antisite",
+       "ratio": 10.08
+      },
+      {
+       "step": 10442,
+       "batch": "defect-free",
+       "ratio": 31.8
+      },
+      {
+       "step": 10443,
+       "batch": "vacancy",
+       "ratio": 31.18
+      },
+      {
+       "step": 10444,
+       "batch": "vacancy",
+       "ratio": 21.04
+      },
+      {
+       "step": 10445,
+       "batch": "antisite",
+       "ratio": 9.34
+      },
+      {
+       "step": 10478,
+       "batch": "defect-free",
+       "ratio": 5.07
+      },
+      {
+       "step": 10618,
+       "batch": "frenkel",
+       "ratio": 5.76
+      },
+      {
+       "step": 10619,
+       "batch": "defect-free",
+       "ratio": 42.11
+      },
+      {
+       "step": 10620,
+       "batch": "interstitial",
+       "ratio": 46.44
+      },
+      {
+       "step": 10621,
+       "batch": "antisite",
+       "ratio": 23.6
+      },
+      {
+       "step": 10643,
+       "batch": "defect-free",
+       "ratio": 5.2
+      },
+      {
+       "step": 10644,
+       "batch": "interstitial",
+       "ratio": 8.41
+      },
+      {
+       "step": 10645,
+       "batch": "interstitial",
+       "ratio": 6.89
+      },
+      {
+       "step": 10695,
+       "batch": "interstitial",
+       "ratio": 5.21
+      },
+      {
+       "step": 10767,
+       "batch": "antisite",
+       "ratio": 7.83
+      },
+      {
+       "step": 10768,
+       "batch": "interstitial",
+       "ratio": 5.87
+      },
+      {
+       "step": 10929,
+       "batch": "vacancy",
+       "ratio": 21.69
+      },
+      {
+       "step": 10930,
+       "batch": "defect-free",
+       "ratio": 35.82
+      },
+      {
+       "step": 10931,
+       "batch": "antisite",
+       "ratio": 29.19
+      },
+      {
+       "step": 11181,
+       "batch": "antisite",
+       "ratio": 5.21
+      },
+      {
+       "step": 11182,
+       "batch": "defect-free",
+       "ratio": 9.81
+      },
+      {
+       "step": 11183,
+       "batch": "defect-free",
+       "ratio": 9.21
+      },
+      {
+       "step": 11279,
+       "batch": "antisite",
+       "ratio": 5.08
+      },
+      {
+       "step": 11280,
+       "batch": "vacancy",
+       "ratio": 6.68
+      },
+      {
+       "step": 11281,
+       "batch": "interstitial",
+       "ratio": 7.37
+      },
+      {
+       "step": 11318,
+       "batch": "interstitial",
+       "ratio": 5.51
+      },
+      {
+       "step": 11320,
+       "batch": "defect-free",
+       "ratio": 5.84
+      },
+      {
+       "step": 11518,
+       "batch": "interstitial",
+       "ratio": 5.11
+      },
+      {
+       "step": 11628,
+       "batch": "defect-free",
+       "ratio": 7.58
+      },
+      {
+       "step": 11629,
+       "batch": "interstitial",
+       "ratio": 12.87
+      },
+      {
+       "step": 11631,
+       "batch": "defect-free",
+       "ratio": 7.65
+      },
+      {
+       "step": 11694,
+       "batch": "defect-free",
+       "ratio": 5.66
+      },
+      {
+       "step": 11719,
+       "batch": "interstitial",
+       "ratio": 8.46
+      },
+      {
+       "step": 11721,
+       "batch": "defect-free",
+       "ratio": 8.58
+      },
+      {
+       "step": 11812,
+       "batch": "antisite",
+       "ratio": 19.62
+      },
+      {
+       "step": 11813,
+       "batch": "defect-free",
+       "ratio": 29.7
+      },
+      {
+       "step": 11814,
+       "batch": "antisite",
+       "ratio": 24.92
+      },
+      {
+       "step": 11815,
+       "batch": "frenkel",
+       "ratio": 8.51
+      },
+      {
+       "step": 11816,
+       "batch": "interstitial",
+       "ratio": 6.57
+      },
+      {
+       "step": 11995,
+       "batch": "interstitial",
+       "ratio": 5.21
+      },
+      {
+       "step": 12120,
+       "batch": "defect-free",
+       "ratio": 5.16
+      },
+      {
+       "step": 12257,
+       "batch": "antisite",
+       "ratio": 14.51
+      },
+      {
+       "step": 12258,
+       "batch": "interstitial",
+       "ratio": 15.78
+      },
+      {
+       "step": 12259,
+       "batch": "interstitial",
+       "ratio": 10.06
+      },
+      {
+       "step": 12315,
+       "batch": "interstitial",
+       "ratio": 10.78
+      },
+      {
+       "step": 12317,
+       "batch": "antisite",
+       "ratio": 14.26
+      },
+      {
+       "step": 12493,
+       "batch": "antisite",
+       "ratio": 14.85
+      },
+      {
+       "step": 12494,
+       "batch": "defect-free",
+       "ratio": 20.26
+      },
+      {
+       "step": 12501,
+       "batch": "interstitial",
+       "ratio": 7.35
+      },
+      {
+       "step": 12502,
+       "batch": "antisite",
+       "ratio": 12.08
+      },
+      {
+       "step": 12503,
+       "batch": "defect-free",
+       "ratio": 8.35
+      },
+      {
+       "step": 12620,
+       "batch": "antisite",
+       "ratio": 13.16
+      },
+      {
+       "step": 12621,
+       "batch": "interstitial",
+       "ratio": 31.06
+      },
+      {
+       "step": 12622,
+       "batch": "vacancy",
+       "ratio": 28.67
+      },
+      {
+       "step": 12623,
+       "batch": "defect-free",
+       "ratio": 20.68
+      },
+      {
+       "step": 12624,
+       "batch": "defect-free",
+       "ratio": 8.56
+      },
+      {
+       "step": 12829,
+       "batch": "antisite",
+       "ratio": 6.95
+      },
+      {
+       "step": 12830,
+       "batch": "antisite",
+       "ratio": 16.88
+      },
+      {
+       "step": 12831,
+       "batch": "antisite",
+       "ratio": 24.73
+      },
+      {
+       "step": 12832,
+       "batch": "defect-free",
+       "ratio": 16.98
+      },
+      {
+       "step": 12833,
+       "batch": "antisite",
+       "ratio": 9.03
+      },
+      {
+       "step": 13051,
+       "batch": "vacancy",
+       "ratio": 7.55
+      },
+      {
+       "step": 13052,
+       "batch": "defect-free",
+       "ratio": 6.35
+      },
+      {
+       "step": 13147,
+       "batch": "interstitial",
+       "ratio": 7.51
+      },
+      {
+       "step": 13148,
+       "batch": "antisite",
+       "ratio": 17.25
+      },
+      {
+       "step": 13149,
+       "batch": "antisite",
+       "ratio": 16.55
+      },
+      {
+       "step": 13150,
+       "batch": "antisite",
+       "ratio": 9.55
+      },
+      {
+       "step": 13185,
+       "batch": "interstitial",
+       "ratio": 12.11
+      },
+      {
+       "step": 13186,
+       "batch": "antisite",
+       "ratio": 9.23
+      },
+      {
+       "step": 13187,
+       "batch": "antisite",
+       "ratio": 7.07
+      },
+      {
+       "step": 13362,
+       "batch": "antisite",
+       "ratio": 6.1
+      },
+      {
+       "step": 13364,
+       "batch": "defect-free",
+       "ratio": 8.22
+      },
+      {
+       "step": 13365,
+       "batch": "interstitial",
+       "ratio": 7.9
+      },
+      {
+       "step": 13366,
+       "batch": "interstitial",
+       "ratio": 5.12
+      },
+      {
+       "step": 13630,
+       "batch": "antisite",
+       "ratio": 9.32
+      },
+      {
+       "step": 13631,
+       "batch": "vacancy",
+       "ratio": 9.12
+      },
+      {
+       "step": 13632,
+       "batch": "defect-free",
+       "ratio": 10.67
+      },
+      {
+       "step": 14021,
+       "batch": "antisite",
+       "ratio": 7.07
+      },
+      {
+       "step": 14023,
+       "batch": "interstitial",
+       "ratio": 5.51
+      },
+      {
+       "step": 14161,
+       "batch": "interstitial",
+       "ratio": 5.79
+      },
+      {
+       "step": 14309,
+       "batch": "antisite",
+       "ratio": 5.51
+      },
+      {
+       "step": 14317,
+       "batch": "antisite",
+       "ratio": 12.79
+      },
+      {
+       "step": 14318,
+       "batch": "defect-free",
+       "ratio": 5.47
+      },
+      {
+       "step": 14613,
+       "batch": "antisite",
+       "ratio": 5.07
+      },
+      {
+       "step": 14982,
+       "batch": "antisite",
+       "ratio": 5.05
+      },
+      {
+       "step": 15368,
+       "batch": "interstitial",
+       "ratio": 5.04
+      },
+      {
+       "step": 15370,
+       "batch": "antisite",
+       "ratio": 12.53
+      },
+      {
+       "step": 15371,
+       "batch": "interstitial",
+       "ratio": 15.85
+      },
+      {
+       "step": 15372,
+       "batch": "defect-free",
+       "ratio": 12.02
+      },
+      {
+       "step": 15482,
+       "batch": "antisite",
+       "ratio": 6.95
+      },
+      {
+       "step": 15483,
+       "batch": "interstitial",
+       "ratio": 6.81
+      },
+      {
+       "step": 15484,
+       "batch": "interstitial",
+       "ratio": 5.12
+      },
+      {
+       "step": 15558,
+       "batch": "interstitial",
+       "ratio": 7.06
+      },
+      {
+       "step": 15559,
+       "batch": "defect-free",
+       "ratio": 6.22
+      },
+      {
+       "step": 15924,
+       "batch": "antisite",
+       "ratio": 5.03
+      },
+      {
+       "step": 16361,
+       "batch": "vacancy",
+       "ratio": 5.44
+      },
+      {
+       "step": 16362,
+       "batch": "frenkel",
+       "ratio": 6.02
+      },
+      {
+       "step": 16844,
+       "batch": "antisite",
+       "ratio": 6.47
+      },
+      {
+       "step": 16846,
+       "batch": "interstitial",
+       "ratio": 6.38
+      },
+      {
+       "step": 17584,
+       "batch": "antisite",
+       "ratio": 5.14
+      },
+      {
+       "step": 17585,
+       "batch": "defect-free",
+       "ratio": 5.43
+      },
+      {
+       "step": 17943,
+       "batch": "vacancy",
+       "ratio": 6.09
+      },
+      {
+       "step": 17944,
+       "batch": "interstitial",
+       "ratio": 13.69
+      },
+      {
+       "step": 18146,
+       "batch": "interstitial",
+       "ratio": 5.44
+      },
+      {
+       "step": 18224,
+       "batch": "defect-free",
+       "ratio": 6.4
+      },
+      {
+       "step": 19646,
+       "batch": "defect-free",
+       "ratio": 5.45
+      }
+     ],
+     "loss_spikes": [
+      {
+       "step": 4295,
+       "batch": "defect-free",
+       "ratio": 3.08
+      },
+      {
+       "step": 10178,
+       "batch": "defect-free",
+       "ratio": 6.84
+      },
+      {
+       "step": 10283,
+       "batch": "defect-free",
+       "ratio": 5.25
+      },
+      {
+       "step": 10285,
+       "batch": "defect-free",
+       "ratio": 10.09
+      },
+      {
+       "step": 10442,
+       "batch": "defect-free",
+       "ratio": 6.17
+      },
+      {
+       "step": 10619,
+       "batch": "defect-free",
+       "ratio": 8.31
+      },
+      {
+       "step": 10930,
+       "batch": "defect-free",
+       "ratio": 6.68
+      },
+      {
+       "step": 11182,
+       "batch": "defect-free",
+       "ratio": 3.33
+      },
+      {
+       "step": 11183,
+       "batch": "defect-free",
+       "ratio": 3.2
+      },
+      {
+       "step": 11813,
+       "batch": "defect-free",
+       "ratio": 7.29
+      },
+      {
+       "step": 12494,
+       "batch": "defect-free",
+       "ratio": 4.37
+      },
+      {
+       "step": 12623,
+       "batch": "defect-free",
+       "ratio": 3.22
+      },
+      {
+       "step": 12832,
+       "batch": "defect-free",
+       "ratio": 3.74
+      },
+      {
+       "step": 13364,
+       "batch": "defect-free",
+       "ratio": 3.45
+      },
+      {
+       "step": 13632,
+       "batch": "defect-free",
+       "ratio": 3.1
+      },
+      {
+       "step": 15372,
+       "batch": "defect-free",
+       "ratio": 3.86
+      },
+      {
+       "step": 15557,
+       "batch": "defect-free",
+       "ratio": 3.44
+      },
+      {
+       "step": 15559,
+       "batch": "defect-free",
+       "ratio": 4.61
+      },
+      {
+       "step": 15560,
+       "batch": "defect-free",
+       "ratio": 3.7
+      },
+      {
+       "step": 15561,
+       "batch": "defect-free",
+       "ratio": 3.1
+      },
+      {
+       "step": 17585,
+       "batch": "defect-free",
+       "ratio": 3.33
+      },
+      {
+       "step": 19646,
+       "batch": "defect-free",
+       "ratio": 3.11
+      }
+     ],
+     "loss_last_1000_by_batch": {
+      "antisite": 0.4499,
+      "defect-free": 0.0891,
+      "frenkel": 0.8806,
+      "interstitial": 0.3193,
+      "vacancy": 0.3547
+     }
+    },
+    "2": {
+     "updates": 20000,
+     "not_finite": 0,
+     "grad_norm": {
+      "median": 1.569,
+      "p99": 6.805,
+      "largest": 61.078,
+      "largest_at": 12788,
+      "largest_batch": "defect-free",
+      "median_first_100": 1.697,
+      "median_last_1000": 1.432
+     },
+     "clipped": 0.869,
+     "clipped_last_1000": 0.794,
+     "grad_spikes": [
+      {
+       "step": 9704,
+       "batch": "interstitial",
+       "ratio": 12.73
+      },
+      {
+       "step": 9705,
+       "batch": "defect-free",
+       "ratio": 17.83
+      },
+      {
+       "step": 9706,
+       "batch": "interstitial",
+       "ratio": 14.92
+      },
+      {
+       "step": 10203,
+       "batch": "antisite",
+       "ratio": 7.5
+      },
+      {
+       "step": 10204,
+       "batch": "defect-free",
+       "ratio": 14.0
+      },
+      {
+       "step": 10205,
+       "batch": "antisite",
+       "ratio": 16.14
+      },
+      {
+       "step": 10430,
+       "batch": "interstitial",
+       "ratio": 7.45
+      },
+      {
+       "step": 10431,
+       "batch": "defect-free",
+       "ratio": 7.5
+      },
+      {
+       "step": 10738,
+       "batch": "interstitial",
+       "ratio": 9.39
+      },
+      {
+       "step": 10739,
+       "batch": "defect-free",
+       "ratio": 14.54
+      },
+      {
+       "step": 10740,
+       "batch": "defect-free",
+       "ratio": 15.49
+      },
+      {
+       "step": 10741,
+       "batch": "defect-free",
+       "ratio": 11.01
+      },
+      {
+       "step": 10742,
+       "batch": "interstitial",
+       "ratio": 5.81
+      },
+      {
+       "step": 11334,
+       "batch": "frenkel",
+       "ratio": 7.61
+      },
+      {
+       "step": 11335,
+       "batch": "defect-free",
+       "ratio": 14.52
+      },
+      {
+       "step": 11336,
+       "batch": "defect-free",
+       "ratio": 12.15
+      },
+      {
+       "step": 11337,
+       "batch": "defect-free",
+       "ratio": 8.16
+      },
+      {
+       "step": 11581,
+       "batch": "antisite",
+       "ratio": 5.77
+      },
+      {
+       "step": 11698,
+       "batch": "interstitial",
+       "ratio": 10.93
+      },
+      {
+       "step": 11699,
+       "batch": "interstitial",
+       "ratio": 13.4
+      },
+      {
+       "step": 11700,
+       "batch": "defect-free",
+       "ratio": 12.1
+      },
+      {
+       "step": 12048,
+       "batch": "defect-free",
+       "ratio": 7.26
+      },
+      {
+       "step": 12049,
+       "batch": "vacancy",
+       "ratio": 6.53
+      },
+      {
+       "step": 12050,
+       "batch": "interstitial",
+       "ratio": 8.63
+      },
+      {
+       "step": 12051,
+       "batch": "antisite",
+       "ratio": 5.48
+      },
+      {
+       "step": 12253,
+       "batch": "antisite",
+       "ratio": 5.42
+      },
+      {
+       "step": 12362,
+       "batch": "antisite",
+       "ratio": 5.33
+      },
+      {
+       "step": 12363,
+       "batch": "antisite",
+       "ratio": 8.58
+      },
+      {
+       "step": 12364,
+       "batch": "antisite",
+       "ratio": 8.7
+      },
+      {
+       "step": 12471,
+       "batch": "interstitial",
+       "ratio": 7.87
+      },
+      {
+       "step": 12472,
+       "batch": "interstitial",
+       "ratio": 6.58
+      },
+      {
+       "step": 12528,
+       "batch": "defect-free",
+       "ratio": 5.08
+      },
+      {
+       "step": 12529,
+       "batch": "antisite",
+       "ratio": 6.27
+      },
+      {
+       "step": 12612,
+       "batch": "frenkel",
+       "ratio": 13.49
+      },
+      {
+       "step": 12613,
+       "batch": "antisite",
+       "ratio": 23.99
+      },
+      {
+       "step": 12614,
+       "batch": "defect-free",
+       "ratio": 19.58
+      },
+      {
+       "step": 12615,
+       "batch": "antisite",
+       "ratio": 15.14
+      },
+      {
+       "step": 12785,
+       "batch": "vacancy",
+       "ratio": 6.93
+      },
+      {
+       "step": 12786,
+       "batch": "frenkel",
+       "ratio": 12.6
+      },
+      {
+       "step": 12787,
+       "batch": "vacancy",
+       "ratio": 19.86
+      },
+      {
+       "step": 12788,
+       "batch": "defect-free",
+       "ratio": 23.74
+      },
+      {
+       "step": 12789,
+       "batch": "frenkel",
+       "ratio": 12.42
+      },
+      {
+       "step": 12790,
+       "batch": "defect-free",
+       "ratio": 11.68
+      },
+      {
+       "step": 12923,
+       "batch": "interstitial",
+       "ratio": 7.51
+      },
+      {
+       "step": 12924,
+       "batch": "defect-free",
+       "ratio": 6.83
+      },
+      {
+       "step": 12925,
+       "batch": "defect-free",
+       "ratio": 5.31
+      },
+      {
+       "step": 13281,
+       "batch": "defect-free",
+       "ratio": 6.15
+      },
+      {
+       "step": 13386,
+       "batch": "antisite",
+       "ratio": 5.2
+      },
+      {
+       "step": 13525,
+       "batch": "antisite",
+       "ratio": 5.54
+      },
+      {
+       "step": 13527,
+       "batch": "interstitial",
+       "ratio": 6.95
+      },
+      {
+       "step": 13633,
+       "batch": "defect-free",
+       "ratio": 6.88
+      },
+      {
+       "step": 14060,
+       "batch": "interstitial",
+       "ratio": 5.0
+      },
+      {
+       "step": 14064,
+       "batch": "interstitial",
+       "ratio": 5.3
+      },
+      {
+       "step": 14066,
+       "batch": "interstitial",
+       "ratio": 5.46
+      },
+      {
+       "step": 14103,
+       "batch": "interstitial",
+       "ratio": 6.29
+      },
+      {
+       "step": 14162,
+       "batch": "interstitial",
+       "ratio": 5.35
+      },
+      {
+       "step": 14664,
+       "batch": "interstitial",
+       "ratio": 5.43
+      },
+      {
+       "step": 14665,
+       "batch": "defect-free",
+       "ratio": 5.18
+      },
+      {
+       "step": 14811,
+       "batch": "interstitial",
+       "ratio": 8.46
+      },
+      {
+       "step": 14812,
+       "batch": "defect-free",
+       "ratio": 8.92
+      },
+      {
+       "step": 14813,
+       "batch": "interstitial",
+       "ratio": 10.49
+      },
+      {
+       "step": 14815,
+       "batch": "interstitial",
+       "ratio": 5.37
+      },
+      {
+       "step": 14909,
+       "batch": "defect-free",
+       "ratio": 5.72
+      },
+      {
+       "step": 14941,
+       "batch": "vacancy",
+       "ratio": 6.22
+      },
+      {
+       "step": 15069,
+       "batch": "antisite",
+       "ratio": 9.19
+      },
+      {
+       "step": 15070,
+       "batch": "antisite",
+       "ratio": 7.08
+      },
+      {
+       "step": 15237,
+       "batch": "interstitial",
+       "ratio": 8.68
+      },
+      {
+       "step": 15239,
+       "batch": "vacancy",
+       "ratio": 5.58
+      },
+      {
+       "step": 15240,
+       "batch": "antisite",
+       "ratio": 7.19
+      },
+      {
+       "step": 15414,
+       "batch": "antisite",
+       "ratio": 5.86
+      },
+      {
+       "step": 15415,
+       "batch": "defect-free",
+       "ratio": 6.04
+      },
+      {
+       "step": 15572,
+       "batch": "defect-free",
+       "ratio": 5.16
+      },
+      {
+       "step": 15573,
+       "batch": "defect-free",
+       "ratio": 8.24
+      },
+      {
+       "step": 15574,
+       "batch": "interstitial",
+       "ratio": 9.67
+      },
+      {
+       "step": 15575,
+       "batch": "defect-free",
+       "ratio": 5.38
+      },
+      {
+       "step": 15753,
+       "batch": "antisite",
+       "ratio": 14.56
+      },
+      {
+       "step": 15754,
+       "batch": "interstitial",
+       "ratio": 15.89
+      },
+      {
+       "step": 15755,
+       "batch": "vacancy",
+       "ratio": 9.97
+      },
+      {
+       "step": 15756,
+       "batch": "antisite",
+       "ratio": 7.28
+      },
+      {
+       "step": 16043,
+       "batch": "defect-free",
+       "ratio": 5.2
+      },
+      {
+       "step": 16045,
+       "batch": "antisite",
+       "ratio": 5.45
+      },
+      {
+       "step": 16425,
+       "batch": "interstitial",
+       "ratio": 7.15
+      },
+      {
+       "step": 16426,
+       "batch": "defect-free",
+       "ratio": 6.02
+      },
+      {
+       "step": 16581,
+       "batch": "interstitial",
+       "ratio": 7.6
+      },
+      {
+       "step": 16582,
+       "batch": "antisite",
+       "ratio": 9.58
+      },
+      {
+       "step": 16583,
+       "batch": "defect-free",
+       "ratio": 13.3
+      },
+      {
+       "step": 16584,
+       "batch": "antisite",
+       "ratio": 11.5
+      },
+      {
+       "step": 16994,
+       "batch": "interstitial",
+       "ratio": 5.85
+      },
+      {
+       "step": 17434,
+       "batch": "antisite",
+       "ratio": 5.22
+      },
+      {
+       "step": 17435,
+       "batch": "interstitial",
+       "ratio": 6.42
+      },
+      {
+       "step": 17436,
+       "batch": "interstitial",
+       "ratio": 5.21
+      },
+      {
+       "step": 17661,
+       "batch": "interstitial",
+       "ratio": 5.98
+      },
+      {
+       "step": 18802,
+       "batch": "interstitial",
+       "ratio": 6.19
+      },
+      {
+       "step": 19284,
+       "batch": "interstitial",
+       "ratio": 5.75
+      },
+      {
+       "step": 19790,
+       "batch": "interstitial",
+       "ratio": 10.05
+      },
+      {
+       "step": 19792,
+       "batch": "interstitial",
+       "ratio": 7.26
+      }
+     ],
+     "loss_spikes": [
+      {
+       "step": 9705,
+       "batch": "defect-free",
+       "ratio": 6.52
+      },
+      {
+       "step": 10204,
+       "batch": "defect-free",
+       "ratio": 3.86
+      },
+      {
+       "step": 10431,
+       "batch": "defect-free",
+       "ratio": 3.33
+      },
+      {
+       "step": 10739,
+       "batch": "defect-free",
+       "ratio": 5.57
+      },
+      {
+       "step": 10740,
+       "batch": "defect-free",
+       "ratio": 6.26
+      },
+      {
+       "step": 10741,
+       "batch": "defect-free",
+       "ratio": 4.68
+      },
+      {
+       "step": 11335,
+       "batch": "defect-free",
+       "ratio": 4.34
+      },
+      {
+       "step": 11336,
+       "batch": "defect-free",
+       "ratio": 3.86
+      },
+      {
+       "step": 11337,
+       "batch": "defect-free",
+       "ratio": 3.07
+      },
+      {
+       "step": 11700,
+       "batch": "defect-free",
+       "ratio": 4.16
+      },
+      {
+       "step": 12048,
+       "batch": "defect-free",
+       "ratio": 3.66
+      },
+      {
+       "step": 12366,
+       "batch": "defect-free",
+       "ratio": 3.36
+      },
+      {
+       "step": 12613,
+       "batch": "antisite",
+       "ratio": 3.01
+      },
+      {
+       "step": 12614,
+       "batch": "defect-free",
+       "ratio": 9.84
+      },
+      {
+       "step": 12788,
+       "batch": "defect-free",
+       "ratio": 10.3
+      },
+      {
+       "step": 12790,
+       "batch": "defect-free",
+       "ratio": 5.45
+      },
+      {
+       "step": 12924,
+       "batch": "defect-free",
+       "ratio": 3.65
+      },
+      {
+       "step": 12925,
+       "batch": "defect-free",
+       "ratio": 3.04
+      },
+      {
+       "step": 12936,
+       "batch": "defect-free",
+       "ratio": 3.02
+      },
+      {
+       "step": 13281,
+       "batch": "defect-free",
+       "ratio": 4.13
+      },
+      {
+       "step": 13457,
+       "batch": "defect-free",
+       "ratio": 3.07
+      },
+      {
+       "step": 13458,
+       "batch": "defect-free",
+       "ratio": 3.32
+      },
+      {
+       "step": 13633,
+       "batch": "defect-free",
+       "ratio": 4.3
+      },
+      {
+       "step": 14102,
+       "batch": "defect-free",
+       "ratio": 3.33
+      },
+      {
+       "step": 14161,
+       "batch": "defect-free",
+       "ratio": 3.75
+      },
+      {
+       "step": 14256,
+       "batch": "defect-free",
+       "ratio": 3.25
+      },
+      {
+       "step": 14665,
+       "batch": "defect-free",
+       "ratio": 3.33
+      },
+      {
+       "step": 14812,
+       "batch": "defect-free",
+       "ratio": 4.28
+      },
+      {
+       "step": 14909,
+       "batch": "defect-free",
+       "ratio": 4.5
+      },
+      {
+       "step": 14943,
+       "batch": "defect-free",
+       "ratio": 4.06
+      },
+      {
+       "step": 15415,
+       "batch": "defect-free",
+       "ratio": 3.01
+      },
+      {
+       "step": 15573,
+       "batch": "defect-free",
+       "ratio": 3.6
+      },
+      {
+       "step": 16043,
+       "batch": "defect-free",
+       "ratio": 3.27
+      },
+      {
+       "step": 16583,
+       "batch": "defect-free",
+       "ratio": 4.7
+      }
+     ],
+     "loss_last_1000_by_batch": {
+      "antisite": 0.4184,
+      "defect-free": 0.0802,
+      "frenkel": 0.9692,
+      "interstitial": 0.3016,
+      "vacancy": 0.3771
+     }
+    }
+   }
+  },
+  "egnn_pretrained": {
+   "what": "the finder of the report after 20,000 updates (from the denoiser)",
+   "seeds": [
+    0
+   ],
+   "parameters": 523037,
+   "hours_per_run": [
+    null
+   ],
+   "found": {
+    "vacancy": {
+     "mean": 0.67,
+     "sd": null,
+     "low": 0.67,
+     "high": 0.67,
+     "n": 1
+    },
+    "interstitial": {
+     "mean": 0.475,
+     "sd": null,
+     "low": 0.475,
+     "high": 0.475,
+     "n": 1
+    },
+    "frenkel": {
+     "mean": 0.3667,
+     "sd": null,
+     "low": 0.3667,
+     "high": 0.3667,
+     "n": 1
+    },
+    "antisite": {
+     "mean": 0.465,
+     "sd": null,
+     "low": 0.465,
+     "high": 0.465,
+     "n": 1
+    },
+    "all": {
+     "mean": 0.5027,
+     "sd": null,
+     "low": 0.5027,
+     "high": 0.5027,
+     "n": 1
+    }
+   },
+   "per_seed": {
+    "0": {
+     "vacancy": 0.67,
+     "interstitial": 0.475,
+     "frenkel": 0.3667,
+     "antisite": 0.465,
+     "all": 0.5027
+    }
+   },
+   "against_egnn_control": {
+    "0": {
+     "only_new": 91,
+     "only_base": 43,
+     "p": 4.111304765431349e-05
+    }
+   },
+   "symmetry": {
+    "turn by 90 degrees": 1.0,
+    "random shift": 1.0,
+    "renumbering": 1.0
+   },
+   "stability": {}
+  },
+  "egnn_pretrained_60k": {
+   "what": "the finder of the report, 60,000 updates (from the denoiser)",
+   "seeds": [
+    0
+   ],
+   "parameters": 523037,
+   "hours_per_run": [
+    null
+   ],
+   "found": {
+    "vacancy": {
+     "mean": 0.695,
+     "sd": null,
+     "low": 0.695,
+     "high": 0.695,
+     "n": 1
+    },
+    "interstitial": {
+     "mean": 0.5,
+     "sd": null,
+     "low": 0.5,
+     "high": 0.5,
+     "n": 1
+    },
+    "frenkel": {
+     "mean": 0.4533,
+     "sd": null,
+     "low": 0.4533,
+     "high": 0.4533,
+     "n": 1
+    },
+    "antisite": {
+     "mean": 0.49,
+     "sd": null,
+     "low": 0.49,
+     "high": 0.49,
+     "n": 1
+    },
+    "all": {
+     "mean": 0.54,
+     "sd": null,
+     "low": 0.54,
+     "high": 0.54,
+     "n": 1
+    }
+   },
+   "per_seed": {
+    "0": {
+     "vacancy": 0.695,
+     "interstitial": 0.5,
+     "frenkel": 0.4533,
+     "antisite": 0.49,
+     "all": 0.54
+    }
+   },
+   "against_egnn_control": {
+    "0": {
+     "only_new": 122,
+     "only_base": 46,
+     "p": 3.930443008498041e-09
+    }
+   },
+   "symmetry": {
+    "turn by 90 degrees": 1.0,
+    "random shift": 1.0,
+    "renumbering": 1.0
+   },
+   "stability": {}
+  }
+ },
+ "between": {
+  "attention vs cnn": {
+   "0": {
+    "vacancy": {
+     "only_first": 6,
+     "only_second": 10,
+     "p": 0.454498291015625
+    },
+    "interstitial": {
+     "only_first": 6,
+     "only_second": 9,
+     "p": 0.6072387695312499
+    },
+    "frenkel": {
+     "only_first": 17,
+     "only_second": 10,
+     "p": 0.24778856337070465
+    },
+    "antisite": {
+     "only_first": 12,
+     "only_second": 10,
+     "p": 0.8318119049072266
+    },
+    "all": {
+     "only_first": 41,
+     "only_second": 39,
+     "p": 0.9110721212260928
+    }
+   },
+   "1": {
+    "vacancy": {
+     "only_first": 4,
+     "only_second": 11,
+     "p": 0.11846923828124999
+    },
+    "interstitial": {
+     "only_first": 5,
+     "only_second": 10,
+     "p": 0.30175781249999994
+    },
+    "frenkel": {
+     "only_first": 14,
+     "only_second": 10,
+     "p": 0.5412561893463135
+    },
+    "antisite": {
+     "only_first": 16,
+     "only_second": 10,
+     "p": 0.32693958282470703
+    },
+    "all": {
+     "only_first": 39,
+     "only_second": 41,
+     "p": 0.9110721212260928
+    }
+   },
+   "2": {
+    "vacancy": {
+     "only_first": 11,
+     "only_second": 15,
+     "p": 0.557197093963623
+    },
+    "interstitial": {
+     "only_first": 3,
+     "only_second": 12,
+     "p": 0.03515625
+    },
+    "frenkel": {
+     "only_first": 17,
+     "only_second": 12,
+     "p": 0.45825831964612007
+    },
+    "antisite": {
+     "only_first": 17,
+     "only_second": 17,
+     "p": 1.0
+    },
+    "all": {
+     "only_first": 48,
+     "only_second": 56,
+     "p": 0.49264506648650236
+    }
+   }
+  },
+  "attention vs egnn_scratch": {
+   "0": {
+    "vacancy": {
+     "only_first": 11,
+     "only_second": 2,
+     "p": 0.0224609375
+    },
+    "interstitial": {
+     "only_first": 42,
+     "only_second": 4,
+     "p": 5.100190492157708e-09
+    },
+    "frenkel": {
+     "only_first": 25,
+     "only_second": 19,
+     "p": 0.4513808323961257
+    },
+    "antisite": {
+     "only_first": 32,
+     "only_second": 11,
+     "p": 0.001913961001264397
+    },
+    "all": {
+     "only_first": 110,
+     "only_second": 36,
+     "p": 6.54725587913841e-10
+    }
+   },
+   "1": {
+    "vacancy": {
+     "only_first": 10,
+     "only_second": 4,
+     "p": 0.1795654296875
+    },
+    "interstitial": {
+     "only_first": 46,
+     "only_second": 5,
+     "p": 2.3280151140170346e-09
+    },
+    "frenkel": {
+     "only_first": 23,
+     "only_second": 14,
+     "p": 0.18774155899882317
+    },
+    "antisite": {
+     "only_first": 37,
+     "only_second": 11,
+     "p": 0.0002222449626216872
+    },
+    "all": {
+     "only_first": 116,
+     "only_second": 34,
+     "p": 1.1198515999607739e-11
+    }
+   },
+   "2": {
+    "vacancy": {
+     "only_first": 15,
+     "only_second": 6,
+     "p": 0.0783538818359375
+    },
+    "interstitial": {
+     "only_first": 41,
+     "only_second": 8,
+     "p": 1.9646537765538596e-06
+    },
+    "frenkel": {
+     "only_first": 31,
+     "only_second": 15,
+     "p": 0.02589608179323477
+    },
+    "antisite": {
+     "only_first": 26,
+     "only_second": 12,
+     "p": 0.03355243967962451
+    },
+    "all": {
+     "only_first": 113,
+     "only_second": 41,
+     "p": 5.607104085256979e-09
+    }
+   }
+  },
+  "cnn vs egnn_scratch": {
+   "0": {
+    "vacancy": {
+     "only_first": 18,
+     "only_second": 5,
+     "p": 0.010622024536132812
+    },
+    "interstitial": {
+     "only_first": 43,
+     "only_second": 2,
+     "p": 5.88897819397971e-11
+    },
+    "frenkel": {
+     "only_first": 23,
+     "only_second": 24,
+     "p": 1.0
+    },
+    "antisite": {
+     "only_first": 30,
+     "only_second": 11,
+     "p": 0.00432400493446039
+    },
+    "all": {
+     "only_first": 114,
+     "only_second": 42,
+     "p": 7.139319451743965e-09
+    }
+   },
+   "1": {
+    "vacancy": {
+     "only_first": 17,
+     "only_second": 4,
+     "p": 0.007197380065917969
+    },
+    "interstitial": {
+     "only_first": 48,
+     "only_second": 2,
+     "p": 2.2666313270747196e-12
+    },
+    "frenkel": {
+     "only_first": 22,
+     "only_second": 17,
+     "p": 0.5223973804968411
+    },
+    "antisite": {
+     "only_first": 35,
+     "only_second": 15,
+     "p": 0.006600447966810918
+    },
+    "all": {
+     "only_first": 122,
+     "only_second": 38,
+     "p": 1.795956230322765e-11
+    }
+   },
+   "2": {
+    "vacancy": {
+     "only_first": 22,
+     "only_second": 9,
+     "p": 0.029449373483657837
+    },
+    "interstitial": {
+     "only_first": 47,
+     "only_second": 5,
+     "p": 1.2848229147266466e-09
+    },
+    "frenkel": {
+     "only_first": 25,
+     "only_second": 14,
+     "p": 0.10812902140605732
+    },
+    "antisite": {
+     "only_first": 28,
+     "only_second": 14,
+     "p": 0.04355852192384191
+    },
+    "all": {
+     "only_first": 122,
+     "only_second": 42,
+     "p": 3.0524644530566556e-10
+    }
+   }
+  }
+ },
+ "agreement": {
+  "0": {
+   "finders": [
+    "attention",
+    "cnn",
+    "egnn_scratch"
+   ],
+   "by_all": 0.3667,
+   "by_none": 0.3787,
+   "by_at_least_one": 0.6213
+  },
+  "1": {
+   "finders": [
+    "attention",
+    "cnn",
+    "egnn_scratch"
+   ],
+   "by_all": 0.364,
+   "by_none": 0.376,
+   "by_at_least_one": 0.624
+  },
+  "2": {
+   "finders": [
+    "attention",
+    "cnn",
+    "egnn_scratch"
+   ],
+   "by_all": 0.3587,
+   "by_none": 0.36,
+   "by_at_least_one": 0.64
+  }
+ },
+ "together": {
+  "transformer, 3 seeds": {
+   "members": [
+    "attention_s0",
+    "attention_s1",
+    "attention_s2"
+   ],
+   "found": {
+    "vacancy": {
+     "rate": 0.68,
+     "lo": 0.61,
+     "hi": 0.75
+    },
+    "interstitial": {
+     "rate": 0.48,
+     "lo": 0.405,
+     "hi": 0.555
+    },
+    "frenkel": {
+     "rate": 0.4266666666666667,
+     "lo": 0.3591504153123872,
+     "hi": 0.4930555555555556
+    },
+    "antisite": {
+     "rate": 0.565,
+     "lo": 0.5,
+     "hi": 0.63
+    },
+    "all": {
+     "rate": 0.5453333333333333,
+     "lo": 0.5060724658213501,
+     "hi": 0.5825650746599935
+    }
+   },
+   "best_member": "attention_s1",
+   "against_best_member": {
+    "only_new": 16,
+    "only_base": 11,
+    "p": 0.44206833839416504
+   }
+  },
+  "CNN, 3 seeds": {
+   "members": [
+    "cnn_s0",
+    "cnn_s1",
+    "cnn_s2"
+   ],
+   "found": {
+    "vacancy": {
+     "rate": 0.705,
+     "lo": 0.63,
+     "hi": 0.775
+    },
+    "interstitial": {
+     "rate": 0.515,
+     "lo": 0.435,
+     "hi": 0.595
+    },
+    "frenkel": {
+     "rate": 0.38666666666666666,
+     "lo": 0.3154270478992369,
+     "hi": 0.45806451612903226
+    },
+    "antisite": {
+     "rate": 0.54,
+     "lo": 0.475,
+     "hi": 0.61
+    },
+    "all": {
+     "rate": 0.5466666666666666,
+     "lo": 0.5079575596816976,
+     "hi": 0.5851063829787234
+    }
+   },
+   "best_member": "cnn_s2",
+   "against_best_member": {
+    "only_new": 17,
+    "only_base": 15,
+    "p": 0.860050065908581
+   }
+  },
+  "EGNN control, 3 seeds": {
+   "members": [
+    "egnn_scratch_s0",
+    "egnn_scratch_s1",
+    "egnn_scratch_s2"
+   ],
+   "found": {
+    "vacancy": {
+     "rate": 0.65,
+     "lo": 0.58,
+     "hi": 0.72
+    },
+    "interstitial": {
+     "rate": 0.3,
+     "lo": 0.24,
+     "hi": 0.365
+    },
+    "frenkel": {
+     "rate": 0.32666666666666666,
+     "lo": 0.2532467532467532,
+     "hi": 0.4025974025974026
+    },
+    "antisite": {
+     "rate": 0.455,
+     "lo": 0.38,
+     "hi": 0.53
+    },
+    "all": {
+     "rate": 0.44,
+     "lo": 0.4010691659729375,
+     "hi": 0.4801087253207169
+    }
+   },
+   "best_member": "egnn_scratch_s0",
+   "against_best_member": {
+    "only_new": 15,
+    "only_base": 14,
+    "p": 1.0
+   }
+  },
+  "transformer + CNN, seed 0": {
+   "members": [
+    "attention_s0",
+    "cnn_s0"
+   ],
+   "found": {
+    "vacancy": {
+     "rate": 0.69,
+     "lo": 0.62,
+     "hi": 0.76
+    },
+    "interstitial": {
+     "rate": 0.515,
+     "lo": 0.435,
+     "hi": 0.595
+    },
+    "frenkel": {
+     "rate": 0.41333333333333333,
+     "lo": 0.3464052287581699,
+     "hi": 0.4774193548387097
+    },
+    "antisite": {
+     "rate": 0.555,
+     "lo": 0.485,
+     "hi": 0.625
+    },
+    "all": {
+     "rate": 0.552,
+     "lo": 0.5146276595744681,
+     "hi": 0.5896414342629482
+    }
+   },
+   "best_member": "attention_s0",
+   "against_best_member": {
+    "only_new": 23,
+    "only_base": 12,
+    "p": 0.08953107893466952
+   }
+  },
+  "transformer + CNN + EGNN control, seed 0": {
+   "members": [
+    "attention_s0",
+    "cnn_s0",
+    "egnn_scratch_s0"
+   ],
+   "found": {
+    "vacancy": {
+     "rate": 0.68,
+     "lo": 0.61,
+     "hi": 0.75
+    },
+    "interstitial": {
+     "rate": 0.5,
+     "lo": 0.42,
+     "hi": 0.575
+    },
+    "frenkel": {
+     "rate": 0.4066666666666667,
+     "lo": 0.33548387096774196,
+     "hi": 0.4805194805194805
+    },
+    "antisite": {
+     "rate": 0.545,
+     "lo": 0.475,
+     "hi": 0.615
+    },
+    "all": {
+     "rate": 0.5413333333333333,
+     "lo": 0.5019710906701709,
+     "hi": 0.5803826584654944
+    }
+   },
+   "best_member": "attention_s0",
+   "against_best_member": {
+    "only_new": 25,
+    "only_base": 22,
+    "p": 0.7708669945730263
+   }
+  },
+  "transformer + CNN, 3 seeds each": {
+   "members": [
+    "attention_s0",
+    "attention_s1",
+    "attention_s2",
+    "cnn_s0",
+    "cnn_s1",
+    "cnn_s2"
+   ],
+   "found": {
+    "vacancy": {
+     "rate": 0.7,
+     "lo": 0.63,
+     "hi": 0.77
+    },
+    "interstitial": {
+     "rate": 0.495,
+     "lo": 0.415,
+     "hi": 0.575
+    },
+    "frenkel": {
+     "rate": 0.41333333333333333,
+     "lo": 0.34459459459459457,
+     "hi": 0.4827586206896552
+    },
+    "antisite": {
+     "rate": 0.56,
+     "lo": 0.49,
+     "hi": 0.63
+    },
+    "all": {
+     "rate": 0.5506666666666666,
+     "lo": 0.511968085106383,
+     "hi": 0.589170116939881
+    }
+   },
+   "best_member": "cnn_s2",
+   "against_best_member": {
+    "only_new": 29,
+    "only_base": 24,
+    "p": 0.5831321542611763
+   }
+  },
+  "transformer + CNN (seed 0) + the finder of the report": {
+   "members": [
+    "attention_s0",
+    "cnn_s0",
+    "egnn_pretrained_60k_s0"
+   ],
+   "found": {
+    "vacancy": {
+     "rate": 0.7,
+     "lo": 0.63,
+     "hi": 0.77
+    },
+    "interstitial": {
+     "rate": 0.51,
+     "lo": 0.43,
+     "hi": 0.585
+    },
+    "frenkel": {
+     "rate": 0.41333333333333333,
+     "lo": 0.34459459459459457,
+     "hi": 0.48299890425969033
+    },
+    "antisite": {
+     "rate": 0.55,
+     "lo": 0.48,
+     "hi": 0.62
+    },
+    "all": {
+     "rate": 0.552,
+     "lo": 0.5126498002663116,
+     "hi": 0.5895055042280407
+    }
+   },
+   "best_member": "egnn_pretrained_60k_s0",
+   "against_best_member": {
+    "only_new": 34,
+    "only_base": 25,
+    "p": 0.2975952082844287
+   }
+  }
+ }
+}
