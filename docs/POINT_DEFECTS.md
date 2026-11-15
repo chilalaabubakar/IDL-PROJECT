@@ -297,6 +297,30 @@ stays the same when the glass is turned, shifted or renumbered, and the training
 from the per-update log (gradient norm before clipping, clipped share, spikes). Both notebooks
 were run end to end on CPU in their quick-test mode (`QUICK_TEST = True`).
 
+**Results so far** (`results/kaggle_arch_20261115-0247Z/`; the CNN notebook has not been run
+yet). From random weights, 20,000 updates, three seeds each, on the 750 real test defects:
+
+| Finder | Vacancy | Interstitial | Frenkel pair | Antisite | All | Gradient spikes per run |
+|---|---|---|---|---|---|---|
+| Transformer | 67.2% | 48.3% | 42.0% | 54.2% | **53.6%** (53.3-53.9) | 0, 0, 0 |
+| EGNN (control) | 63.2% | 29.7% | 35.1% | 44.0% | 43.5% (42.9-43.9) | 71, 131, 96 |
+| EGNN from the denoiser (the report's finder at 20,000 updates, one seed) | 67.0% | 47.5% | 36.7% | 46.5% | 50.3% | |
+
+The transformer finds 10 points more than the EGNN trained the same way, in every seed
+(McNemar p < 1e-8 each), and more than the report's finder at the same number of updates; it
+nearly matches the report's finder after 60,000 updates (54.0%). It also trains faster (0.58 h
+against 0.77 h per run on a T4) and without a single gradient spike; the EGNN develops
+frequent spikes after 6,000-8,000 updates, which clipping contains. Caveats: the transformer
+has a learning-rate warmup and 10% more parameters than the control. Both keep every
+symmetry check at 100%.
+
+**Seed study** (`results/point_defects_seeds_20261114/README.md`): the six 2,000-update
+ablation runs with three seeds each. The current finder finds 43.8 ± 0.8% (seeds agree within
+1.5 points); the ablation table holds, except that training without the faulty Frenkel pairs
+makes no difference at all (the single-seed loss of 2.6 points was seed noise). No run
+diverged; runs from the denoiser have gradient spikes that clipping contains, runs from random
+weights have none in their first 2,000 updates.
+
 ## Next: amorphous silica
 
 The same study in amorphous SiO₂, with oxygen vacancies, oxygen interstitials, oxygen Frenkel

@@ -213,7 +213,10 @@ def figure(out: Path, steps: dict[tuple[str, int], Path], found: dict) -> None:
     }
     fig, axes = plt.subplots(1, 3, figsize=(7.2, 2.3), gridspec_kw=dict(width_ratios=[1, 1, 1.15]))
     fig.subplots_adjust(left=0.07, right=0.995, bottom=0.2, top=0.86, wspace=0.32)
-    for (name, seed), path in sorted(steps.items()):
+    order = list(colour)  # draw and list the variants in this order
+    for (name, seed), path in sorted(
+        steps.items(), key=lambda kv: (order.index(kv[0][0]) if kv[0][0] in colour else 9, kv[0][1])
+    ):
         if name not in colour:
             continue
         s = read_steps(path)
@@ -225,12 +228,15 @@ def figure(out: Path, steps: dict[tuple[str, int], Path], found: dict) -> None:
             x, np.median(s["grad"][:k].reshape(-1, w), 1), color=colour[name], lw=0.9, label=label
         )
         axes[0].plot(x, s["grad"][:k].reshape(-1, w).max(1), color=colour[name], lw=0.5, alpha=0.35)
-        axes[1].plot(x, np.median(s["loss"][:k].reshape(-1, w), 1), color=colour[name], lw=0.9)
+        if name != "no_weights":  # its loss has no class weights: not on the same scale
+            axes[1].plot(x, np.median(s["loss"][:k].reshape(-1, w), 1), color=colour[name], lw=0.9)
     axes[0].axhline(CLIP, color="#767676", lw=0.8, ls="--")
-    axes[0].text(1990, CLIP * 1.08, "clip", ha="right", va="bottom", fontsize=6, color="#767676")
+    axes[0].text(20, CLIP * 0.8, "clip", ha="left", va="top", fontsize=6, color="#767676")
     axes[0].set_yscale("log")
-    axes[0].set_title("Gradient norm before clipping", fontsize=7.5, loc="left")
-    axes[1].set_title("Training loss", fontsize=7.5, loc="left")
+    axes[0].set_title("Gradient norm before clipping", fontsize=7.5, loc="left", pad=11)
+    axes[0].text(0.0, 1.015, "median of 50 updates; faint: their largest", transform=axes[0].transAxes,
+                 fontsize=5.5, color="#5A5A5A", va="bottom")  # fmt: skip
+    axes[1].set_title("Training loss (class-weighted)", fontsize=7.5, loc="left", pad=11)
     for ax in axes[:2]:
         ax.set_xlabel("update", fontsize=6.5)
         ax.grid(axis="y", color="#E1E0D9", lw=0.5)
@@ -253,7 +259,7 @@ def figure(out: Path, steps: dict[tuple[str, int], Path], found: dict) -> None:
         range(len(names)), [n.replace("_", " ") for n in names], rotation=35, ha="right", fontsize=6
     )
     ax.set_ylabel("% of test defects found", fontsize=6.5)
-    ax.set_title("Found, per seed (line: mean)", fontsize=7.5, loc="left")
+    ax.set_title("Found, per seed (line: mean)", fontsize=7.5, loc="left", pad=11)
     ax.grid(axis="y", color="#E1E0D9", lw=0.5)
     ax.set_axisbelow(True)
     for a, letter in zip(axes, "abc"):
