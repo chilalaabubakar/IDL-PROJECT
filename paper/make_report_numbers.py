@@ -16,10 +16,15 @@ and writes
     paper/pd_table_found.tex        Table "found"
     paper/pd_table_restored.tex     Table "restored"
     paper/data/pd_report_results.json   the same rates with intervals and tests, for the figure
-and, from results/point_defects_ablations_20261112/ablations.json
-(scripts/pilots/finder_ablations.py) when it is there,
+and, from the finder experiments when their files are there,
+    results/point_defects_ablations_20261112/ablations.json   (scripts/pilots/finder_ablations.py)
+    results/point_defects_seeds_20261114/seeds.json           (scripts/pilots/finder_seeds.py)
+    results/point_defects_architectures_20261115/architectures.json
+                                                      (scripts/pilots/finder_architectures.py)
     paper/pd_table_experiments.tex  Table "experiments": the comparisons made on the way
-    paper/pd_table_ablations.tex    Table "ablations", once all six ablation runs are finished
+    paper/pd_table_ablations.tex    Table "ablations": six settings, three seeds each
+    paper/pd_table_stability.tex    Table "stability": gradients and spikes during training
+    paper/pd_table_finders.tex      Table "finders": transformer and CNN against the EGNN
 
 Intervals are 95% and resample whole test glasses (10,000 bootstrap samples), because the two
 defects made in one glass are not independent. Where a rate is 0 or 100%, resampling gives no
@@ -38,6 +43,8 @@ from scipy.stats import binomtest
 ROOT = Path(__file__).resolve().parents[1]
 RES = ROOT / "results/point_defects_recheck_20261111"
 ABL = ROOT / "results/point_defects_ablations_20261112/ablations.json"
+SEEDS = ROOT / "results/point_defects_seeds_20261114/seeds.json"
+ARCH = ROOT / "results/point_defects_architectures_20261115/architectures.json"
 ABLATION_ROWS = (  # run, what changed, compared with
     ("reference", "Reference: starts from the denoiser, 4 layers, class weights", None),
     ("scratch", "Random starting weights", "reference"),
@@ -124,6 +131,17 @@ def p_text(p: float) -> str:
     return "$p<0.001$" if p < 0.001 else f"$p={p:.3f}$" if p < 0.1 else f"$p={p:.2f}$"
 
 
+def one(x: float) -> str:
+    """0.6297 -> '63.0': a mean over seeds, always with one decimal."""
+    return f"{100 * x:.1f}"
+
+
+def span(values, digits: int = 0, scale: float = 1.0) -> str:
+    """Lowest and highest of the values, '38--86'; one number when they are equal."""
+    lo, hi = f"{scale * min(values):.{digits}f}", f"{scale * max(values):.{digits}f}"
+    return lo if lo == hi else f"{lo}--{hi}"
+
+
 def experiments(K: dict) -> dict[str, str]:
     """Tables "experiments" and "ablations" and their numbers, from the finder experiments."""
     num: dict[str, str] = {}
@@ -194,35 +212,46 @@ def experiments(K: dict) -> dict[str, str]:
         + "\n\\bottomrule\n\\end{tabularx}\n\\end{table}\n"
     )
 
-    # ---- the ablation runs: only when all are there
+    # ---- the ablation runs, three seeds each: only when all are there
     table = ROOT / "paper/pd_table_ablations.tex"
     runs = abl["ablations"] if abl else {}
-    if not all(name in runs for name, _, _ in ABLATION_ROWS):
+    seeds = json.loads(SEEDS.read_text()) if SEEDS.exists() else {"variants": {}}
+    if not all(
+        name in runs and len(seeds["variants"].get(name, {}).get("seeds", [])) >= 3
+        for name, _, _ in ABLATION_ROWS
+    ):
         table.unlink(missing_ok=True)
         return num
     order = (*KINDS, "all")
+
+    def each(name: str) -> dict[int, float]:  # found, all defects, per seed
+        return {
+            s: seeds["runs"][f"{name} seed {s}"]["found"]["all"]["rate"]
+            for s in seeds["variants"][name]["seeds"]
+        }
+
     rows = []
     for name, what, base in ABLATION_ROWS:
-        f = runs[name]["found"]
+        f = seeds["variants"][name]["found"]
         key = name.replace("_", "-")  # no underscore in the name of a number in the text
-        cells = [pct(f[k]["rate"]) for k in order]
-        lo, hi = 100 * f["all"]["lo"], 100 * f["all"]["hi"]
-        cells[-1] += f" {{\\scriptsize[{lo:.0f}, {hi:.0f}]}}"
+        cells = [one(f[k]["mean"]) for k in order]
+        cells[-1] += f" $\\pm$ {100 * f['all']['sd']:.1f}"
         if base:
-            p = abl["ablation_tests"][f"{name} against {base}"]["all"]["p"]
-            num[f"abl-p-{key}"] = p_text(p)
-            cells.append(
-                p_text(p).replace("$p=", "").replace("$p<", "$<").removesuffix("$")
-                if p >= 0.001
-                else "$<0.001$"
-            )
+            a, b = each(name), each(base)
+            diff = [a[s] - b[s] for s in a]
+            mean = 100 * float(np.mean(diff))
+            lower = sum(d < 0 for d in diff)
+            num[f"abl-diff-{key}"] = f"{abs(mean):.1f}"
+            num[f"abl-lower-{key}"] = str(lower)
+            shown = "0.0" if abs(mean) < 0.05 else f"{mean:+.1f}".replace("-", "$-$")
+            cells.append(f"{shown} ({lower} of {len(diff)})")
         else:
             cells.append("--")
         for k in order:
-            num[f"abl-{key}-{k}"] = pct(f[k]["rate"])
-        # the same run scored with the moving average of its weights
-        num[f"abl-avg-{key}"] = pct(abl["moving_average"][name]["all"]["rate"])
-        # validation glasses: atoms of a defect role that are given that role
+            num[f"abl-{key}-{k}"] = one(f[k]["mean"])
+        num[f"abl-{key}-sd"] = f"{100 * f['all']['sd']:.1f}"
+        num[f"abl-{key}-low"], num[f"abl-{key}-high"] = one(f["all"]["low"]), one(f["all"]["high"])
+        # validation glasses, first run: atoms of a defect role that are given that role
         val = runs[name]["validation"]
         num[f"abl-label-{key}-vacancy"] = f"{100 * val['vacancy_recall_near_vacancy']:.0f}"
         num[f"abl-label-{key}-interstitial"] = (
@@ -233,21 +262,216 @@ def experiments(K: dict) -> dict[str, str]:
         if name in ("reference", "layers1"):
             rows.append("\\addlinespace")
     num["abl-updates"] = f"{runs['reference']['updates']:,}"
+    num["abl-seeds"] = "three"
+    agree = seeds["reference_agreement"]
+    num["seed-agree"] = f"{100 * (agree['found_by_all'] + agree['found_by_none']):.0f}"
+    num["seed-by-all"], num["seed-by-none"] = (
+        one(agree["found_by_all"]),
+        one(agree["found_by_none"]),
+    )
+    num["seed-ensemble"] = one(agree["ensemble"]["all"]["rate"])
+    ref = sorted(each("reference").values())
+    num["seed-ref-runs"] = ", ".join(one(r) for r in ref[:-1]) + f" and {one(ref[-1])}"
+    swing = seeds["variants"]["real_only"]["difference_from_reference_same_seed"]
+    num["abl-real-only-behind"], num["abl-real-only-ahead"] = (
+        f"{abs(100 * swing['low']):.1f}",
+        f"{100 * swing['high']:.1f}",
+    )
     table.write_text(
         "% written by make_report_numbers.py\n"
         "\\begin{table}[t]\n\\centering\n"
         f"\\caption{{Ablations of the finder: defects found (\\%) on the real test defects after "
-        f"{num['abl-updates']} updates, one setting changed per run. Size in millions of "
-        "parameters. Brackets: the range that holds the true rate with 95\\% confidence. $p$: the "
-        "probability that the difference from the run it is compared with is chance; that run "
-        "is the reference, or, for the two runs with fewer layers, the run with random "
-        "starting weights and 4 layers.}\n"
-        "\\label{tab:ablations}\n\\footnotesize\\setlength{\\tabcolsep}{3.5pt}\n"
+        f"{num['abl-updates']} updates, one setting changed per row. Every row is the mean of "
+        "three training runs that differ only in the random seed; for all defects the spread "
+        "between the three runs (standard deviation) follows the $\\pm$. Size in millions of "
+        "parameters. Difference: in all defects found, from the row it is compared with, run "
+        "by run with the same seed; in brackets, in how many of the three runs the row was "
+        "lower. The row compared with is the reference, or, for the two rows with fewer "
+        "layers, the row with random starting weights and 4 layers.}\n"
+        "\\label{tab:ablations}\n\\footnotesize\\setlength{\\tabcolsep}{3.2pt}\n"
         "\\begin{tabularx}{\\linewidth}{@{}>{\\raggedright\\arraybackslash}Xcccccll@{}}\n"
         "\\toprule\n"
-        "Run & Size & Vacancy & Interst. & Antisite & Frenkel & All & $p$ \\\\\n\\midrule\n"
-        + "\n".join(rows)
-        + "\n\\bottomrule\n\\end{tabularx}\n\\end{table}\n"
+        "Setting & Size & Vacancy & Interst. & Antisite & Frenkel & All & Difference \\\\\n"
+        "\\midrule\n" + "\n".join(rows) + "\n\\bottomrule\n\\end{tabularx}\n\\end{table}\n"
+    )
+    num.update(stability(seeds))
+    num.update(finders())
+    return num
+
+
+def stability(seeds: dict) -> dict[str, str]:
+    """Table "stability" and its numbers: gradients and spikes in the logged training runs."""
+    num: dict[str, str] = {}
+    arch = json.loads(ARCH.read_text())["models"] if ARCH.exists() else {}
+    short = seeds["stability"]  # "<variant> seed <s>": the 2,000-update runs
+    groups = [  # key, what, start, the runs
+        ("ref", "EGNN", "denoiser", [v for k, v in short.items() if k.startswith("reference ")]),
+        ("now", "EGNN, no class weights", "denoiser",
+         [v for k, v in short.items() if k.startswith("no_weights ")]),
+        ("scr", "EGNN", "random", [v for k, v in short.items() if k.startswith("scratch ")]),
+    ]  # fmt: skip
+    long = (("egnn", "EGNN", "egnn_scratch"), ("tr", "Transformer", "attention"), ("cnn", "CNN", "cnn"))  # fmt: skip
+    for key, what, model in long:
+        if model in arch:
+            groups.append((key, what, "random", list(arch[model]["stability"].values())))
+    rows, total = [], 0
+    for key, what, start, runs in groups:
+        if not runs:
+            continue
+        total += len(runs)
+        g = dict(
+            updates=f"{runs[0]['updates']:,}",
+            runs=str(len(runs)),
+            median=span([r["grad_norm"]["median"] for r in runs], 1),
+            largest=span([r["grad_norm"]["largest"] for r in runs], 0 if key in ("ref", "egnn") else 1),
+            clipped=span([r["clipped"] for r in runs], 0, 100),
+            gspikes=span([len(r["grad_spikes"]) for r in runs]),
+            lspikes=span([len(r["loss_spikes"]) for r in runs]),
+        )  # fmt: skip
+        if key == "now":  # gradients ten times smaller: two digits
+            g["median"] = span([r["grad_norm"]["median"] for r in runs], 2)
+        for k, v in g.items():
+            num[f"stab-{key}-{k}"] = v
+        first = [min(s["step"] for s in r["grad_spikes"]) for r in runs if r["grad_spikes"]]
+        if first:  # the update of the first gradient spike, earliest and latest run
+            num[f"stab-{key}-first"] = f"{min(first):,} and {max(first):,}"
+        rows.append(
+            f"{what} & {start} & {g['updates']} & {g['runs']} & {g['median']} & {g['largest']} & "
+            f"{g['clipped']}\\% & {g['gspikes']} & {g['lspikes']} \\\\"
+        )
+        if key == "scr":
+            rows.append("\\addlinespace")
+    every = list(short.values()) + [
+        r for m in arch.values() for r in m.get("stability", {}).values()
+    ]
+    num["stab-runs"] = str(len(every))
+    weighted = [r for key, _, _, runs in groups if key in ("ref", "scr", "egnn") for r in runs]
+    num["stab-egnn-cut"] = span([r["clipped"] for r in weighted], 0, 100)  # EGNN, class weights
+    num["stab-max-ratio"] = f"{max(s['ratio'] for r in every for s in r['grad_spikes']):.0f}"
+    num["stab-not-finite"] = str(sum(r["not_finite"] for r in every))
+    table = ROOT / "paper/pd_table_stability.tex"
+    if len(groups) < 6:
+        table.unlink(missing_ok=True)
+        return num
+    table.write_text(
+        "% written by make_report_numbers.py\n"
+        "\\begin{table}[t]\n\\centering\n"
+        "\\caption{Training stability. Gradient: the size (norm) of the gradient of the loss "
+        "in one update, before it is cut to 1; the median and the largest value of a run. "
+        "Cut: the share of updates whose gradient was larger than 1 and was scaled down. "
+        "Gradient spike: a gradient more than 5 times the median of the 100 updates before "
+        "it. Loss spike: a loss more than 3 times the median of the last 50 updates on the "
+        "same kind of batch. Where the runs differ, the lowest and the highest are given.}\n"
+        "\\label{tab:stability}\n\\footnotesize\\setlength{\\tabcolsep}{4pt}\n"
+        "\\begin{tabularx}{\\linewidth}{@{}>{\\raggedright\\arraybackslash}Xlrcccccc@{}}\n"
+        "\\toprule\n"
+        " & & & & \\multicolumn{2}{c}{Gradient} & & \\multicolumn{2}{c}{Spikes} \\\\\n"
+        "\\cmidrule(lr){5-6}\\cmidrule(l){8-9}\n"
+        "Finder & Start & Updates & Runs & median & largest & Cut & gradient & loss \\\\\n"
+        "\\midrule\n" + "\n".join(rows) + "\n\\bottomrule\n\\end{tabularx}\n\\end{table}\n"
+    )
+    return num
+
+
+FINDER_ROWS = (  # model in architectures.json, key in the text, finder, start, updates
+    ("attention", "tr", "Transformer", "random", "20,000"),
+    ("cnn", "cnn", "CNN", "random", "20,000"),
+    ("egnn_scratch", "egnn", "EGNN", "random", "20,000"),
+    ("egnn_pretrained", "pre", "EGNN", "denoiser", "20,000"),
+    ("egnn_pretrained_60k", "main", "EGNN, the finder of the main results", "denoiser", "60,000"),
+)
+
+
+def finders() -> dict[str, str]:
+    """Table "finders" and its numbers: the transformer and the CNN against the EGNN."""
+    num: dict[str, str] = {}
+    table = ROOT / "paper/pd_table_finders.tex"
+    arch = json.loads(ARCH.read_text()) if ARCH.exists() else {"models": {}}
+    models = arch["models"]
+    if not all(m in models for m, *_ in FINDER_ROWS):
+        table.unlink(missing_ok=True)
+        return num
+    order = (*KINDS, "all")
+    rows = []
+    for model, key, what, start, updates in FINDER_ROWS:
+        e = models[model]
+        f, n = e["found"], len(e["seeds"])
+        cells = [one(f[k]["mean"]) for k in order]
+        if n > 1:
+            cells[-1] += f" $\\pm$ {100 * f['all']['sd']:.1f}"
+        for k in order:
+            num[f"fin-{key}-{k}"] = one(f[k]["mean"])
+        if n > 1:
+            num[f"fin-{key}-low"], num[f"fin-{key}-high"] = (
+                one(f["all"]["low"]),
+                one(f["all"]["high"]),
+            )
+            num[f"fin-{key}-hours"] = f"{np.mean(e['hours_per_run']):.1f}"
+        num[f"fin-{key}-size"] = f"{e['parameters'] / 1e6:.2f}"
+        num[f"fin-{key}-shift"] = f"{100 * e['symmetry']['random shift']:.0f}"
+        num[f"fin-{key}-noshift"] = f"{100 * (1 - e['symmetry']['random shift']):.0f}"
+        rows.append(
+            f"{what} & {start} & {updates} & {n} & {e['parameters'] / 1e6:.2f} & "
+            + " & ".join(cells)
+            + " \\\\"
+        )
+        if key == "cnn":
+            rows.append("\\addlinespace")
+    # against the EGNN trained the same way, per seed: the least clear of the three seeds
+    for key, model in (("tr", "attention"), ("cnn", "cnn"), ("pre", "egnn_pretrained")):
+        tests = models[model]["against_egnn_control"].values()
+        num[f"fin-p-{key}"] = p_text(max(t["p"] for t in tests))
+        num[f"fin-only-{key}"] = span([t["only_new"] for t in tests])
+        num[f"fin-lost-{key}"] = span([t["only_base"] for t in tests])
+    pair = arch["between"]["attention vs cnn"]  # transformer against CNN, per seed
+    ps = [t["all"]["p"] for t in pair.values()]
+    num["fin-p-tr-cnn"] = f"$p={min(ps):.2f}$--${max(ps):.2f}$" if min(ps) >= 0.095 else p_text(min(ps))  # fmt: skip
+    for k in KINDS:
+        num[f"fin-p-tr-cnn-{k}"] = f"{min(t[k]['p'] for t in pair.values()):.2f}"
+    agree = arch["agreement"]
+    num["fin-by-all"] = span([a["by_all"] for a in agree.values()], 0, 100)
+    num["fin-by-none"] = span([a["by_none"] for a in agree.values()], 0, 100)
+    num["fin-by-one"] = span([a["by_at_least_one"] for a in agree.values()], 0, 100)
+    together = arch["together"]
+    names = {
+        "pair": "transformer + CNN, seed 0",
+        "six": "transformer + CNN, 3 seeds each",
+        "three": "transformer + CNN + EGNN control, seed 0",
+        "report": "transformer + CNN (seed 0) + the finder of the report",
+        "tr3": "transformer, 3 seeds",
+        "cnn3": "CNN, 3 seeds",
+        "egnn3": "EGNN control, 3 seeds",
+    }
+    for key, name in names.items():
+        e = together[name]
+        for k in order:
+            num[f"fin-{key}-{k}"] = one(e["found"][k]["rate"])
+        num[f"fin-{key}-lo"] = f"{100 * e['found']['all']['lo']:.0f}"
+        num[f"fin-{key}-hi"] = f"{100 * e['found']['all']['hi']:.0f}"
+        num[f"fin-{key}-p"] = p_text(e["against_best_member"]["p"])
+    e = together[names["six"]]
+    cells = [one(e["found"][k]["rate"]) for k in order]
+    rows += [
+        "\\addlinespace",
+        "Transformer and CNN together (all six runs) & random & 20,000 & 6 & -- & "
+        + " & ".join(cells)
+        + " \\\\",
+    ]
+    table.write_text(
+        "% written by make_report_numbers.py\n"
+        "\\begin{table}[t]\n\\centering\n"
+        "\\caption{Three kinds of network as finder: defects found (\\%) on the real test "
+        "defects. The first three rows were trained in exactly the same way, from random "
+        "starting weights; each is the mean of three runs that differ in the random seed, "
+        "with the spread between the runs after the $\\pm$. The two rows below them are the "
+        "EGNN that starts from the denoiser (one run each). Last row: the six transformer "
+        "and CNN runs used together, by averaging their probabilities. Size in millions of "
+        "parameters.}\n"
+        "\\label{tab:finders}\n\\footnotesize\\setlength{\\tabcolsep}{3.2pt}\n"
+        "\\begin{tabularx}{\\linewidth}{@{}>{\\raggedright\\arraybackslash}Xlrccccccl@{}}\n"
+        "\\toprule\n"
+        "Finder & Start & Updates & Runs & Size & Vacancy & Interst. & Antisite & Frenkel & All "
+        "\\\\\n\\midrule\n" + "\n".join(rows) + "\n\\bottomrule\n\\end{tabularx}\n\\end{table}\n"
     )
     return num
 

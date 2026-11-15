@@ -1,0 +1,21 @@
+% written by make_report_numbers.py
+\begin{table}[t]
+\centering
+\caption{Three kinds of network as finder: defects found (\%) on the real test defects. The first three rows were trained in exactly the same way, from random starting weights; each is the mean of three runs that differ in the random seed, with the spread between the runs after the $\pm$. The two rows below them are the EGNN that starts from the denoiser (one run each). Last row: the six transformer and CNN runs used together, by averaging their probabilities. Size in millions of parameters.}
+\label{tab:finders}
+\footnotesize\setlength{\tabcolsep}{3.2pt}
+\begin{tabularx}{\linewidth}{@{}>{\raggedright\arraybackslash}Xlrccccccl@{}}
+\toprule
+Finder & Start & Updates & Runs & Size & Vacancy & Interst. & Antisite & Frenkel & All \\
+\midrule
+Transformer & random & 20,000 & 3 & 0.58 & 67.2 & 48.3 & 54.2 & 42.0 & 53.6 $\pm$ 0.3 \\
+CNN & random & 20,000 & 3 & 0.50 & 69.7 & 51.2 & 52.8 & 38.4 & 54.0 $\pm$ 0.5 \\
+\addlinespace
+EGNN & random & 20,000 & 3 & 0.52 & 63.2 & 29.7 & 44.0 & 35.1 & 43.5 $\pm$ 0.5 \\
+EGNN & denoiser & 20,000 & 1 & 0.52 & 67.0 & 47.5 & 46.5 & 36.7 & 50.3 \\
+EGNN, the finder of the main results & denoiser & 60,000 & 1 & 0.52 & 69.5 & 50.0 & 49.0 & 45.3 & 54.0 \\
+\addlinespace
+Transformer and CNN together (all six runs) & random & 20,000 & 6 & -- & 70.0 & 49.5 & 56.0 & 41.3 & 55.1 \\
+\bottomrule
+\end{tabularx}
+\end{table}

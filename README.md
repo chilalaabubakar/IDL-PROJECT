@@ -25,7 +25,7 @@ then to label the atoms that belong to a defect (the finder).
 
 ## Documents
 
-- [Report](paper/point_defects_report.pdf) (17 pages): the complete study.
+- [Report](paper/point_defects_report.pdf) (22 pages): the complete study.
 - [Summary in plain language](docs/Point_Defects_Study_Summary.docx) (Word): the materials
   science, the deep learning and what the study shows, for readers new to either field.
 - [Method and results in detail](docs/POINT_DEFECTS.md).
@@ -49,10 +49,17 @@ without learning is the best of cell size, number of unlike neighbours and atom 
 
 - Once the defect is found, ordinary energy minimisation does the repair; a network trained
   to undo the defect directly is not needed.
-- Starting the finder from the denoiser nearly doubles what it finds after the same short
-  training (44.7% against 23.7%).
+- Starting the finder from the denoiser doubles what it finds after the same short
+  training (43.8% against 21.9%, mean of three seeds).
+- Training is stable: the EGNN shows gradient spikes, but with gradient clipping no run
+  failed and three seeds find the same share of the defects to within one point.
+- A transformer and a CNN, trained like the EGNN from random weights, find 53.6% and 54.0% of
+  all defects against 43.5% for the EGNN, without gradient spikes. They match the finder of
+  the table above (54.0%), which starts from the denoiser and has three times the training.
 - Numbers and tests: [`results/point_defects_recheck_20261111/`](results/point_defects_recheck_20261111/README.md);
-  experiments and ablations: [`results/point_defects_ablations_20261112/`](results/point_defects_ablations_20261112/README.md).
+  experiments and ablations: [`results/point_defects_ablations_20261112/`](results/point_defects_ablations_20261112/README.md);
+  seeds and stability: [`results/point_defects_seeds_20261114/`](results/point_defects_seeds_20261114/README.md);
+  transformer and CNN: [`results/point_defects_architectures_20261115/`](results/point_defects_architectures_20261115/README.md).
 
 ## Setup
 
@@ -73,6 +80,8 @@ python scripts/train_point_defects.py --config configs/train/heal_point_defects_
 # 3. test evaluation, experiments on the finder, and the report
 bash scripts/pilots/recheck_real_defects.sh
 bash scripts/pilots/finder_ablations.sh && python scripts/pilots/finder_ablations.py
+bash scripts/pilots/finder_seeds.sh && python scripts/pilots/finder_seeds.py
+python scripts/pilots/finder_architectures.py evaluate --out results/point_defects_architectures_20261115
 python paper/make_report_numbers.py && python paper/make_report_figures.py
 cd paper && latexmk -pdf -outdir=build point_defects_report.tex
 ```

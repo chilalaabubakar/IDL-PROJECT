@@ -280,7 +280,7 @@ finder (per-atom logits of the five roles) are trained and tested exactly like i
 | CNN | `src/glassdiff/models/cnn.py` (0.50 M) | the glass drawn as a 2-channel image (one per species, a Gaussian blob per atom, 128 x 128 pixels); a U-Net with circular padding; features read at each atom | the 8 turns and reflections of the square box: exact at test time (averaged); shifts: by whole coarse pixels (1.8σ) exact, otherwise learned from random shifts in training |
 | EGNN, the control | `src/glassdiff/models/egnn_pbc.py` (0.52 M) | messages between atoms within 2.5σ, reach 10σ after four layers | exact |
 
-**A fair comparison.** Starting from the denoiser nearly doubles what the EGNN finds (ablation
+**A fair comparison.** Starting from the denoiser doubles what the EGNN finds (ablation
 table), so all three start from random weights here and the EGNN trained the same way is the
 control (`configs/train/detect_egnn_scratch.yaml`, `detect_attention.yaml`,
 `detect_cnn.yaml`). Same data, loss, class weights, optimiser, batch size, 20,000 updates, three
@@ -297,22 +297,34 @@ stays the same when the glass is turned, shifted or renumbered, and the training
 from the per-update log (gradient norm before clipping, clipped share, spikes). Both notebooks
 were run end to end on CPU in their quick-test mode (`QUICK_TEST = True`).
 
-**Results so far** (`results/kaggle_arch_20261115-0247Z/`; the CNN notebook has not been run
-yet). From random weights, 20,000 updates, three seeds each, on the 750 real test defects:
+**Results** (`results/point_defects_architectures_20261115/README.md`; the runs are in
+`results/kaggle_arch_20261115-*/`). From random weights, 20,000 updates, three seeds each, on
+the 750 real test defects:
 
-| Finder | Vacancy | Interstitial | Frenkel pair | Antisite | All | Gradient spikes per run |
-|---|---|---|---|---|---|---|
-| Transformer | 67.2% | 48.3% | 42.0% | 54.2% | **53.6%** (53.3-53.9) | 0, 0, 0 |
-| EGNN (control) | 63.2% | 29.7% | 35.1% | 44.0% | 43.5% (42.9-43.9) | 71, 131, 96 |
-| EGNN from the denoiser (the report's finder at 20,000 updates, one seed) | 67.0% | 47.5% | 36.7% | 46.5% | 50.3% | |
+| Finder | Vacancy | Interstitial | Frenkel pair | Antisite | All (mean ± spread of seeds) | Gradient spikes per run | Same flagged atom after a random shift |
+|---|---|---|---|---|---|---|---|
+| Transformer | 67.2% | 48.3% | 42.0% | 54.2% | **53.6 ± 0.3%** | 0, 0, 0 | 100% |
+| CNN | 69.7% | 51.2% | 38.4% | 52.8% | **54.0 ± 0.5%** | 0, 0, 0 | 88% |
+| EGNN (control) | 63.2% | 29.7% | 35.1% | 44.0% | 43.5 ± 0.5% | 71, 131, 96 | 100% |
+| EGNN from the denoiser (the report's finder at 20,000 updates, one seed) | 67.0% | 47.5% | 36.7% | 46.5% | 50.3% | | 100% |
+| EGNN from the denoiser, 60,000 updates (the report's finder, one seed) | 69.5% | 50.0% | 45.3% | 49.0% | 54.0% | | 100% |
 
-The transformer finds 10 points more than the EGNN trained the same way, in every seed
-(McNemar p < 1e-8 each), and more than the report's finder at the same number of updates; it
-nearly matches the report's finder after 60,000 updates (54.0%). It also trains faster (0.58 h
-against 0.77 h per run on a T4) and without a single gradient spike; the EGNN develops
-frequent spikes after 6,000-8,000 updates, which clipping contains. Caveats: the transformer
-has a learning-rate warmup and 10% more parameters than the control. Both keep every
-symmetry check at 100%.
+- The transformer and the CNN each find 10 points more than the EGNN trained the same way, in
+  every seed (McNemar p < 1e-8 each), mostly interstitials and antisites. They do not differ
+  from each other (p = 0.49-0.91) and match the report's finder, which starts from the denoiser
+  and has three times the training.
+- They train without a single gradient spike (largest gradient 4.9-8.1). The EGNN develops
+  frequent spikes after 8,000-10,000 updates (largest 55-82), which clipping contains.
+- The three finders mostly find the same defects: 36-37% are found by all three, 36-38% by
+  none. Using the transformer and the CNN together (averaged probabilities, six runs) finds
+  55.1% [51, 59], not significantly more than one alone.
+- The CNN is not exactly shift-invariant: after a random shift it flags a different atom in
+  12% of the glasses. The transformer and the EGNN keep every symmetry check at 100%.
+- Cost per run on a T4: 0.58 h (transformer), 0.62 h (CNN), 0.77 h (EGNN). The transformer's
+  cost grows with the square of the number of atoms.
+- Caveats: one training length; finding only (the repair was not rerun with the new finders);
+  the transformer has a learning-rate warmup and 10% more parameters than the control (the CNN
+  has neither).
 
 **Seed study** (`results/point_defects_seeds_20261114/README.md`): the six 2,000-update
 ablation runs with three seeds each. The current finder finds 43.8 ± 0.8% (seeds agree within
@@ -320,6 +332,9 @@ ablation runs with three seeds each. The current finder finds 43.8 ± 0.8% (seed
 makes no difference at all (the single-seed loss of 2.6 points was seed noise). No run
 diverged; runs from the denoiser have gradient spikes that clipping contains, runs from random
 weights have none in their first 2,000 updates.
+
+The report (`paper/point_defects_report.pdf`) gives all of this in Sections 5.4 to 5.6: the
+ablation table as the mean of three seeds, the stability of training, and the three finders.
 
 ## Next: amorphous silica
 
