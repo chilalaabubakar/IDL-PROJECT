@@ -1,0 +1,42 @@
+name: attention_s2
+task: detect
+seed: 2
+data: data/ka2d_256_point_defects
+model:
+  name: atom_transformer
+  hidden: 128
+  n_layers: 4
+  n_heads: 8
+  ffn: 256
+  n_classes: 5
+init_from: null
+kind_probs:
+  vacancy: 0.25
+  interstitial: 0.25
+  frenkel: 0.25
+  antisite: 0.25
+p_clean: 0.2
+class_weight_power: 0.5
+optim:
+  lr: 0.0002
+  weight_decay: 0.0
+  batch_size: 16
+  n_updates: 20000
+  grad_clip: 1.0
+  ema: 0.999
+  warmup: 1000
+n_val: 200
+log_every: 100
+val_every: 1000
+ckpt_every: 1000
+log_steps: true
+max_minutes: 480
+threads: 2
+runs_root: /kaggle/working/arch_attention/runs
+resolved_model:
+  name: atom_transformer
+  hidden: 128
+  n_layers: 4
+  n_heads: 8
+  ffn: 256
+  n_classes: 5
