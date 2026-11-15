@@ -1,0 +1,2121 @@
+{
+ "n": {
+  "vacancy": 200,
+  "interstitial": 200,
+  "frenkel": 150,
+  "antisite": 200
+ },
+ "settings": {
+  "clip": 1.0,
+  "loss_spike": "> 3.0 x median of the previous 50 updates of the same batch type",
+  "grad_spike": "> 5.0 x median of the previous 100 updates",
+  "warm_up": 100
+ },
+ "seed0_rerun_identical": {
+  "reference": true,
+  "scratch": true
+ },
+ "stability": {
+  "layers1 seed 1": {
+   "updates": 2000,
+   "not_finite": 0,
+   "grad_norm": {
+    "median": 1.407,
+    "p99": 2.914,
+    "largest": 3.621,
+    "largest_at": 38,
+    "largest_batch": "frenkel",
+    "median_first_100": 1.533,
+    "median_last_1000": 1.364
+   },
+   "clipped": 0.934,
+   "clipped_last_1000": 0.925,
+   "grad_spikes": [],
+   "loss_spikes": [],
+   "loss_last_1000_by_batch": {
+    "antisite": 0.6255,
+    "defect-free": 0.1466,
+    "frenkel": 0.9822,
+    "interstitial": 0.416,
+    "vacancy": 0.6269
+   }
+  },
+  "layers1 seed 2": {
+   "updates": 2000,
+   "not_finite": 0,
+   "grad_norm": {
+    "median": 1.413,
+    "p99": 2.924,
+    "largest": 3.848,
+    "largest_at": 1259,
+    "largest_batch": "frenkel",
+    "median_first_100": 1.517,
+    "median_last_1000": 1.333
+   },
+   "clipped": 0.915,
+   "clipped_last_1000": 0.904,
+   "grad_spikes": [],
+   "loss_spikes": [],
+   "loss_last_1000_by_batch": {
+    "antisite": 0.6042,
+    "defect-free": 0.1262,
+    "frenkel": 1.0175,
+    "interstitial": 0.4118,
+    "vacancy": 0.6469
+   }
+  },
+  "layers2 seed 1": {
+   "updates": 2000,
+   "not_finite": 0,
+   "grad_norm": {
+    "median": 1.462,
+    "p99": 3.134,
+    "largest": 3.856,
+    "largest_at": 1755,
+    "largest_batch": "frenkel",
+    "median_first_100": 1.552,
+    "median_last_1000": 1.423
+   },
+   "clipped": 0.926,
+   "clipped_last_1000": 0.922,
+   "grad_spikes": [],
+   "loss_spikes": [],
+   "loss_last_1000_by_batch": {
+    "antisite": 0.6201,
+    "defect-free": 0.1423,
+    "frenkel": 0.9889,
+    "interstitial": 0.4054,
+    "vacancy": 0.6354
+   }
+  },
+  "layers2 seed 2": {
+   "updates": 2000,
+   "not_finite": 0,
+   "grad_norm": {
+    "median": 1.365,
+    "p99": 3.188,
+    "largest": 4.125,
+    "largest_at": 1259,
+    "largest_batch": "frenkel",
+    "median_first_100": 1.463,
+    "median_last_1000": 1.309
+   },
+   "clipped": 0.874,
+   "clipped_last_1000": 0.851,
+   "grad_spikes": [],
+   "loss_spikes": [],
+   "loss_last_1000_by_batch": {
+    "antisite": 0.5979,
+    "defect-free": 0.1204,
+    "frenkel": 1.0222,
+    "interstitial": 0.4025,
+    "vacancy": 0.6502
+   }
+  },
+  "no_weights seed 1": {
+   "updates": 2000,
+   "not_finite": 0,
+   "grad_norm": {
+    "median": 0.311,
+    "p99": 1.282,
+    "largest": 6.218,
+    "largest_at": 1,
+    "largest_batch": "vacancy",
+    "median_first_100": 0.422,
+    "median_last_1000": 0.266
+   },
+   "clipped": 0.013,
+   "clipped_last_1000": 0.001,
+   "grad_spikes": [
+    {
+     "step": 731,
+     "batch": "antisite",
+     "ratio": 13.65
+    },
+    {
+     "step": 732,
+     "batch": "defect-free",
+     "ratio": 9.85
+    },
+    {
+     "step": 1034,
+     "batch": "defect-free",
+     "ratio": 5.26
+    }
+   ],
+   "loss_spikes": [
+    {
+     "step": 732,
+     "batch": "defect-free",
+     "ratio": 4.57
+    },
+    {
+     "step": 1193,
+     "batch": "defect-free",
+     "ratio": 3.47
+    },
+    {
+     "step": 1567,
+     "batch": "defect-free",
+     "ratio": 3.04
+    },
+    {
+     "step": 1594,
+     "batch": "defect-free",
+     "ratio": 3.05
+    },
+    {
+     "step": 1612,
+     "batch": "defect-free",
+     "ratio": 3.47
+    }
+   ],
+   "loss_last_1000_by_batch": {
+    "antisite": 0.0537,
+    "defect-free": 0.0088,
+    "frenkel": 0.133,
+    "interstitial": 0.0303,
+    "vacancy": 0.0725
+   }
+  },
+  "no_weights seed 2": {
+   "updates": 2000,
+   "not_finite": 0,
+   "grad_norm": {
+    "median": 0.343,
+    "p99": 1.546,
+    "largest": 6.696,
+    "largest_at": 5,
+    "largest_batch": "defect-free",
+    "median_first_100": 0.503,
+    "median_last_1000": 0.292
+   },
+   "clipped": 0.029,
+   "clipped_last_1000": 0.006,
+   "grad_spikes": [
+    {
+     "step": 647,
+     "batch": "vacancy",
+     "ratio": 5.38
+    },
+    {
+     "step": 919,
+     "batch": "frenkel",
+     "ratio": 7.61
+    },
+    {
+     "step": 920,
+     "batch": "interstitial",
+     "ratio": 10.89
+    },
+    {
+     "step": 1608,
+     "batch": "defect-free",
+     "ratio": 6.54
+    }
+   ],
+   "loss_spikes": [
+    {
+     "step": 506,
+     "batch": "defect-free",
+     "ratio": 3.59
+    },
+    {
+     "step": 560,
+     "batch": "defect-free",
+     "ratio": 3.27
+    },
+    {
+     "step": 576,
+     "batch": "defect-free",
+     "ratio": 3.66
+    },
+    {
+     "step": 743,
+     "batch": "defect-free",
+     "ratio": 3.45
+    },
+    {
+     "step": 758,
+     "batch": "defect-free",
+     "ratio": 5.36
+    },
+    {
+     "step": 774,
+     "batch": "defect-free",
+     "ratio": 3.26
+    },
+    {
+     "step": 938,
+     "batch": "defect-free",
+     "ratio": 3.64
+    },
+    {
+     "step": 1016,
+     "batch": "defect-free",
+     "ratio": 4.21
+    },
+    {
+     "step": 1017,
+     "batch": "defect-free",
+     "ratio": 3.27
+    },
+    {
+     "step": 1279,
+     "batch": "defect-free",
+     "ratio": 3.13
+    },
+    {
+     "step": 1608,
+     "batch": "defect-free",
+     "ratio": 4.55
+    }
+   ],
+   "loss_last_1000_by_batch": {
+    "antisite": 0.054,
+    "defect-free": 0.0085,
+    "frenkel": 0.1366,
+    "interstitial": 0.0302,
+    "vacancy": 0.0742
+   }
+  },
+  "real_only seed 1": {
+   "updates": 2000,
+   "not_finite": 0,
+   "grad_norm": {
+    "median": 1.944,
+    "p99": 6.853,
+    "largest": 25.812,
+    "largest_at": 494,
+    "largest_batch": "defect-free",
+    "median_first_100": 2.531,
+    "median_last_1000": 1.709
+   },
+   "clipped": 0.931,
+   "clipped_last_1000": 0.908,
+   "grad_spikes": [
+    {
+     "step": 493,
+     "batch": "antisite",
+     "ratio": 5.51
+    },
+    {
+     "step": 494,
+     "batch": "defect-free",
+     "ratio": 11.17
+    },
+    {
+     "step": 495,
+     "batch": "interstitial",
+     "ratio": 9.71
+    },
+    {
+     "step": 1333,
+     "batch": "interstitial",
+     "ratio": 6.81
+    },
+    {
+     "step": 1674,
+     "batch": "defect-free",
+     "ratio": 5.21
+    },
+    {
+     "step": 1840,
+     "batch": "vacancy",
+     "ratio": 9.11
+    },
+    {
+     "step": 1841,
+     "batch": "defect-free",
+     "ratio": 9.21
+    }
+   ],
+   "loss_spikes": [
+    {
+     "step": 494,
+     "batch": "defect-free",
+     "ratio": 4.19
+    },
+    {
+     "step": 887,
+     "batch": "defect-free",
+     "ratio": 3.85
+    },
+    {
+     "step": 928,
+     "batch": "defect-free",
+     "ratio": 3.52
+    },
+    {
+     "step": 1674,
+     "batch": "defect-free",
+     "ratio": 3.14
+    }
+   ],
+   "loss_last_1000_by_batch": {
+    "antisite": 0.4831,
+    "defect-free": 0.0886,
+    "frenkel": 0.8776,
+    "interstitial": 0.3241,
+    "vacancy": 0.3975
+   }
+  },
+  "real_only seed 2": {
+   "updates": 2000,
+   "not_finite": 0,
+   "grad_norm": {
+    "median": 2.519,
+    "p99": 12.855,
+    "largest": 71.809,
+    "largest_at": 650,
+    "largest_batch": "antisite",
+    "median_first_100": 2.725,
+    "median_last_1000": 2.221
+   },
+   "clipped": 0.961,
+   "clipped_last_1000": 0.94,
+   "grad_spikes": [
+    {
+     "step": 399,
+     "batch": "vacancy",
+     "ratio": 6.43
+    },
+    {
+     "step": 400,
+     "batch": "frenkel",
+     "ratio": 5.26
+    },
+    {
+     "step": 401,
+     "batch": "defect-free",
+     "ratio": 7.1
+    },
+    {
+     "step": 502,
+     "batch": "defect-free",
+     "ratio": 6.43
+    },
+    {
+     "step": 649,
+     "batch": "vacancy",
+     "ratio": 17.55
+    },
+    {
+     "step": 650,
+     "batch": "antisite",
+     "ratio": 23.45
+    },
+    {
+     "step": 651,
+     "batch": "vacancy",
+     "ratio": 16.05
+    },
+    {
+     "step": 758,
+     "batch": "defect-free",
+     "ratio": 7.91
+    },
+    {
+     "step": 759,
+     "batch": "antisite",
+     "ratio": 16.49
+    },
+    {
+     "step": 760,
+     "batch": "vacancy",
+     "ratio": 20.24
+    },
+    {
+     "step": 761,
+     "batch": "defect-free",
+     "ratio": 18.84
+    },
+    {
+     "step": 762,
+     "batch": "frenkel",
+     "ratio": 5.86
+    },
+    {
+     "step": 908,
+     "batch": "interstitial",
+     "ratio": 6.31
+    },
+    {
+     "step": 1016,
+     "batch": "defect-free",
+     "ratio": 8.23
+    },
+    {
+     "step": 1017,
+     "batch": "defect-free",
+     "ratio": 10.43
+    },
+    {
+     "step": 1018,
+     "batch": "antisite",
+     "ratio": 8.05
+    },
+    {
+     "step": 1019,
+     "batch": "defect-free",
+     "ratio": 5.9
+    },
+    {
+     "step": 1085,
+     "batch": "antisite",
+     "ratio": 5.18
+    },
+    {
+     "step": 1086,
+     "batch": "antisite",
+     "ratio": 6.08
+    },
+    {
+     "step": 1087,
+     "batch": "interstitial",
+     "ratio": 6.61
+    },
+    {
+     "step": 1264,
+     "batch": "interstitial",
+     "ratio": 5.78
+    }
+   ],
+   "loss_spikes": [
+    {
+     "step": 401,
+     "batch": "defect-free",
+     "ratio": 3.78
+    },
+    {
+     "step": 502,
+     "batch": "defect-free",
+     "ratio": 4.32
+    },
+    {
+     "step": 560,
+     "batch": "defect-free",
+     "ratio": 4.13
+    },
+    {
+     "step": 758,
+     "batch": "defect-free",
+     "ratio": 3.14
+    },
+    {
+     "step": 761,
+     "batch": "defect-free",
+     "ratio": 6.54
+    },
+    {
+     "step": 1016,
+     "batch": "defect-free",
+     "ratio": 4.11
+    },
+    {
+     "step": 1017,
+     "batch": "defect-free",
+     "ratio": 4.88
+    },
+    {
+     "step": 1019,
+     "batch": "defect-free",
+     "ratio": 3.02
+    },
+    {
+     "step": 1263,
+     "batch": "defect-free",
+     "ratio": 4.06
+    },
+    {
+     "step": 1346,
+     "batch": "defect-free",
+     "ratio": 3.59
+    },
+    {
+     "step": 1360,
+     "batch": "defect-free",
+     "ratio": 3.14
+    },
+    {
+     "step": 1407,
+     "batch": "defect-free",
+     "ratio": 3.37
+    },
+    {
+     "step": 1408,
+     "batch": "defect-free",
+     "ratio": 3.47
+    },
+    {
+     "step": 1480,
+     "batch": "defect-free",
+     "ratio": 4.23
+    },
+    {
+     "step": 1481,
+     "batch": "defect-free",
+     "ratio": 3.55
+    },
+    {
+     "step": 1523,
+     "batch": "defect-free",
+     "ratio": 3.99
+    },
+    {
+     "step": 1834,
+     "batch": "defect-free",
+     "ratio": 3.26
+    }
+   ],
+   "loss_last_1000_by_batch": {
+    "antisite": 0.4948,
+    "defect-free": 0.0778,
+    "frenkel": 0.9038,
+    "interstitial": 0.3485,
+    "vacancy": 0.4001
+   }
+  },
+  "reference seed 0": {
+   "updates": 2000,
+   "not_finite": 0,
+   "grad_norm": {
+    "median": 2.173,
+    "p99": 12.927,
+    "largest": 44.104,
+    "largest_at": 1456,
+    "largest_batch": "defect-free",
+    "median_first_100": 2.237,
+    "median_last_1000": 1.948
+   },
+   "clipped": 0.954,
+   "clipped_last_1000": 0.927,
+   "grad_spikes": [
+    {
+     "step": 452,
+     "batch": "antisite",
+     "ratio": 5.18
+    },
+    {
+     "step": 484,
+     "batch": "defect-free",
+     "ratio": 6.12
+    },
+    {
+     "step": 523,
+     "batch": "antisite",
+     "ratio": 5.49
+    },
+    {
+     "step": 524,
+     "batch": "interstitial",
+     "ratio": 5.25
+    },
+    {
+     "step": 566,
+     "batch": "frenkel",
+     "ratio": 5.01
+    },
+    {
+     "step": 567,
+     "batch": "interstitial",
+     "ratio": 9.79
+    },
+    {
+     "step": 568,
+     "batch": "defect-free",
+     "ratio": 10.24
+    },
+    {
+     "step": 569,
+     "batch": "antisite",
+     "ratio": 6.9
+    },
+    {
+     "step": 570,
+     "batch": "defect-free",
+     "ratio": 5.94
+    },
+    {
+     "step": 718,
+     "batch": "antisite",
+     "ratio": 5.32
+    },
+    {
+     "step": 719,
+     "batch": "interstitial",
+     "ratio": 11.5
+    },
+    {
+     "step": 720,
+     "batch": "frenkel",
+     "ratio": 8.37
+    },
+    {
+     "step": 721,
+     "batch": "defect-free",
+     "ratio": 11.3
+    },
+    {
+     "step": 722,
+     "batch": "defect-free",
+     "ratio": 8.18
+    },
+    {
+     "step": 951,
+     "batch": "defect-free",
+     "ratio": 5.72
+    },
+    {
+     "step": 952,
+     "batch": "interstitial",
+     "ratio": 6.39
+    },
+    {
+     "step": 996,
+     "batch": "defect-free",
+     "ratio": 5.98
+    },
+    {
+     "step": 997,
+     "batch": "defect-free",
+     "ratio": 6.58
+    },
+    {
+     "step": 1323,
+     "batch": "interstitial",
+     "ratio": 5.31
+    },
+    {
+     "step": 1454,
+     "batch": "vacancy",
+     "ratio": 6.86
+    },
+    {
+     "step": 1455,
+     "batch": "interstitial",
+     "ratio": 24.05
+    },
+    {
+     "step": 1456,
+     "batch": "defect-free",
+     "ratio": 25.04
+    },
+    {
+     "step": 1457,
+     "batch": "defect-free",
+     "ratio": 20.99
+    },
+    {
+     "step": 1458,
+     "batch": "interstitial",
+     "ratio": 15.12
+    }
+   ],
+   "loss_spikes": [
+    {
+     "step": 484,
+     "batch": "defect-free",
+     "ratio": 3.23
+    },
+    {
+     "step": 568,
+     "batch": "defect-free",
+     "ratio": 8.57
+    },
+    {
+     "step": 570,
+     "batch": "defect-free",
+     "ratio": 4.78
+    },
+    {
+     "step": 721,
+     "batch": "defect-free",
+     "ratio": 7.69
+    },
+    {
+     "step": 722,
+     "batch": "defect-free",
+     "ratio": 5.67
+    },
+    {
+     "step": 951,
+     "batch": "defect-free",
+     "ratio": 3.7
+    },
+    {
+     "step": 1395,
+     "batch": "defect-free",
+     "ratio": 3.46
+    },
+    {
+     "step": 1456,
+     "batch": "defect-free",
+     "ratio": 9.84
+    },
+    {
+     "step": 1457,
+     "batch": "defect-free",
+     "ratio": 8.3
+    },
+    {
+     "step": 1557,
+     "batch": "defect-free",
+     "ratio": 3.31
+    },
+    {
+     "step": 1901,
+     "batch": "defect-free",
+     "ratio": 3.27
+    }
+   ],
+   "loss_last_1000_by_batch": {
+    "antisite": 0.4956,
+    "defect-free": 0.0898,
+    "frenkel": 0.9317,
+    "interstitial": 0.3376,
+    "vacancy": 0.4142
+   }
+  },
+  "reference seed 1": {
+   "updates": 2000,
+   "not_finite": 0,
+   "grad_norm": {
+    "median": 1.99,
+    "p99": 7.127,
+    "largest": 37.623,
+    "largest_at": 813,
+    "largest_batch": "antisite",
+    "median_first_100": 2.462,
+    "median_last_1000": 1.749
+   },
+   "clipped": 0.946,
+   "clipped_last_1000": 0.92,
+   "grad_spikes": [
+    {
+     "step": 811,
+     "batch": "vacancy",
+     "ratio": 5.27
+    },
+    {
+     "step": 812,
+     "batch": "frenkel",
+     "ratio": 10.46
+    },
+    {
+     "step": 813,
+     "batch": "antisite",
+     "ratio": 17.72
+    },
+    {
+     "step": 814,
+     "batch": "frenkel",
+     "ratio": 7.47
+    },
+    {
+     "step": 1225,
+     "batch": "interstitial",
+     "ratio": 5.71
+    },
+    {
+     "step": 1227,
+     "batch": "antisite",
+     "ratio": 6.92
+    },
+    {
+     "step": 1840,
+     "batch": "vacancy",
+     "ratio": 5.73
+    },
+    {
+     "step": 1841,
+     "batch": "defect-free",
+     "ratio": 11.32
+    },
+    {
+     "step": 1842,
+     "batch": "interstitial",
+     "ratio": 9.99
+    }
+   ],
+   "loss_spikes": [
+    {
+     "step": 1841,
+     "batch": "defect-free",
+     "ratio": 5.97
+    }
+   ],
+   "loss_last_1000_by_batch": {
+    "antisite": 0.4938,
+    "defect-free": 0.0983,
+    "frenkel": 0.92,
+    "interstitial": 0.3303,
+    "vacancy": 0.3944
+   }
+  },
+  "reference seed 2": {
+   "updates": 2000,
+   "not_finite": 0,
+   "grad_norm": {
+    "median": 2.456,
+    "p99": 16.791,
+    "largest": 85.972,
+    "largest_at": 651,
+    "largest_batch": "vacancy",
+    "median_first_100": 2.782,
+    "median_last_1000": 2.247
+   },
+   "clipped": 0.964,
+   "clipped_last_1000": 0.937,
+   "grad_spikes": [
+    {
+     "step": 395,
+     "batch": "interstitial",
+     "ratio": 6.89
+    },
+    {
+     "step": 396,
+     "batch": "vacancy",
+     "ratio": 9.5
+    },
+    {
+     "step": 397,
+     "batch": "vacancy",
+     "ratio": 7.75
+    },
+    {
+     "step": 599,
+     "batch": "interstitial",
+     "ratio": 7.95
+    },
+    {
+     "step": 606,
+     "batch": "defect-free",
+     "ratio": 5.38
+    },
+    {
+     "step": 607,
+     "batch": "vacancy",
+     "ratio": 6.32
+    },
+    {
+     "step": 608,
+     "batch": "interstitial",
+     "ratio": 6.75
+    },
+    {
+     "step": 649,
+     "batch": "vacancy",
+     "ratio": 9.16
+    },
+    {
+     "step": 650,
+     "batch": "antisite",
+     "ratio": 27.23
+    },
+    {
+     "step": 651,
+     "batch": "vacancy",
+     "ratio": 29.24
+    },
+    {
+     "step": 652,
+     "batch": "frenkel",
+     "ratio": 20.83
+    },
+    {
+     "step": 653,
+     "batch": "defect-free",
+     "ratio": 18.66
+    },
+    {
+     "step": 654,
+     "batch": "vacancy",
+     "ratio": 5.32
+    },
+    {
+     "step": 727,
+     "batch": "interstitial",
+     "ratio": 6.02
+    },
+    {
+     "step": 728,
+     "batch": "interstitial",
+     "ratio": 5.85
+    },
+    {
+     "step": 743,
+     "batch": "defect-free",
+     "ratio": 5.1
+    },
+    {
+     "step": 860,
+     "batch": "interstitial",
+     "ratio": 5.29
+    },
+    {
+     "step": 925,
+     "batch": "defect-free",
+     "ratio": 7.63
+    },
+    {
+     "step": 926,
+     "batch": "defect-free",
+     "ratio": 6.38
+    },
+    {
+     "step": 1015,
+     "batch": "interstitial",
+     "ratio": 16.08
+    },
+    {
+     "step": 1016,
+     "batch": "defect-free",
+     "ratio": 31.23
+    },
+    {
+     "step": 1017,
+     "batch": "defect-free",
+     "ratio": 37.82
+    },
+    {
+     "step": 1018,
+     "batch": "antisite",
+     "ratio": 30.11
+    },
+    {
+     "step": 1019,
+     "batch": "defect-free",
+     "ratio": 19.85
+    },
+    {
+     "step": 1020,
+     "batch": "antisite",
+     "ratio": 8.2
+    },
+    {
+     "step": 1157,
+     "batch": "interstitial",
+     "ratio": 5.3
+    },
+    {
+     "step": 1404,
+     "batch": "interstitial",
+     "ratio": 6.93
+    },
+    {
+     "step": 1406,
+     "batch": "interstitial",
+     "ratio": 7.2
+    },
+    {
+     "step": 1424,
+     "batch": "interstitial",
+     "ratio": 5.33
+    },
+    {
+     "step": 1637,
+     "batch": "defect-free",
+     "ratio": 7.99
+    },
+    {
+     "step": 1639,
+     "batch": "interstitial",
+     "ratio": 7.84
+    },
+    {
+     "step": 1902,
+     "batch": "interstitial",
+     "ratio": 6.16
+    }
+   ],
+   "loss_spikes": [
+    {
+     "step": 502,
+     "batch": "defect-free",
+     "ratio": 3.26
+    },
+    {
+     "step": 526,
+     "batch": "defect-free",
+     "ratio": 3.53
+    },
+    {
+     "step": 653,
+     "batch": "defect-free",
+     "ratio": 7.1
+    },
+    {
+     "step": 743,
+     "batch": "defect-free",
+     "ratio": 3.16
+    },
+    {
+     "step": 925,
+     "batch": "defect-free",
+     "ratio": 3.13
+    },
+    {
+     "step": 1016,
+     "batch": "defect-free",
+     "ratio": 12.14
+    },
+    {
+     "step": 1017,
+     "batch": "defect-free",
+     "ratio": 15.3
+    },
+    {
+     "step": 1018,
+     "batch": "antisite",
+     "ratio": 3.24
+    },
+    {
+     "step": 1019,
+     "batch": "defect-free",
+     "ratio": 8.33
+    },
+    {
+     "step": 1407,
+     "batch": "defect-free",
+     "ratio": 3.2
+    },
+    {
+     "step": 1480,
+     "batch": "defect-free",
+     "ratio": 3.55
+    },
+    {
+     "step": 1481,
+     "batch": "defect-free",
+     "ratio": 3.22
+    },
+    {
+     "step": 1637,
+     "batch": "defect-free",
+     "ratio": 4.75
+    }
+   ],
+   "loss_last_1000_by_batch": {
+    "antisite": 0.507,
+    "defect-free": 0.0833,
+    "frenkel": 0.9419,
+    "interstitial": 0.3463,
+    "vacancy": 0.3976
+   }
+  },
+  "scratch seed 0": {
+   "updates": 2000,
+   "not_finite": 0,
+   "grad_norm": {
+    "median": 1.388,
+    "p99": 3.188,
+    "largest": 4.101,
+    "largest_at": 1862,
+    "largest_batch": "frenkel",
+    "median_first_100": 1.57,
+    "median_last_1000": 1.376
+   },
+   "clipped": 0.922,
+   "clipped_last_1000": 0.912,
+   "grad_spikes": [],
+   "loss_spikes": [],
+   "loss_last_1000_by_batch": {
+    "antisite": 0.5987,
+    "defect-free": 0.1352,
+    "frenkel": 0.997,
+    "interstitial": 0.4,
+    "vacancy": 0.6542
+   }
+  },
+  "scratch seed 1": {
+   "updates": 2000,
+   "not_finite": 0,
+   "grad_norm": {
+    "median": 1.445,
+    "p99": 3.2,
+    "largest": 5.177,
+    "largest_at": 1747,
+    "largest_batch": "frenkel",
+    "median_first_100": 1.71,
+    "median_last_1000": 1.407
+   },
+   "clipped": 0.925,
+   "clipped_last_1000": 0.913,
+   "grad_spikes": [],
+   "loss_spikes": [],
+   "loss_last_1000_by_batch": {
+    "antisite": 0.6147,
+    "defect-free": 0.1429,
+    "frenkel": 0.9893,
+    "interstitial": 0.3993,
+    "vacancy": 0.6354
+   }
+  },
+  "scratch seed 2": {
+   "updates": 2000,
+   "not_finite": 0,
+   "grad_norm": {
+    "median": 1.53,
+    "p99": 3.549,
+    "largest": 4.874,
+    "largest_at": 1259,
+    "largest_batch": "frenkel",
+    "median_first_100": 1.697,
+    "median_last_1000": 1.443
+   },
+   "clipped": 0.932,
+   "clipped_last_1000": 0.929,
+   "grad_spikes": [],
+   "loss_spikes": [],
+   "loss_last_1000_by_batch": {
+    "antisite": 0.5987,
+    "defect-free": 0.1164,
+    "frenkel": 1.0282,
+    "interstitial": 0.3966,
+    "vacancy": 0.6597
+   }
+  }
+ },
+ "runs": {
+  "layers1 seed 0": {
+   "source": "ablation run",
+   "found": {
+    "vacancy": {
+     "rate": 0.135,
+     "lo": 0.095,
+     "hi": 0.18
+    },
+    "interstitial": {
+     "rate": 0.23,
+     "lo": 0.17,
+     "hi": 0.295
+    },
+    "frenkel": {
+     "rate": 0.17333333333333334,
+     "lo": 0.11188811188811189,
+     "hi": 0.23870967741935484
+    },
+    "antisite": {
+     "rate": 0.155,
+     "lo": 0.105,
+     "hi": 0.205
+    },
+    "all": {
+     "rate": 0.17333333333333334,
+     "lo": 0.1436241610738255,
+     "hi": 0.20394736842105263
+    }
+   }
+  },
+  "layers1 seed 1": {
+   "source": "seed study",
+   "found": {
+    "vacancy": {
+     "rate": 0.12,
+     "lo": 0.08,
+     "hi": 0.165
+    },
+    "interstitial": {
+     "rate": 0.215,
+     "lo": 0.16,
+     "hi": 0.275
+    },
+    "frenkel": {
+     "rate": 0.12,
+     "lo": 0.06896551724137931,
+     "hi": 0.17482954545454538
+    },
+    "antisite": {
+     "rate": 0.13,
+     "lo": 0.085,
+     "hi": 0.18
+    },
+    "all": {
+     "rate": 0.148,
+     "lo": 0.12182061579651941,
+     "hi": 0.17506799741840307
+    }
+   }
+  },
+  "layers1 seed 2": {
+   "source": "seed study",
+   "found": {
+    "vacancy": {
+     "rate": 0.115,
+     "lo": 0.075,
+     "hi": 0.16
+    },
+    "interstitial": {
+     "rate": 0.21,
+     "lo": 0.15,
+     "hi": 0.275
+    },
+    "frenkel": {
+     "rate": 0.12,
+     "lo": 0.07051282051282051,
+     "hi": 0.17532467532467533
+    },
+    "antisite": {
+     "rate": 0.14,
+     "lo": 0.09,
+     "hi": 0.19
+    },
+    "all": {
+     "rate": 0.148,
+     "lo": 0.12315930388219545,
+     "hi": 0.17315436241610738
+    }
+   }
+  },
+  "layers2 seed 0": {
+   "source": "ablation run",
+   "found": {
+    "vacancy": {
+     "rate": 0.155,
+     "lo": 0.11,
+     "hi": 0.205
+    },
+    "interstitial": {
+     "rate": 0.275,
+     "lo": 0.215,
+     "hi": 0.34
+    },
+    "frenkel": {
+     "rate": 0.24666666666666667,
+     "lo": 0.16993464052287582,
+     "hi": 0.32679738562091504
+    },
+    "antisite": {
+     "rate": 0.25,
+     "lo": 0.19,
+     "hi": 0.31
+    },
+    "all": {
+     "rate": 0.23066666666666666,
+     "lo": 0.1959993288590604,
+     "hi": 0.26702269692923897
+    }
+   }
+  },
+  "layers2 seed 1": {
+   "source": "seed study",
+   "found": {
+    "vacancy": {
+     "rate": 0.135,
+     "lo": 0.095,
+     "hi": 0.18
+    },
+    "interstitial": {
+     "rate": 0.265,
+     "lo": 0.2,
+     "hi": 0.33
+    },
+    "frenkel": {
+     "rate": 0.20666666666666667,
+     "lo": 0.1354751525719268,
+     "hi": 0.28187919463087246
+    },
+    "antisite": {
+     "rate": 0.21,
+     "lo": 0.155,
+     "hi": 0.265
+    },
+    "all": {
+     "rate": 0.204,
+     "lo": 0.17060109959191502,
+     "hi": 0.23765184034666847
+    }
+   }
+  },
+  "layers2 seed 2": {
+   "source": "seed study",
+   "found": {
+    "vacancy": {
+     "rate": 0.125,
+     "lo": 0.085,
+     "hi": 0.17
+    },
+    "interstitial": {
+     "rate": 0.255,
+     "lo": 0.19,
+     "hi": 0.32
+    },
+    "frenkel": {
+     "rate": 0.18666666666666668,
+     "lo": 0.12162162162162163,
+     "hi": 0.25517241379310346
+    },
+    "antisite": {
+     "rate": 0.165,
+     "lo": 0.115,
+     "hi": 0.22
+    },
+    "all": {
+     "rate": 0.18266666666666667,
+     "lo": 0.15211640211640212,
+     "hi": 0.21495327102803738
+    }
+   }
+  },
+  "no_weights seed 0": {
+   "source": "ablation run",
+   "found": {
+    "vacancy": {
+     "rate": 0.61,
+     "lo": 0.535,
+     "hi": 0.68
+    },
+    "interstitial": {
+     "rate": 0.315,
+     "lo": 0.25,
+     "hi": 0.385
+    },
+    "frenkel": {
+     "rate": 0.36666666666666664,
+     "lo": 0.28205128205128205,
+     "hi": 0.45098039215686275
+    },
+    "antisite": {
+     "rate": 0.41,
+     "lo": 0.34,
+     "hi": 0.48
+    },
+    "all": {
+     "rate": 0.42933333333333334,
+     "lo": 0.38533333333333336,
+     "hi": 0.473967020385814
+    }
+   }
+  },
+  "no_weights seed 1": {
+   "source": "seed study",
+   "found": {
+    "vacancy": {
+     "rate": 0.635,
+     "lo": 0.56,
+     "hi": 0.705
+    },
+    "interstitial": {
+     "rate": 0.305,
+     "lo": 0.245,
+     "hi": 0.37
+    },
+    "frenkel": {
+     "rate": 0.30666666666666664,
+     "lo": 0.22818791946308725,
+     "hi": 0.3860759493670886
+    },
+    "antisite": {
+     "rate": 0.39,
+     "lo": 0.32,
+     "hi": 0.46
+    },
+    "all": {
+     "rate": 0.416,
+     "lo": 0.37401548695670334,
+     "hi": 0.4579451916014487
+    }
+   }
+  },
+  "no_weights seed 2": {
+   "source": "seed study",
+   "found": {
+    "vacancy": {
+     "rate": 0.65,
+     "lo": 0.58,
+     "hi": 0.715
+    },
+    "interstitial": {
+     "rate": 0.31,
+     "lo": 0.245,
+     "hi": 0.375
+    },
+    "frenkel": {
+     "rate": 0.38,
+     "lo": 0.30344271412680757,
+     "hi": 0.46
+    },
+    "antisite": {
+     "rate": 0.385,
+     "lo": 0.32,
+     "hi": 0.455
+    },
+    "all": {
+     "rate": 0.43466666666666665,
+     "lo": 0.39124522351641267,
+     "hi": 0.4772727272727273
+    }
+   }
+  },
+  "real_only seed 0": {
+   "source": "ablation run",
+   "found": {
+    "vacancy": {
+     "rate": 0.64,
+     "lo": 0.57,
+     "hi": 0.71
+    },
+    "interstitial": {
+     "rate": 0.295,
+     "lo": 0.235,
+     "hi": 0.36
+    },
+    "frenkel": {
+     "rate": 0.35333333333333333,
+     "lo": 0.27631578947368424,
+     "hi": 0.4304635761589404
+    },
+    "antisite": {
+     "rate": 0.38,
+     "lo": 0.32,
+     "hi": 0.445
+    },
+    "all": {
+     "rate": 0.42133333333333334,
+     "lo": 0.38114048405589207,
+     "hi": 0.4614387274959083
+    }
+   }
+  },
+  "real_only seed 1": {
+   "source": "seed study",
+   "found": {
+    "vacancy": {
+     "rate": 0.63,
+     "lo": 0.555,
+     "hi": 0.7
+    },
+    "interstitial": {
+     "rate": 0.315,
+     "lo": 0.25,
+     "hi": 0.38
+    },
+    "frenkel": {
+     "rate": 0.37333333333333335,
+     "lo": 0.2965453384418901,
+     "hi": 0.45454545454545453
+    },
+    "antisite": {
+     "rate": 0.39,
+     "lo": 0.325,
+     "hi": 0.46
+    },
+    "all": {
+     "rate": 0.43066666666666664,
+     "lo": 0.3891084059483989,
+     "hi": 0.4729020052058228
+    }
+   }
+  },
+  "real_only seed 2": {
+   "source": "seed study",
+   "found": {
+    "vacancy": {
+     "rate": 0.67,
+     "lo": 0.6,
+     "hi": 0.735
+    },
+    "interstitial": {
+     "rate": 0.315,
+     "lo": 0.25,
+     "hi": 0.38
+    },
+    "frenkel": {
+     "rate": 0.41333333333333333,
+     "lo": 0.34,
+     "hi": 0.48890442890442865
+    },
+    "antisite": {
+     "rate": 0.435,
+     "lo": 0.365,
+     "hi": 0.505
+    },
+    "all": {
+     "rate": 0.4613333333333333,
+     "lo": 0.42153899596672195,
+     "hi": 0.5006657789613849
+    }
+   }
+  },
+  "reference seed 0": {
+   "source": "seed study",
+   "found": {
+    "vacancy": {
+     "rate": 0.64,
+     "lo": 0.565,
+     "hi": 0.715
+    },
+    "interstitial": {
+     "rate": 0.295,
+     "lo": 0.235,
+     "hi": 0.36
+    },
+    "frenkel": {
+     "rate": 0.42,
+     "lo": 0.3439392755265523,
+     "hi": 0.4965986394557823
+    },
+    "antisite": {
+     "rate": 0.425,
+     "lo": 0.355,
+     "hi": 0.495
+    },
+    "all": {
+     "rate": 0.44666666666666666,
+     "lo": 0.40447540564439666,
+     "hi": 0.4906921066369434
+    }
+   }
+  },
+  "reference seed 1": {
+   "source": "seed study",
+   "found": {
+    "vacancy": {
+     "rate": 0.625,
+     "lo": 0.55,
+     "hi": 0.695
+    },
+    "interstitial": {
+     "rate": 0.315,
+     "lo": 0.25,
+     "hi": 0.385
+    },
+    "frenkel": {
+     "rate": 0.3466666666666667,
+     "lo": 0.2684563758389262,
+     "hi": 0.42567567567567566
+    },
+    "antisite": {
+     "rate": 0.42,
+     "lo": 0.35,
+     "hi": 0.49
+    },
+    "all": {
+     "rate": 0.432,
+     "lo": 0.39014647137150466,
+     "hi": 0.47549668874172185
+    }
+   }
+  },
+  "reference seed 2": {
+   "source": "seed study",
+   "found": {
+    "vacancy": {
+     "rate": 0.625,
+     "lo": 0.545,
+     "hi": 0.7
+    },
+    "interstitial": {
+     "rate": 0.31,
+     "lo": 0.25,
+     "hi": 0.375
+    },
+    "frenkel": {
+     "rate": 0.3933333333333333,
+     "lo": 0.3181818181818182,
+     "hi": 0.4697986577181208
+    },
+    "antisite": {
+     "rate": 0.405,
+     "lo": 0.335,
+     "hi": 0.475
+    },
+    "all": {
+     "rate": 0.436,
+     "lo": 0.3941370929511088,
+     "hi": 0.47644683714670255
+    }
+   }
+  },
+  "scratch seed 0": {
+   "source": "seed study",
+   "found": {
+    "vacancy": {
+     "rate": 0.17,
+     "lo": 0.12,
+     "hi": 0.22
+    },
+    "interstitial": {
+     "rate": 0.275,
+     "lo": 0.21,
+     "hi": 0.34
+    },
+    "frenkel": {
+     "rate": 0.24,
+     "lo": 0.16233766233766234,
+     "hi": 0.32432432432432434
+    },
+    "antisite": {
+     "rate": 0.265,
+     "lo": 0.205,
+     "hi": 0.33
+    },
+    "all": {
+     "rate": 0.23733333333333334,
+     "lo": 0.20345744680851063,
+     "hi": 0.27358490566037735
+    }
+   }
+  },
+  "scratch seed 1": {
+   "source": "seed study",
+   "found": {
+    "vacancy": {
+     "rate": 0.145,
+     "lo": 0.1,
+     "hi": 0.195
+    },
+    "interstitial": {
+     "rate": 0.27,
+     "lo": 0.21,
+     "hi": 0.335
+    },
+    "frenkel": {
+     "rate": 0.23333333333333334,
+     "lo": 0.1610738255033557,
+     "hi": 0.3137254901960784
+    },
+    "antisite": {
+     "rate": 0.28,
+     "lo": 0.22,
+     "hi": 0.345
+    },
+    "all": {
+     "rate": 0.232,
+     "lo": 0.19973544973544974,
+     "hi": 0.2660427807486631
+    }
+   }
+  },
+  "scratch seed 2": {
+   "source": "seed study",
+   "found": {
+    "vacancy": {
+     "rate": 0.115,
+     "lo": 0.075,
+     "hi": 0.15512499999999818
+    },
+    "interstitial": {
+     "rate": 0.26,
+     "lo": 0.195,
+     "hi": 0.325
+    },
+    "frenkel": {
+     "rate": 0.19333333333333333,
+     "lo": 0.12666666666666668,
+     "hi": 0.2635135135135135
+    },
+    "antisite": {
+     "rate": 0.18,
+     "lo": 0.13,
+     "hi": 0.235
+    },
+    "all": {
+     "rate": 0.18666666666666668,
+     "lo": 0.15546548981937863,
+     "hi": 0.21866772068511198
+    }
+   }
+  }
+ },
+ "variants": {
+  "reference": {
+   "what": "starts from the denoiser, 4 layers, class weights",
+   "seeds": [
+    0,
+    1,
+    2
+   ],
+   "found": {
+    "vacancy": {
+     "mean": 0.63,
+     "sd": 0.0087,
+     "low": 0.625,
+     "high": 0.64,
+     "n": 3
+    },
+    "interstitial": {
+     "mean": 0.3067,
+     "sd": 0.0104,
+     "low": 0.295,
+     "high": 0.315,
+     "n": 3
+    },
+    "frenkel": {
+     "mean": 0.3867,
+     "sd": 0.0371,
+     "low": 0.3467,
+     "high": 0.42,
+     "n": 3
+    },
+    "antisite": {
+     "mean": 0.4167,
+     "sd": 0.0104,
+     "low": 0.405,
+     "high": 0.425,
+     "n": 3
+    },
+    "all": {
+     "mean": 0.4382,
+     "sd": 0.0076,
+     "low": 0.432,
+     "high": 0.4467,
+     "n": 3
+    }
+   }
+  },
+  "scratch": {
+   "what": "random starting weights",
+   "seeds": [
+    0,
+    1,
+    2
+   ],
+   "found": {
+    "vacancy": {
+     "mean": 0.1433,
+     "sd": 0.0275,
+     "low": 0.115,
+     "high": 0.17,
+     "n": 3
+    },
+    "interstitial": {
+     "mean": 0.2683,
+     "sd": 0.0076,
+     "low": 0.26,
+     "high": 0.275,
+     "n": 3
+    },
+    "frenkel": {
+     "mean": 0.2222,
+     "sd": 0.0252,
+     "low": 0.1933,
+     "high": 0.24,
+     "n": 3
+    },
+    "antisite": {
+     "mean": 0.2417,
+     "sd": 0.0539,
+     "low": 0.18,
+     "high": 0.28,
+     "n": 3
+    },
+    "all": {
+     "mean": 0.2187,
+     "sd": 0.0278,
+     "low": 0.1867,
+     "high": 0.2373,
+     "n": 3
+    }
+   },
+   "difference_from_reference_same_seed": {
+    "mean": -0.2196,
+    "sd": 0.0262,
+    "low": -0.2493,
+    "high": -0.2,
+    "n": 3,
+    "lower_in": 3,
+    "seeds": [
+     0,
+     1,
+     2
+    ],
+    "p_per_seed": [
+     0.0,
+     0.0,
+     0.0
+    ]
+   }
+  },
+  "layers2": {
+   "what": "random starting weights, 2 layers",
+   "seeds": [
+    0,
+    1,
+    2
+   ],
+   "found": {
+    "vacancy": {
+     "mean": 0.1383,
+     "sd": 0.0153,
+     "low": 0.125,
+     "high": 0.155,
+     "n": 3
+    },
+    "interstitial": {
+     "mean": 0.265,
+     "sd": 0.01,
+     "low": 0.255,
+     "high": 0.275,
+     "n": 3
+    },
+    "frenkel": {
+     "mean": 0.2133,
+     "sd": 0.0306,
+     "low": 0.1867,
+     "high": 0.2467,
+     "n": 3
+    },
+    "antisite": {
+     "mean": 0.2083,
+     "sd": 0.0425,
+     "low": 0.165,
+     "high": 0.25,
+     "n": 3
+    },
+    "all": {
+     "mean": 0.2058,
+     "sd": 0.024,
+     "low": 0.1827,
+     "high": 0.2307,
+     "n": 3
+    }
+   },
+   "difference_from_reference_same_seed": {
+    "mean": -0.2324,
+    "sd": 0.0191,
+    "low": -0.2533,
+    "high": -0.216,
+    "n": 3,
+    "lower_in": 3,
+    "seeds": [
+     0,
+     1,
+     2
+    ],
+    "p_per_seed": [
+     0.0,
+     0.0,
+     0.0
+    ]
+   }
+  },
+  "layers1": {
+   "what": "random starting weights, 1 layer",
+   "seeds": [
+    0,
+    1,
+    2
+   ],
+   "found": {
+    "vacancy": {
+     "mean": 0.1233,
+     "sd": 0.0104,
+     "low": 0.115,
+     "high": 0.135,
+     "n": 3
+    },
+    "interstitial": {
+     "mean": 0.2183,
+     "sd": 0.0104,
+     "low": 0.21,
+     "high": 0.23,
+     "n": 3
+    },
+    "frenkel": {
+     "mean": 0.1378,
+     "sd": 0.0308,
+     "low": 0.12,
+     "high": 0.1733,
+     "n": 3
+    },
+    "antisite": {
+     "mean": 0.1417,
+     "sd": 0.0126,
+     "low": 0.13,
+     "high": 0.155,
+     "n": 3
+    },
+    "all": {
+     "mean": 0.1564,
+     "sd": 0.0146,
+     "low": 0.148,
+     "high": 0.1733,
+     "n": 3
+    }
+   },
+   "difference_from_reference_same_seed": {
+    "mean": -0.2818,
+    "sd": 0.0076,
+    "low": -0.288,
+    "high": -0.2733,
+    "n": 3,
+    "lower_in": 3,
+    "seeds": [
+     0,
+     1,
+     2
+    ],
+    "p_per_seed": [
+     0.0,
+     0.0,
+     0.0
+    ]
+   }
+  },
+  "no_weights": {
+   "what": "no class weights",
+   "seeds": [
+    0,
+    1,
+    2
+   ],
+   "found": {
+    "vacancy": {
+     "mean": 0.6317,
+     "sd": 0.0202,
+     "low": 0.61,
+     "high": 0.65,
+     "n": 3
+    },
+    "interstitial": {
+     "mean": 0.31,
+     "sd": 0.005,
+     "low": 0.305,
+     "high": 0.315,
+     "n": 3
+    },
+    "frenkel": {
+     "mean": 0.3511,
+     "sd": 0.0391,
+     "low": 0.3067,
+     "high": 0.38,
+     "n": 3
+    },
+    "antisite": {
+     "mean": 0.395,
+     "sd": 0.0132,
+     "low": 0.385,
+     "high": 0.41,
+     "n": 3
+    },
+    "all": {
+     "mean": 0.4267,
+     "sd": 0.0096,
+     "low": 0.416,
+     "high": 0.4347,
+     "n": 3
+    }
+   },
+   "difference_from_reference_same_seed": {
+    "mean": -0.0116,
+    "sd": 0.0089,
+    "low": -0.0173,
+    "high": -0.0013,
+    "n": 3,
+    "lower_in": 3,
+    "seeds": [
+     0,
+     1,
+     2
+    ],
+    "p_per_seed": [
+     0.1175,
+     0.1038,
+     1.0
+    ]
+   }
+  },
+  "real_only": {
+   "what": "trained without the annihilated Frenkel pairs",
+   "seeds": [
+    0,
+    1,
+    2
+   ],
+   "found": {
+    "vacancy": {
+     "mean": 0.6467,
+     "sd": 0.0208,
+     "low": 0.63,
+     "high": 0.67,
+     "n": 3
+    },
+    "interstitial": {
+     "mean": 0.3083,
+     "sd": 0.0115,
+     "low": 0.295,
+     "high": 0.315,
+     "n": 3
+    },
+    "frenkel": {
+     "mean": 0.38,
+     "sd": 0.0306,
+     "low": 0.3533,
+     "high": 0.4133,
+     "n": 3
+    },
+    "antisite": {
+     "mean": 0.4017,
+     "sd": 0.0293,
+     "low": 0.38,
+     "high": 0.435,
+     "n": 3
+    },
+    "all": {
+     "mean": 0.4378,
+     "sd": 0.0209,
+     "low": 0.4213,
+     "high": 0.4613,
+     "n": 3
+    }
+   },
+   "difference_from_reference_same_seed": {
+    "mean": -0.0004,
+    "sd": 0.0253,
+    "low": -0.0253,
+    "high": 0.0253,
+    "n": 3,
+    "lower_in": 2,
+    "seeds": [
+     0,
+     1,
+     2
+    ],
+    "p_per_seed": [
+     0.0271,
+     1.0,
+     0.0026
+    ]
+   }
+  }
+ },
+ "reference_agreement": {
+  "seeds": [
+   0,
+   1,
+   2
+  ],
+  "found_by_all": 0.3773,
+  "found_by_some": 0.1213,
+  "found_by_none": 0.5013,
+  "ensemble": {
+   "vacancy": {
+    "rate": 0.635,
+    "lo": 0.565,
+    "hi": 0.705
+   },
+   "interstitial": {
+    "rate": 0.31,
+    "lo": 0.25,
+    "hi": 0.375
+   },
+   "frenkel": {
+    "rate": 0.3933333333333333,
+    "lo": 0.31690140845070425,
+    "hi": 0.474025974025974
+   },
+   "antisite": {
+    "rate": 0.45,
+    "lo": 0.38,
+    "hi": 0.52
+   },
+   "all": {
+    "rate": 0.45066666666666666,
+    "lo": 0.4087301587301587,
+    "hi": 0.4933862433862434
+   }
+  }
+ }
+}
