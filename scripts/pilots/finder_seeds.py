@@ -205,7 +205,12 @@ def figure(out: Path, steps: dict[tuple[str, int], Path], found: dict) -> None:
     from figstyle import apply_publication_style, finalize_figure, panel_letter
 
     apply_publication_style()
-    colour = {"reference": "#2A78D6", "scratch": "#EB6834"}
+    colour = {"reference": "#2A78D6", "scratch": "#EB6834", "no_weights": "#1BAF7A"}
+    names = {
+        "reference": "from the denoiser",
+        "scratch": "random start",
+        "no_weights": "no class weights",
+    }
     fig, axes = plt.subplots(1, 3, figsize=(7.2, 2.3), gridspec_kw=dict(width_ratios=[1, 1, 1.15]))
     fig.subplots_adjust(left=0.07, right=0.995, bottom=0.2, top=0.86, wspace=0.32)
     for (name, seed), path in sorted(steps.items()):
@@ -215,11 +220,7 @@ def figure(out: Path, steps: dict[tuple[str, int], Path], found: dict) -> None:
         w = 50
         k = len(s["step"]) // w * w
         x = s["step"][:k].reshape(-1, w).mean(1)
-        label = (
-            f"{'from the denoiser' if name == 'reference' else 'random start'}"
-            if seed == 1
-            else None
-        )
+        label = names[name] if seed == 1 else None
         axes[0].plot(
             x, np.median(s["grad"][:k].reshape(-1, w), 1), color=colour[name], lw=0.9, label=label
         )
