@@ -1,7 +1,7 @@
 """Other finders: a transformer and a CNN against the EGNN, trained and tested the same way.
 
 Used by notebooks/kaggle_attention_finder.ipynb and notebooks/kaggle_cnn_finder.ipynb; runs
-anywhere (GPU or CPU). Three commands:
+anywhere (GPU or CPU). Four commands (status prints the runs not finished yet):
 
     python scripts/pilots/finder_architectures.py train --models attention egnn_scratch \\
         --seeds 0 1 2 --runs <dir> --minutes 600
@@ -349,6 +349,21 @@ def summary(out: dict, kinds: list[str]) -> str:
     return "\n".join(md) + "\n"
 
 
+def status(args) -> None:
+    """Prints, as JSON, the runs that are not finished here or pushed."""
+    runs = Path(args.runs)
+    print(
+        json.dumps(
+            [
+                f"{m}_s{s}"
+                for m in args.models
+                for s in args.seeds
+                if not finished(runs, f"{m}_s{s}")
+            ]
+        )
+    )
+
+
 def main() -> None:
     ap = argparse.ArgumentParser(description=__doc__.split("\n\n")[0])
     sub = ap.add_subparsers(dest="command", required=True)
@@ -374,8 +389,13 @@ def main() -> None:
     e.add_argument("--out", required=True)
     e.add_argument("--device", default=None)
     e.add_argument("--max-examples", type=int, default=None, help="per defect kind (quick checks)")
+    st = sub.add_parser("status")
+    st.add_argument("--models", nargs="+", choices=list(MODELS), required=True)
+    st.add_argument("--seeds", nargs="+", type=int, default=[0, 1, 2])
+    st.add_argument("--runs", required=True)
     args = ap.parse_args()
-    {"train": train, "export": export, "evaluate": evaluate}[args.command](args)
+    commands = {"train": train, "export": export, "evaluate": evaluate, "status": status}
+    commands[args.command](args)
 
 
 if __name__ == "__main__":
