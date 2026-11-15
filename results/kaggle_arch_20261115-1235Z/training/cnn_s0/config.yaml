@@ -1,0 +1,48 @@
+name: cnn_s0
+task: detect
+seed: 0
+data: data/ka2d_256_point_defects
+model:
+  name: grid_unet
+  grid: 128
+  blob: 0.15
+  channels: &id001
+  - 16
+  - 32
+  - 48
+  - 64
+  - 96
+  n_classes: 5
+  augment: true
+  tta: true
+init_from: null
+kind_probs:
+  vacancy: 0.25
+  interstitial: 0.25
+  frenkel: 0.25
+  antisite: 0.25
+p_clean: 0.2
+class_weight_power: 0.5
+optim:
+  lr: 0.0002
+  weight_decay: 0.0
+  batch_size: 16
+  n_updates: 20000
+  grad_clip: 1.0
+  ema: 0.999
+n_val: 200
+log_every: 100
+val_every: 1000
+ckpt_every: 1000
+log_steps: true
+max_minutes: 550
+threads: 2
+runs_root: /kaggle/working/arch_cnn/runs
+resolved_model:
+  name: grid_unet
+  grid: 128
+  blob: 0.15
+  channels: *id001
+  n_classes: 5
+  augment: true
+  tta: true
