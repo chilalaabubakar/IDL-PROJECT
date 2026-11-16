@@ -25,7 +25,7 @@ then to label the atoms that belong to a defect (the finder).
 
 ## Documents
 
-- [Report](paper/point_defects_report.pdf) (23 pages): the complete study.
+- [Report](paper/point_defects_report.pdf) (25 pages): the complete study.
 - [Summary in plain language](docs/Point_Defects_Study_Summary.docx) (Word): the materials
   science, the deep learning and what the study shows, for readers new to either field.
 - [Method and results in detail](docs/POINT_DEFECTS.md).

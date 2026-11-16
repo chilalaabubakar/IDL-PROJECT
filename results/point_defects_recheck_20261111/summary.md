@@ -20,29 +20,29 @@ Restored (the original glass after correcting the atoms and minimising):
 
 Learned finder against each baseline on the same defects (McNemar's exact test; the counts are defects that only one of the two gets right):
 
-| Defect | Comparison | Only the finder | Only the baseline | p |
-|---|---|---|---|---|
-| Vacancy | found: finder vs cell size | 49 | 5 | < 0.001 |
-| Vacancy | restored: finder vs cell size | 31 | 5 | < 0.001 |
-| Vacancy | found: finder vs unlike neighbours | 87 | 6 | < 0.001 |
-| Vacancy | restored: finder vs unlike neighbours | 65 | 2 | < 0.001 |
-| Vacancy | found: finder vs atom energy | 85 | 5 | < 0.001 |
-| Vacancy | restored: finder vs atom energy | 58 | 3 | < 0.001 |
-| Interstitial | found: finder vs cell size | 79 | 9 | < 0.001 |
-| Interstitial | restored: finder vs cell size | 62 | 3 | < 0.001 |
-| Interstitial | found: finder vs unlike neighbours | 50 | 6 | < 0.001 |
-| Interstitial | restored: finder vs unlike neighbours | 37 | 4 | < 0.001 |
-| Interstitial | found: finder vs atom energy | 48 | 4 | < 0.001 |
-| Interstitial | restored: finder vs atom energy | 36 | 2 | < 0.001 |
-| Antisite | found: finder vs cell size | 74 | 9 | < 0.001 |
-| Antisite | restored: finder vs cell size | 57 | 0 | < 0.001 |
-| Antisite | found: finder vs unlike neighbours | 49 | 14 | < 0.001 |
-| Antisite | restored: finder vs unlike neighbours | 47 | 2 | < 0.001 |
-| Antisite | found: finder vs atom energy | 55 | 15 | < 0.001 |
-| Antisite | restored: finder vs atom energy | 47 | 3 | < 0.001 |
-| Frenkel pair | found: finder vs cell size | 47 | 19 | < 0.001 |
-| Frenkel pair | restored: finder vs cell size | 19 | 0 | < 0.001 |
-| Frenkel pair | found: finder vs unlike neighbours | 38 | 11 | < 0.001 |
-| Frenkel pair | restored: finder vs unlike neighbours | 18 | 1 | < 0.001 |
-| Frenkel pair | found: finder vs atom energy | 37 | 18 | 0.014 |
-| Frenkel pair | restored: finder vs atom energy | 17 | 9 | 0.169 |
+| Defect | Comparison | Only the finder | Only the baseline | p | p, Holm (12 per family) |
+|---|---|---|---|---|---|
+| Vacancy | found: finder vs cell size | 49 | 5 | < 0.001 | < 0.001 |
+| Vacancy | restored: finder vs cell size | 31 | 5 | < 0.001 | < 0.001 |
+| Vacancy | found: finder vs unlike neighbours | 87 | 6 | < 0.001 | < 0.001 |
+| Vacancy | restored: finder vs unlike neighbours | 65 | 2 | < 0.001 | < 0.001 |
+| Vacancy | found: finder vs atom energy | 85 | 5 | < 0.001 | < 0.001 |
+| Vacancy | restored: finder vs atom energy | 58 | 3 | < 0.001 | < 0.001 |
+| Interstitial | found: finder vs cell size | 79 | 9 | < 0.001 | < 0.001 |
+| Interstitial | restored: finder vs cell size | 62 | 3 | < 0.001 | < 0.001 |
+| Interstitial | found: finder vs unlike neighbours | 50 | 6 | < 0.001 | < 0.001 |
+| Interstitial | restored: finder vs unlike neighbours | 37 | 4 | < 0.001 | < 0.001 |
+| Interstitial | found: finder vs atom energy | 48 | 4 | < 0.001 | < 0.001 |
+| Interstitial | restored: finder vs atom energy | 36 | 2 | < 0.001 | < 0.001 |
+| Antisite | found: finder vs cell size | 74 | 9 | < 0.001 | < 0.001 |
+| Antisite | restored: finder vs cell size | 57 | 0 | < 0.001 | < 0.001 |
+| Antisite | found: finder vs unlike neighbours | 49 | 14 | < 0.001 | < 0.001 |
+| Antisite | restored: finder vs unlike neighbours | 47 | 2 | < 0.001 | < 0.001 |
+| Antisite | found: finder vs atom energy | 55 | 15 | < 0.001 | < 0.001 |
+| Antisite | restored: finder vs atom energy | 47 | 3 | < 0.001 | < 0.001 |
+| Frenkel pair | found: finder vs cell size | 47 | 19 | < 0.001 | 0.002 |
+| Frenkel pair | restored: finder vs cell size | 19 | 0 | < 0.001 | < 0.001 |
+| Frenkel pair | found: finder vs unlike neighbours | 38 | 11 | < 0.001 | < 0.001 |
+| Frenkel pair | restored: finder vs unlike neighbours | 18 | 1 | < 0.001 | < 0.001 |
+| Frenkel pair | found: finder vs atom energy | 37 | 18 | 0.014 | 0.014 |
+| Frenkel pair | restored: finder vs atom energy | 17 | 9 | 0.169 | 0.169 |

@@ -56,32 +56,38 @@
     "found: finder vs geometry": {
      "only_first": 49,
      "only_second": 5,
-     "p": 3.8913883226854296e-10
+     "p": 3.8913883226854296e-10,
+     "p_holm": 2.7239718258798007e-09
     },
     "restored: finder vs geometry": {
      "only_first": 31,
      "only_second": 5,
-     "p": 1.2913485988974571e-05
+     "p": 1.2913485988974571e-05,
+     "p_holm": 3.8740457966923714e-05
     },
     "found: finder vs bonds": {
      "only_first": 87,
      "only_second": 6,
-     "p": 1.6504649136152465e-19
+     "p": 1.6504649136152465e-19,
+     "p_holm": 1.815511404976771e-18
     },
     "restored: finder vs bonds": {
      "only_first": 65,
      "only_second": 2,
-     "p": 3.088620938868081e-17
+     "p": 3.088620938868081e-17,
+     "p_holm": 3.397483032754889e-16
     },
     "found: finder vs energy": {
      "only_first": 85,
      "only_second": 5,
-     "p": 7.532842063484042e-20
+     "p": 7.532842063484042e-20,
+     "p_holm": 9.03941047618085e-19
     },
     "restored: finder vs energy": {
      "only_first": 58,
      "only_second": 3,
-     "p": 3.2857397358476703e-14
+     "p": 3.2857397358476703e-14,
+     "p_holm": 2.9571657622629033e-13
     }
    }
   },
@@ -141,32 +147,38 @@
     "found: finder vs geometry": {
      "only_first": 79,
      "only_second": 9,
-     "p": 4.152441283052301e-15
+     "p": 4.152441283052301e-15,
+     "p_holm": 4.152441283052301e-14
     },
     "restored: finder vs geometry": {
      "only_first": 62,
      "only_second": 3,
-     "p": 2.4842324378160363e-15
+     "p": 2.4842324378160363e-15,
+     "p_holm": 2.4842324378160363e-14
     },
     "found: finder vs bonds": {
      "only_first": 50,
      "only_second": 6,
-     "p": 1.0182093779231849e-09
+     "p": 1.0182093779231849e-09,
+     "p_holm": 6.109256267539109e-09
     },
     "restored: finder vs bonds": {
      "only_first": 37,
      "only_second": 4,
-     "p": 1.0258372640237212e-07
+     "p": 1.0258372640237212e-07,
+     "p_holm": 5.129186320118606e-07
     },
     "found: finder vs energy": {
      "only_first": 48,
      "only_second": 4,
-     "p": 1.3065282189472782e-10
+     "p": 1.3065282189472782e-10,
+     "p_holm": 1.0452225751578226e-09
     },
     "restored: finder vs energy": {
      "only_first": 36,
      "only_second": 2,
-     "p": 5.398760549724102e-09
+     "p": 5.398760549724102e-09,
+     "p_holm": 3.239256329834461e-08
     }
    }
   },
@@ -226,32 +238,38 @@
     "found: finder vs geometry": {
      "only_first": 74,
      "only_second": 9,
-     "p": 7.707195762739296e-14
+     "p": 7.707195762739296e-14,
+     "p_holm": 6.936476186465366e-13
     },
     "restored: finder vs geometry": {
      "only_first": 57,
      "only_second": 0,
-     "p": 1.3877787807814457e-17
+     "p": 1.3877787807814457e-17,
+     "p_holm": 1.6653345369377348e-16
     },
     "found: finder vs bonds": {
      "only_first": 49,
      "only_second": 14,
-     "p": 1.1123023000449022e-05
+     "p": 1.1123023000449022e-05,
+     "p_holm": 4.449209200179609e-05
     },
     "restored: finder vs bonds": {
      "only_first": 47,
      "only_second": 2,
-     "p": 4.355626970209414e-12
+     "p": 4.355626970209414e-12,
+     "p_holm": 3.484501576167531e-11
     },
     "found: finder vs energy": {
      "only_first": 55,
      "only_second": 15,
-     "p": 1.652519847797991e-06
+     "p": 1.652519847797991e-06,
+     "p_holm": 8.262599238989955e-06
     },
     "restored: finder vs energy": {
      "only_first": 47,
      "only_second": 3,
-     "p": 3.708322537931963e-11
+     "p": 3.708322537931963e-11,
+     "p_holm": 2.595825776552374e-10
     }
    }
   },
@@ -311,32 +329,38 @@
     "found: finder vs geometry": {
      "only_first": 47,
      "only_second": 19,
-     "p": 0.0007561070639613921
+     "p": 0.0007561070639613921,
+     "p_holm": 0.0015122141279227841
     },
     "restored: finder vs geometry": {
      "only_first": 19,
      "only_second": 0,
-     "p": 3.814697265625e-06
+     "p": 3.814697265625e-06,
+     "p_holm": 1.52587890625e-05
     },
     "found: finder vs bonds": {
      "only_first": 38,
      "only_second": 11,
-     "p": 0.00014197068519905542
+     "p": 0.00014197068519905542,
+     "p_holm": 0.00042591205559716627
     },
     "restored: finder vs bonds": {
      "only_first": 18,
      "only_second": 1,
-     "p": 7.62939453125e-05
+     "p": 7.62939453125e-05,
+     "p_holm": 0.000152587890625
     },
     "found: finder vs energy": {
      "only_first": 37,
      "only_second": 18,
-     "p": 0.014453833533827728
+     "p": 0.014453833533827728,
+     "p_holm": 0.014453833533827728
     },
     "restored: finder vs energy": {
      "only_first": 17,
      "only_second": 9,
-     "p": 0.16863754391670227
+     "p": 0.16863754391670227,
+     "p_holm": 0.16863754391670227
     }
    },
    "flagged_displaced_atom": {

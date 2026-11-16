@@ -127,6 +127,17 @@ def join(parts: list[dict], *keys: str) -> list:
     return out
 
 
+def holm(p_values: list[float]) -> list[float]:
+    """Holm's step-down correction for multiple comparisons (adjusted p values, same order)."""
+    m = len(p_values)
+    order = np.argsort(p_values)
+    adjusted, running = [0.0] * m, 0.0
+    for rank, i in enumerate(order):
+        running = max(running, min(1.0, (m - rank) * p_values[i]))
+        adjusted[i] = running
+    return adjusted
+
+
 def p_text(p: float) -> str:
     return "$p<0.001$" if p < 0.001 else f"$p={p:.3f}$" if p < 0.1 else f"$p={p:.2f}$"
 
@@ -201,8 +212,10 @@ def experiments(K: dict) -> dict[str, str]:
         "% written by make_report_numbers.py\n"
         "\\begin{table}[t]\n\\centering\n"
         "\\caption{The comparisons made on the way, on the test defects (\\%). The numbers at the "
-        "left are those of the experimental iterations. $^{\\dagger}$Measured with the finder "
-        "after 20,000 updates.}\n"
+        "left are those of the experimental iterations. Some of these choices were made after "
+        "test results of an earlier version had been seen, so the comparisons are a record "
+        "made after the fact, not independent tests (Section~\\ref{sec:iterations}). "
+        "$^{\\dagger}$Measured with the finder after 20,000 updates.}\n"
         "\\label{tab:experiments}\n\\footnotesize\n"
         "\\begin{tabularx}{\\linewidth}{@{}r>{\\raggedright\\arraybackslash}p{1.12in}"
         ">{\\raggedright\\arraybackslash}p{1.2in}>{\\raggedright\\arraybackslash}X"
@@ -296,6 +309,73 @@ def experiments(K: dict) -> dict[str, str]:
     )
     num.update(stability(seeds))
     num.update(finders())
+    return num
+
+
+OCC = RES / "defect_occupancy.json"
+OCC_KEY = {"pair": "pair", "close pair": "close", "antisite-like": "anti", "complex": "complex", "none": "none"}  # fmt: skip
+
+
+def occupancy(each: dict) -> dict[str, str]:
+    """Vacancies by the removed species, and Frenkel pairs by what they became (definition C:
+    scripts/pilots/defect_occupancy.py): rates of every method on each subset."""
+    num: dict[str, str] = {}
+    if not OCC.exists():
+        return num
+    occ = json.loads(OCC.read_text())
+    rng = np.random.default_rng(2)
+    methods = (*METHODS, "ceiling")
+
+    def rates(kind: str, mask: np.ndarray, prefix: str) -> None:
+        e = each[kind]
+        glass = np.asarray(e["glass"])[mask]
+        num[f"{prefix}-n"] = str(int(mask.sum()))
+        for what in ("found", "restored"):
+            for m in methods:
+                if m not in e[what]:
+                    continue
+                hit = np.asarray(e[what][m], dtype=float)[mask]
+                lo, hi = interval(hit, glass, rng)
+                num[f"{prefix}-{what}-{m}"] = pct(float(hit.mean()))
+                num[f"{prefix}-{what}-{m}-lo"] = f"{100 * lo:.0f}"
+                num[f"{prefix}-{what}-{m}-hi"] = f"{100 * hi:.0f}"
+        for what in ("found", "restored"):
+            t = mcnemar(np.asarray(e[what]["finder"])[mask], np.asarray(e[what]["energy"])[mask])
+            num[f"{prefix}-p-{what}-energy"] = p_text(t["p"])
+
+    # ---- vacancies: the removed atom was A or B
+    v = occ["vacancy"]
+    assert v["glass"] == each["vacancy"]["glass"]  # the same defects, in the same order
+    removed = np.asarray(v["removed_species"])
+    for s, name in ((0, "vacA"), (1, "vacB")):
+        rates("vacancy", removed == s, name)
+    # ---- Frenkel pairs: what the 150 real ones are (definition C)
+    f = occ["frenkel"]
+    real = np.asarray(f["real"])
+    cls = np.asarray(f["cls"])[real]
+    assert np.asarray(f["glass"])[real].tolist() == each["frenkel"]["glass"]
+    for c, key in OCC_KEY.items():
+        num[f"fp-n-{key}"] = str(int((cls == c).sum()))
+    num["fp-n-pair-pure"] = str(
+        int(
+            ((np.asarray(f["cls"]) == "pair") & (np.asarray(f["species_changed"]) == 0))[real].sum()
+        )
+    )
+    rates("frenkel", cls == "pair", "fpair")
+    rates("frenkel", cls != "pair", "fother")
+    # ---- how well the rule works on defects whose answer is known (test split)
+    val = occ["validation"]["test"]
+    num["occ-vac"] = pct(val["vacancy"]["classes"].get("vacancy", 0) / val["vacancy"]["examples"])
+    num["occ-int"] = pct(
+        val["interstitial"]["classes"].get("interstitial", 0) / val["interstitial"]["examples"]
+    )
+    num["occ-anti"] = pct(
+        val["antisite"]["classes"].get("antisite-like", 0) / val["antisite"]["examples"]
+    )
+    a = val["antisite"]["classes"]
+    num["occ-anti-pairlike"] = pct((a.get("pair", 0) + a.get("close pair", 0)) / val["antisite"]["examples"])  # fmt: skip
+    num["occ-undone"] = str(val["frenkel_undone"]["classes"].get("none", 0))
+    num["occ-undone-n"] = str(val["frenkel_undone"]["examples"])
     return num
 
 
@@ -521,6 +601,7 @@ def main() -> None:
     rng = np.random.default_rng(0)
     out: dict = {"kinds": {}}
     each_found: dict = {}  # per kind: the finder's result on every test defect, and its glass
+    per_defect: dict = {}  # per kind: every method's result on every test defect
     for k in KINDS:
         e, b, r = pieces("finder", k), pieces("baseline", k), pieces("ceiling", k)
         c = pieces("bonds", k)
@@ -568,6 +649,14 @@ def main() -> None:
             )
         out["kinds"][k] = res
         each_found[k] = (found["finder"], glass)
+        per_defect[k] = dict(found=found, restored=restored, glass=glass)
+    # Holm's correction within each family of twelve comparisons (finder against the three
+    # measures, four defect types): one family for "found", one for "restored"
+    for what in ("found", "restored"):
+        keys = [(k, f"{what}: finder vs {m}") for k in KINDS for m in BASELINES]
+        adjusted = holm([out["kinds"][k]["tests"][key]["p"] for k, key in keys])
+        for (k, key), p_adj in zip(keys, adjusted):
+            out["kinds"][k]["tests"][key]["p_holm"] = p_adj
     out["glass_level"] = level["glass_level"]
     out["left_out_already_original"] = level["left_out_already_original"]
     (ROOT / "paper/data").mkdir(exist_ok=True)
@@ -604,8 +693,10 @@ def main() -> None:
     lead = [float(num[f"lead-found-{k}"]) for k in three]
     num["lead-found-min"], num["lead-found-max"] = f"{min(lead):.0f}", f"{max(lead):.0f}"
     # the least significant of the finder's comparisons for the three defects it wins
-    for what in ("found", "restored"):
-        worst = max(K[k]["tests"][f"{what}: finder vs {m}"]["p"] for k in three for m in BASELINES)
+    for what in ("found", "restored"):  # after Holm's correction
+        worst = max(
+            K[k]["tests"][f"{what}: finder vs {m}"]["p_holm"] for k in three for m in BASELINES
+        )
         num[f"p-worst-{what}"] = "p<0.001" if worst < 0.001 else f"p\\le {worst:.3f}"
     num["n-test"] = str(sum(K[k]["n"] for k in KINDS))
     for who, name in (("model", "finder"), ("energy", "energy")):  # exactly the displaced atom
@@ -623,8 +714,11 @@ def main() -> None:
     for k in KINDS:
         for key, t in K[k]["tests"].items():
             what, other = key.split(": finder vs ")
-            num[f"p-{what}-{other}-{k}"] = "<0.001" if t["p"] < 0.001 else f"{t['p']:.3f}"
+            for name, p_value in ((f"p-{what}-{other}-{k}", t["p_holm"]), (f"praw-{what}-{other}-{k}", t["p"])):  # fmt: skip
+                num[name] = "<0.001" if p_value < 0.001 else f"{p_value:.3f}"
+    num["n-tests-family"] = str(len(KINDS) * len(BASELINES))
     num.update(experiments(K))
+    num.update(occupancy(per_defect))
     num.update(local_pressure(each_found))
     lines = [f"\\pdset{{{k}}}{{{v}}}" for k, v in sorted(num.items())]
     (ROOT / "paper/pd_numbers.tex").write_text(
@@ -652,7 +746,9 @@ def main() -> None:
         "\\caption{Defects found (\\%): the flagged atom lies within $1.5\\sigma$ of the defect. "
         "Brackets: the range that holds the true rate with 95\\% confidence "
         "(Section~\\ref{sec:test}). Only the atom energy uses the interatomic potential. "
-        "Bold: the best method.}\n"
+        "Bold: the best method. Frenkel pair: a flag within $1.5\\sigma$ of either end of the "
+        "pair counts; the finder flags the displaced atom itself in \\pd{frenkel-exact-finder}\\% "
+        "of the pairs and the atom energy in \\pd{frenkel-exact-energy}\\%.}\n"
         "\\label{tab:found}\n\\footnotesize\\setlength{\\tabcolsep}{3.5pt}\n"
         "\\begin{tabular}{@{}lcccccc@{}}\n\\toprule\n"
         " & & \\multicolumn{3}{c}{No potential} & Potential & \\\\\n"
@@ -722,16 +818,16 @@ def main() -> None:
         "Learned finder against each baseline on the same defects (McNemar's exact test; the "
         "counts are defects that only one of the two gets right):",
         "",
-        "| Defect | Comparison | Only the finder | Only the baseline | p |",
-        "|---|---|---|---|---|",
+        "| Defect | Comparison | Only the finder | Only the baseline | p | p, Holm (12 per family) |",
+        "|---|---|---|---|---|---|",
     ]
     for k in KINDS:
         for key, t in K[k]["tests"].items():
-            p_value = "< 0.001" if t["p"] < 0.001 else f"{t['p']:.3f}"
+            p_raw, p_adj = ("< 0.001" if x < 0.001 else f"{x:.3f}" for x in (t["p"], t["p_holm"]))
             what, other = key.split(": finder vs ")
             md.append(
                 f"| {LABEL[k]} | {what}: finder vs {HEAD[other].lower()} | {t['only_first']} | "
-                f"{t['only_second']} | {p_value} |"
+                f"{t['only_second']} | {p_raw} | {p_adj} |"
             )
     (RES / "summary.md").write_text("\n".join(md) + "\n")
     print("\n".join(md))
