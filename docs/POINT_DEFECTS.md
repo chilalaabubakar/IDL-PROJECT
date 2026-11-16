@@ -19,6 +19,35 @@ The model is the one we already have: the periodic EGNN denoiser trained with DM
 That loss teaches the network to remove a perturbation from a glass. Here the perturbation is
 a physical defect instead of only random noise.
 
+## Earlier work, and what is new here
+
+We cannot claim to be the first to identify point defects in a glass. What earlier work
+covers (Section 2 of the report):
+
+| Earlier work | What it does | What it leaves open |
+|---|---|---|
+| Bennett et al. 1979; Delaye & Limoge 1993 | Remove atoms from a Lennard-Jones glass: do the vacancies survive relaxation? | No method to locate a relaxed vacancy |
+| Laakkonen & Nieminen 1988 (J. Phys. C 21, 3663) | Insert vacancies and interstitials in a one-species 3D Lennard-Jones glass, relax, identify them by the empty space (vacancies) and the local pressure (interstitials) | One species, classical measures; no chemical defects, no learned finder |
+| Cubuk et al. 2015; Richard et al. 2020 | Learned and classical indicators of where a glass will rearrange, compared on the same samples | A tendency to move, not a point defect with a known place |
+| Yuan et al. 2023; Morrow et al. 2024; Ciarella et al. 2023 | Machine learning finds a vacancy-like motif (metallic glass), coordination defects (amorphous silicon), tunnelling two-level systems | The defect is defined by the rule or by a pair of energy minima; no exact answer to score against |
+| Hsu et al. 2024; Fang et al. 2026 (arXiv:2608.22074) | Denoising, and a learned classifier, locate point defects in crystals, scored against the lattice | Crystals: the lattice supplies the answer |
+
+**The question that is open, and ours:** how well does a *learned* model locate relaxed point
+defects of known kind and origin in a *glass*, including faults in the chemical order of a
+two-species glass, from positions and species alone, and how does it compare with classical
+measures on the same unseen defects?
+
+Three statements follow from this and are made in the report:
+
+- The inserted defects are **controlled test cases** with a known answer, not a picture of how
+  faults arise in a real glass (in metallic glasses atoms move collectively, Faupel et al.
+  2003).
+- "Without a potential" holds **once the finder is trained**; its training examples come from
+  a simulation that uses the potential.
+- The classical probe for interstitials of the 1988 study, **local pressure**, was added as a
+  check: it finds 19% of the test interstitials (finder 50%, atom energy 28%) and 8.5-16% of
+  the other types (`results/point_defects_recheck_20261111/README.md`).
+
 ## The four defects
 
 Each defect is made by a known operation on a known defect-free glass (an inherent structure

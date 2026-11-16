@@ -299,6 +299,45 @@ def experiments(K: dict) -> dict[str, str]:
     return num
 
 
+def local_pressure(finder: dict) -> dict[str, str]:
+    """A fourth measure without learning, the local pressure of each atom (found only).
+
+    From structural_signatures.json; the rule was chosen on the validation glasses. Its own
+    random numbers, so that the intervals of the tables do not depend on this check.
+    """
+    num: dict[str, str] = {}
+    path = RES / "structural_signatures.json"
+    sig = json.loads(path.read_text()) if path.exists() else {}
+    if "local_pressure" not in sig:
+        return num
+    rng = np.random.default_rng(1)
+    rates = {}
+    for variant, key in (("mean_area", "press"), ("own_cell", "presscell")):
+        for k in KINDS:
+            e = sig["local_pressure"][variant][k]
+            hits, glass = finder[k]
+            assert e["glass"] == glass, k  # the same defects, in the same order
+            lo, hi = interval(e["found_each"], glass, rng)
+            rate = float(np.mean(e["found_each"]))
+            rates[(key, k)] = rate
+            num[f"{key}-{k}"] = pct(rate)
+            num[f"{key}-{k}-lo"], num[f"{key}-{k}-hi"] = f"{100 * lo:.0f}", f"{100 * hi:.0f}"
+            num[f"{key}-{k}-rule"] = e["rule"]
+            num[f"{key}-p-{k}"] = p_text(mcnemar(hits, e["found_each"])["p"])
+    ref = sig["local_pressure"]["defect_free_virial"]
+    num["press-ref-a"] = f"{ref['A']['mean']:.1f}\\pm{ref['A']['sd']:.1f}"
+    num["press-ref-b"] = f"{ref['B']['mean']:.1f}\\pm{ref['B']['sd']:.1f}"
+    on_val = sig["local_pressure"]["mean_area"]["interstitial"]["validation"]
+    num["press-val-unusual"], num["press-val-highest"] = (
+        pct(on_val["most unusual"]),
+        pct(on_val["highest"]),
+    )
+    for key in ("press", "presscell"):
+        values = [rates[(key, k)] for k in KINDS]
+        num[f"{key}-min"], num[f"{key}-max"] = pct(min(values)), pct(max(values))
+    return num
+
+
 def stability(seeds: dict) -> dict[str, str]:
     """Table "stability" and its numbers: gradients and spikes in the logged training runs."""
     num: dict[str, str] = {}
@@ -481,6 +520,7 @@ def main() -> None:
     level = json.loads((RES / "glass_level.json").read_text())
     rng = np.random.default_rng(0)
     out: dict = {"kinds": {}}
+    each_found: dict = {}  # per kind: the finder's result on every test defect, and its glass
     for k in KINDS:
         e, b, r = pieces("finder", k), pieces("baseline", k), pieces("ceiling", k)
         c = pieces("bonds", k)
@@ -527,6 +567,7 @@ def main() -> None:
                 restored["finder"], restored[other]
             )
         out["kinds"][k] = res
+        each_found[k] = (found["finder"], glass)
     out["glass_level"] = level["glass_level"]
     out["left_out_already_original"] = level["left_out_already_original"]
     (ROOT / "paper/data").mkdir(exist_ok=True)
@@ -584,6 +625,7 @@ def main() -> None:
             what, other = key.split(": finder vs ")
             num[f"p-{what}-{other}-{k}"] = "<0.001" if t["p"] < 0.001 else f"{t['p']:.3f}"
     num.update(experiments(K))
+    num.update(local_pressure(each_found))
     lines = [f"\\pdset{{{k}}}{{{v}}}" for k, v in sorted(num.items())]
     (ROOT / "paper/pd_numbers.tex").write_text(
         "% written by make_report_numbers.py\n" + "\n".join(lines) + "\n"

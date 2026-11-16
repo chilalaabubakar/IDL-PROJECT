@@ -47,6 +47,20 @@ def ka_energy(s: Structures, per_atom: bool = False) -> Tensor:
     return e_atom if per_atom else e_atom.sum(-1)
 
 
+def ka_virial(s: Structures) -> Tensor:
+    """Per-atom virial [B, N]: w_i = 1/2 sum_j (-r_ij dU/dr_ij), each pair split equally.
+
+    Positive where an atom is squeezed by its neighbours, negative where it is pulled.
+    The pressure of the whole structure at zero temperature is sum_i w_i / (d V), here
+    with d = 2 and V the box area; w_i / (d V / N) is the local pressure of an atom
+    (Laakkonen and Nieminen, J. Phys. C 21, 3663 (1988), used it to identify interstitials).
+    """
+    _, r2, sig2, eps, mask = _pair_terms(s)
+    x3 = (sig2 / r2) ** 3
+    w = 12 * eps * (2 * x3 * x3 - x3)  # half of -r dU/dr = 24 eps (2 (s/r)^12 - (s/r)^6)
+    return torch.where(mask, w, torch.zeros_like(w)).sum(-1)
+
+
 def ka_forces(s: Structures) -> Tensor:
     """Forces [B, N, 2] = -dE/dpos (analytic)."""
     vec, r2, sig2, eps, mask = _pair_terms(s)

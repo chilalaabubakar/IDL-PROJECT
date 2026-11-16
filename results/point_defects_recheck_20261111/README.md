@@ -167,6 +167,35 @@ atom within 1.5σ), validation split, real defects:
 
 Bold: the rule each baseline uses.
 
+## Local pressure: a fourth measure, for finding only
+
+The one earlier study that identified inserted point defects in a glass (Laakkonen and
+Nieminen, J. Phys. C 21, 3663 (1988): one species, three dimensions) recognised interstitials
+by the local pressure on each atom and vacancies by the empty space. Empty space is what the
+cell-size baseline measures. Local pressure was missing from our comparison, and interstitials
+are where the finder leads most, so it was added as a check
+(`structural_signatures.json`, key `local_pressure`).
+
+For every atom, w = 1/2 sum over neighbours of (-r dU/dr): positive where the atom is
+squeezed (`glassdiff.physics.ka_potential.ka_virial`; the sum over atoms reproduces the
+pressure -dE/dA of the box). It is compared with the atoms of the same species in defect-free
+glass (A: 6.5 ± 5.4, B: 2.9 ± 5.4) and one atom is flagged. The rule was chosen on the
+validation glasses.
+
+| | Vacancy | Interstitial | Frenkel pair | Antisite |
+|---|---|---|---|---|
+| Rule chosen on validation | lowest | most unusual | lowest | lowest |
+| Found on validation | 8% | 21.5% | 16.4% | 13% |
+| **Found on test** | **8.5%** [5, 12] | **19%** [14, 25] | **10.7%** [6, 16] | **16%** [11, 22] |
+| Same, pressure with the atom's own cell area | 7% | 16.5% | 7.3% | 15% |
+| For comparison: atom energy | 29.5% | 28% | 32.7% | 29% |
+| For comparison: learned finder | 69.5% | 50% | 45.3% | 49% |
+
+Local pressure finds fewer defects than the atom energy and the count of unlike neighbours
+for every type (finder against local pressure: McNemar p < 0.001 for every type). The relaxed
+interstitial has made room for itself, and in this two-species glass the pressure on an atom
+of defect-free glass varies as much as its mean. It was not carried through the repair.
+
 ## The repair networks without a potential
 
 `repair_networks.json` (`scripts/eval_point_defect_repair.py --no-minimise`): the count and
