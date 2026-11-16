@@ -5,7 +5,7 @@ from pathlib import Path
 import pytest
 import torch
 
-from glassdiff.physics.ka_potential import ka_energy, ka_forces
+from glassdiff.physics.ka_potential import ka_energy, ka_forces, ka_virial
 from glassdiff.types import Structures
 
 DATA = Path("data/ka2d_256/test.npz")
@@ -47,6 +47,26 @@ def test_forces_match_finite_differences(make_lattice):
         minus[0, atom, axis] -= h
         de = ka_energy(s.with_pos(plus)) - ka_energy(s.with_pos(minus))
         assert f[0, atom, axis].item() == pytest.approx(-(de / (2 * h)).item(), rel=1e-5, abs=1e-6)
+
+
+def test_virial_gives_the_pressure(make_lattice):
+    """The per-atom virials sum to d V P, with P = -dE/dV from scaling box and positions."""
+    s = make_lattice(2, 8, jitter=0.1, seed=3)
+    area = s.box.prod(-1)
+    h = 1e-6
+    up = ka_energy(Structures(s.pos * (1 + h), s.types, s.box * (1 + h)))
+    down = ka_energy(Structures(s.pos * (1 - h), s.types, s.box * (1 - h)))
+    pressure = -(up - down) / (area * ((1 + h) ** 2 - (1 - h) ** 2))
+    w = ka_virial(s)
+    assert w.shape == s.types.shape
+    assert torch.allclose(w.sum(-1) / (2 * area), pressure, rtol=1e-6, atol=1e-8)
+    # two atoms closer than the minimum of the potential push each other apart: positive
+    box = torch.tensor([[20.0, 20.0]], dtype=torch.float64)
+    pair = torch.tensor([[[5.0, 5.0], [5.9, 5.0]]], dtype=torch.float64)
+    close = ka_virial(Structures(pair, torch.zeros(1, 2, dtype=torch.long), box))
+    assert (close > 0).all() and close[0, 0] == close[0, 1]
+    pair[0, 1, 0] = 6.5  # beyond the minimum (1.12 sigma): they attract, negative
+    assert (ka_virial(Structures(pair, torch.zeros(1, 2, dtype=torch.long), box)) < 0).all()
 
 
 def test_per_atom_energy_matches_lammps_dataset():

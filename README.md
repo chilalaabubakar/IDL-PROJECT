@@ -25,7 +25,7 @@ then to label the atoms that belong to a defect (the finder).
 
 ## Documents
 
-- [Report](paper/point_defects_report.pdf) (22 pages): the complete study.
+- [Report](paper/point_defects_report.pdf) (23 pages): the complete study.
 - [Summary in plain language](docs/Point_Defects_Study_Summary.docx) (Word): the materials
   science, the deep learning and what the study shows, for readers new to either field.
 - [Method and results in detail](docs/POINT_DEFECTS.md).
@@ -56,6 +56,10 @@ without learning is the best of cell size, number of unlike neighbours and atom 
 - A transformer and a CNN, trained like the EGNN from random weights, find 53.6% and 54.0% of
   all defects against 43.5% for the EGNN, without gradient spikes. They match the finder of
   the table above (54.0%), which starts from the denoiser and has three times the training.
+- Earlier work identified inserted vacancies and interstitials in a one-species glass with
+  classical measures (Laakkonen & Nieminen, 1988). Their probe for interstitials, local
+  pressure, finds 19% of ours (finder 50%). What is new here is a learned finder, scored on
+  unseen defects in a two-species glass, against classical measures on the same defects.
 - Numbers and tests: [`results/point_defects_recheck_20261111/`](results/point_defects_recheck_20261111/README.md);
   experiments and ablations: [`results/point_defects_ablations_20261112/`](results/point_defects_ablations_20261112/README.md);
   seeds and stability: [`results/point_defects_seeds_20261114/`](results/point_defects_seeds_20261114/README.md);
