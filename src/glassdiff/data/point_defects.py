@@ -454,6 +454,69 @@ def already_original(d: PointDefectSet, tol: float = 0.05) -> Tensor:
     return torch.tensor(same, dtype=torch.bool)
 
 
+OCCUPANCY_CLASSES = (
+    "pair",  # one empty site and one doubly occupied site, more than one shell apart
+    "close pair",  # the same, within one shell
+    "vacancy",  # one empty site only
+    "interstitial",  # one doubly occupied site only
+    "antisite-like",  # every site singly occupied, some by an atom of the other species
+    "none",  # every site singly occupied by an atom of its own species: no defect
+    "complex",  # anything else (more than one empty or doubly occupied site)
+)
+
+
+def site_occupancy(
+    pos: np.ndarray,
+    types: np.ndarray,
+    orig: np.ndarray,
+    otypes: np.ndarray,
+    box: np.ndarray,
+    shell_factor: float = 1.4,
+) -> dict:
+    """What a relaxed defected glass is, judged against the sites of its original glass.
+
+    Each atom is assigned to the nearest atom of the original glass (its Voronoi cell, as in
+    a Wigner-Seitz analysis of a crystal, with the original glass in place of the lattice).
+    A site is empty, singly or doubly occupied. The class (OCCUPANCY_CLASSES) follows from
+    the number of empty and doubly occupied sites only. A Frenkel pair exists only if exactly
+    one site is empty and one is doubly occupied, more than one neighbour shell apart
+    (shell_factor * sigma_ab for the species of the two sites); within one shell it is a
+    close pair. Singly occupied sites that hold an atom of the other species are listed in
+    `wrong`: they make the class "antisite-like" when no site is empty or doubly occupied,
+    and are recorded, not counted, otherwise.
+    """
+    d = np.linalg.norm(wrap(pos[:, None] - orig[None], box), axis=-1)
+    site = d.argmin(1)
+    count = np.bincount(site, minlength=len(orig))
+    held = np.full(len(orig), -1)
+    held[site] = types  # the species held by a singly occupied site
+    wrong = np.nonzero((count == 1) & (held != otypes))[0]
+    empty, double = np.nonzero(count == 0)[0], np.nonzero(count == 2)[0]
+    more = int((count > 2).sum())
+    out = dict(
+        empty=empty.tolist(), double=double.tolist(), wrong=wrong.tolist(), more=more, gap=None
+    )
+    n_empty, n_double = len(empty), len(double)
+    if more:
+        cls = "complex"
+    elif n_empty == 1 and n_double == 1:
+        e, g = int(empty[0]), int(double[0])
+        gap = float(np.linalg.norm(wrap(orig[e] - orig[g], box)))
+        shell = shell_factor * float(np.asarray(KA_SIGMA)[otypes[e], otypes[g]])
+        out["gap"] = round(gap, 3)
+        cls = "pair" if gap > shell else "close pair"
+    elif n_empty == 1 and n_double == 0:
+        cls = "vacancy"
+    elif n_empty == 0 and n_double == 1:
+        cls = "interstitial"
+    elif n_empty == 0 and n_double == 0:
+        cls = "none" if len(wrong) == 0 else "antisite-like"
+    else:
+        cls = "complex"
+    out["class"] = cls
+    return out
+
+
 def real_defects(data: dict[str, PointDefectSet], tol: float = 0.05) -> dict[str, PointDefectSet]:
     """Every kind without the examples that are the original glass again (already_original)."""
     return {name: d.subset(~already_original(d, tol)) for name, d in data.items()}

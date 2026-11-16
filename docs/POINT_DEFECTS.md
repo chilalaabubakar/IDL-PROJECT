@@ -48,6 +48,25 @@ Three statements follow from this and are made in the report:
   check: it finds 19% of the test interstitials (finder 50%, atom energy 28%) and 8.5-16% of
   the other types (`results/point_defects_recheck_20261111/README.md`).
 
+**Checks made for the report** (`results/point_defects_recheck_20261111/README.md`):
+
+- *Multiple comparisons.* The finder is compared with three measures for four defect types,
+  twelve comparisons for finding and twelve for restoring; the p values are corrected with
+  Holm's method. No conclusion changes (Frenkel found vs atom energy stays at p = 0.014).
+- *Vacancies by species.* 127 test vacancies miss an A atom, 73 a B atom. The finder finds
+  both alike (69.3%, 69.9%); the atom energy finds 40.2% and 11%.
+- *What the Frenkel pairs are (definition C).* Judged by the empty and doubly occupied sites
+  of the original glass, 66 of the 150 test Frenkel pairs are Frenkel pairs; 27 are close
+  pairs, 35 antisite-like, 19 complex, 3 no defect. On the 66 the finder finds 47% and the
+  atom energy 34.8% (p = 0.15). The rule recovers 93% of vacancies, 95.5% of interstitials and
+  all 50 pairs that undid themselves (`scripts/pilots/defect_occupancy.py`).
+- *Disclosures.* The finder of the main results was trained once (intervals cover the test
+  sample only); some development choices were made after earlier test results were seen;
+  the interstitials are all B atoms; the vacancy repair is told the missing species; the
+  repair with the true location given is a reference, not an upper limit; the vector head is
+  force-like (cosine 0.81 with the true force), and four layers reach more than half the
+  box, so results are not explained by reach.
+
 ## The four defects
 
 Each defect is made by a known operation on a known defect-free glass (an inherent structure

@@ -41,12 +41,14 @@ atom energy does. Every route ends with energy minimisation.
 
 What the numbers say:
 
-- **The finder finds more of every defect type than any measure without learning.** Compared
-  on the same defects (McNemar's exact test), its lead in finding is significant against each
-  of the three baselines for each type: p < 0.001 everywhere, except against the atom energy
-  for Frenkel pairs (p = 0.014).
-- **Restoring follows finding** for vacancies, interstitials and antisites (p < 0.001 against
-  each baseline route). For Frenkel pairs every route restores few, and the finder's lead
+- **The finder finds more of every defect type than the measures without learning that we
+  tested.** Compared on the same defects (McNemar's exact test, corrected for the twelve
+  comparisons of each table with Holm's method), its lead in finding is significant against
+  each of the three baselines for each type: p < 0.001 everywhere (cell size, Frenkel pairs:
+  0.002), except against the atom energy for Frenkel pairs (p = 0.014 before and after the
+  correction). `summary.md` lists both p values.
+- **For the finder, restoring follows finding** for vacancies, interstitials and antisites
+  (p < 0.001 against each baseline route, after Holm's correction). For Frenkel pairs every route restores few, and the finder's lead
   over the energy route is within the noise (12.7% vs 7.3%, p = 0.17). The finder flags
   exactly the displaced atom, which the repair has to move back, in only 21% of the pairs
   (the atom energy in 7%).
@@ -55,7 +57,60 @@ What the numbers say:
   28-33%), without the potential. Section "What two simple structural measures see" below
   explains why.
 - **Finding still limits the result:** with the true location given, minimisation restores
-  42-80%.
+  42-80%. "True location given" means: vacancy, an atom of the removed species at the most
+  open point within 1σ of the removed atom's place; interstitial, the added atom removed;
+  Frenkel pair, the displaced atom moved to the most open point within 1σ of its original
+  place; antisite, the two species swapped back; then minimisation. It is a reference, not a
+  strict upper limit.
+- **The brackets cover the test sample only.** The finder was trained once; repeated shorter
+  trainings vary by less than one point (`../point_defects_seeds_20261114/`).
+
+## Vacancies by the species removed
+
+`defect_occupancy.json` (key `vacancy`) gives the species of every removed atom; the rates
+are computed by `paper/make_report_numbers.py`.
+
+| Removed atom | n | Found: finder | Cell size | Unlike neighbours | Atom energy | Restored: finder | Atom energy | True location given |
+|---|---|---|---|---|---|---|---|---|
+| A (large) | 127 | **69.3%** | 56.7% | 40.9% | 40.2% | **49.6%** | 34.6% | 58.3% |
+| B (small) | 73 | **69.9%** | 31.5% | 8.2% | 11% | **60.3%** | 11% | 82.2% |
+
+The finder finds both alike. The measures without learning find far fewer B vacancies: a
+missing small atom leaves little trace on any single neighbour. The repair of a vacancy is told
+the species of the missing atom (part of "the type of defect is given").
+
+## What the Frenkel pairs are (definition C)
+
+`defect_occupancy.json`, from `scripts/pilots/defect_occupancy.py`. A Frenkel pair is made by an
+operation; this checks what the relaxed glass contains. Every atom is assigned to the nearest
+atom of the original glass (`glassdiff.data.point_defects.site_occupancy`, a Wigner-Seitz
+analysis with the original glass as reference) and the empty and doubly occupied sites are
+counted. A Frenkel pair exists only if exactly one site is empty and one is doubly occupied,
+more than one neighbour shell (1.4σ_αβ) apart.
+
+Validation on defects whose answer is known (test split; validation split in brackets):
+
+| Defects | Expected | Got it |
+|---|---|---|
+| 200 vacancies | one empty site | 93% (91.5%) |
+| 200 interstitials | one doubly occupied site | 95.5% (94%) |
+| 50 Frenkel pairs that undid themselves | no defect | 100% (65 of 65) |
+| 200 antisites | no empty or doubly occupied site, species changed | 71% (67.5%); 22% (29%) contain an atom pushed into a neighbouring site |
+
+The 150 real test Frenkel pairs:
+
+| Class | n |
+|---|---|
+| Frenkel pair (40 of them without any species change) | 66 |
+| Close pair (empty and doubly occupied site within one shell) | 27 |
+| Antisite-like (every site singly occupied, two of the wrong species) | 35 |
+| Complex | 19 |
+| No defect | 3 |
+
+On the 66 true pairs: found by the finder 47% [35, 59], atom energy 34.8%, cell size 34.8%,
+unlike neighbours 28.8% (finder vs energy p = 0.15); restored by the finder 18.2%, the energy
+route 9.1% (p = 0.18), true location given 60.6%. On the other 84: found by the finder 44%,
+restored 8.3%. The finder was trained with the old labels (all of them "Frenkel pair").
 
 ## A quarter of the Frenkel pairs are no defects
 

@@ -31,6 +31,7 @@ from glassdiff.data.point_defects import (
     real_defects,
     return_displaced_atom,
     save_point_defects,
+    site_occupancy,
     wrap,
 )
 from glassdiff.models.egnn_pbc import EGNNAtomClassifier
@@ -461,3 +462,35 @@ def test_lammps_minimize_matches_fire(glass):
     assert np.abs(out - made["pos"]).max() < 3.0  # returned in the input frame, not wrapped
     again = minimize_many([(made["pos"], types, box)] * 2, workers=2)
     assert np.allclose(again[0][0], out) and np.allclose(again[1][0], out)
+
+
+def test_site_occupancy_names_each_defect(make_lattice):
+    """Definition C: empty and doubly occupied sites of the original glass, more than one
+    neighbour shell apart for a Frenkel pair."""
+    s = make_lattice(1, 8, jitter=0.03, seed=2)
+    orig, otypes, box = s.pos[0].numpy(), s.types[0].numpy(), s.box[0].numpy()
+    a = box[0] / 8  # lattice spacing, 0.91 sigma
+
+    def judge(pos, types):
+        return site_occupancy(pos, types, orig, otypes, box)
+
+    assert judge(orig, otypes)["class"] == "none"
+    o = judge(np.delete(orig, 10, 0), np.delete(otypes, 10))
+    assert o["class"] == "vacancy" and o["empty"] == [10]
+    extra = orig[10] + np.array([0.3 * a, 0.0])  # an extra B atom next to site 10
+    o = judge(np.vstack([orig, extra]), np.append(otypes, 1))
+    assert o["class"] == "interstitial" and o["double"] == [10]
+    i = int(np.nonzero(otypes == 0)[0][0])  # an A atom and a B atom exchanged
+    j = int(np.nonzero(otypes == 1)[0][0])
+    swapped = otypes.copy()
+    swapped[i], swapped[j] = otypes[j], otypes[i]
+    o = judge(orig, swapped)
+    assert o["class"] == "antisite-like" and sorted(o["wrong"]) == sorted([i, j])
+    # atom 0 moved next to a far site: a Frenkel pair; next to a neighbouring site: a close pair
+    for target, cls in ((27, "pair"), (1, "close pair")):
+        moved = orig.copy()
+        moved[0] = orig[target] + np.array([0.0, 0.3 * a])
+        o = judge(moved, otypes)
+        assert o["class"] == cls and o["empty"] == [0] and o["double"] == [target], (target, o)
+    # two atoms removed: not a single defect
+    assert judge(np.delete(orig, [3, 40], 0), np.delete(otypes, [3, 40]))["class"] == "complex"
