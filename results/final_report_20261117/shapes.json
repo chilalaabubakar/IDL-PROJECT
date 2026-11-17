@@ -1,0 +1,544 @@
+{
+ "finder (EGNN)": {
+  "config": {
+   "name": "egnn_classifier",
+   "hidden": 128,
+   "n_layers": 4,
+   "cutoff": 2.5,
+   "k_max": 64,
+   "n_classes": 5
+  },
+  "total": 523021,
+  "output": [
+   16,
+   256,
+   5
+  ],
+  "blocks": [
+   {
+    "block": "rbf",
+    "shape": [
+     [
+      16,
+      256,
+      64,
+      16
+     ]
+    ],
+    "parameters": 0
+   },
+   {
+    "block": "embed",
+    "shape": [
+     [
+      16,
+      256,
+      128
+     ]
+    ],
+    "parameters": 34304
+   },
+   {
+    "block": "layers.0",
+    "shape": [
+     [
+      16,
+      256,
+      128
+     ],
+     [
+      16,
+      256,
+      2
+     ]
+    ],
+    "parameters": 117890
+   },
+   {
+    "block": "layers.1",
+    "shape": [
+     [
+      16,
+      256,
+      128
+     ],
+     [
+      16,
+      256,
+      2
+     ]
+    ],
+    "parameters": 117890
+   },
+   {
+    "block": "layers.2",
+    "shape": [
+     [
+      16,
+      256,
+      128
+     ],
+     [
+      16,
+      256,
+      2
+     ]
+    ],
+    "parameters": 117890
+   },
+   {
+    "block": "layers.3",
+    "shape": [
+     [
+      16,
+      256,
+      128
+     ],
+     [
+      16,
+      256,
+      2
+     ]
+    ],
+    "parameters": 117890
+   },
+   {
+    "block": "head",
+    "shape": [
+     [
+      16,
+      256,
+      5
+     ]
+    ],
+    "parameters": 17157
+   }
+  ]
+ },
+ "denoiser (EGNN)": {
+  "config": {
+   "name": "egnn_pbc",
+   "hidden": 128,
+   "n_layers": 4,
+   "cutoff": 2.5,
+   "k_max": 64,
+   "sigma_aware": true
+  },
+  "total": 530696,
+  "output": [
+   16,
+   256,
+   2
+  ],
+  "blocks": [
+   {
+    "block": "rbf",
+    "shape": [
+     [
+      16,
+      256,
+      64,
+      16
+     ]
+    ],
+    "parameters": 0
+   },
+   {
+    "block": "embed",
+    "shape": [
+     [
+      16,
+      256,
+      128
+     ]
+    ],
+    "parameters": 59136
+   },
+   {
+    "block": "layers.0",
+    "shape": [
+     [
+      16,
+      256,
+      128
+     ],
+     [
+      16,
+      256,
+      2
+     ]
+    ],
+    "parameters": 117890
+   },
+   {
+    "block": "layers.1",
+    "shape": [
+     [
+      16,
+      256,
+      128
+     ],
+     [
+      16,
+      256,
+      2
+     ]
+    ],
+    "parameters": 117890
+   },
+   {
+    "block": "layers.2",
+    "shape": [
+     [
+      16,
+      256,
+      128
+     ],
+     [
+      16,
+      256,
+      2
+     ]
+    ],
+    "parameters": 117890
+   },
+   {
+    "block": "layers.3",
+    "shape": [
+     [
+      16,
+      256,
+      128
+     ],
+     [
+      16,
+      256,
+      2
+     ]
+    ],
+    "parameters": 117890
+   }
+  ]
+ },
+ "transformer": {
+  "config": {
+   "name": "atom_transformer",
+   "hidden": 128,
+   "n_layers": 4,
+   "n_heads": 8,
+   "ffn": 256,
+   "n_classes": 5
+  },
+  "total": 576677,
+  "output": [
+   16,
+   256,
+   5
+  ],
+  "blocks": [
+   {
+    "block": "env_rbf",
+    "shape": [
+     [
+      16,
+      256,
+      256,
+      16
+     ]
+    ],
+    "parameters": 0
+   },
+   {
+    "block": "species",
+    "shape": [
+     [
+      16,
+      256,
+      128
+     ]
+    ],
+    "parameters": 256
+   },
+   {
+    "block": "env",
+    "shape": [
+     [
+      16,
+      256,
+      128
+     ]
+    ],
+    "parameters": 20736
+   },
+   {
+    "block": "rbf",
+    "shape": [
+     [
+      16,
+      256,
+      256,
+      32
+     ]
+    ],
+    "parameters": 0
+   },
+   {
+    "block": "pair",
+    "shape": [
+     [
+      16,
+      256,
+      256,
+      64
+     ]
+    ],
+    "parameters": 6272
+   },
+   {
+    "block": "blocks.0",
+    "shape": [
+     [
+      16,
+      256,
+      128
+     ]
+    ],
+    "parameters": 133000
+   },
+   {
+    "block": "blocks.1",
+    "shape": [
+     [
+      16,
+      256,
+      128
+     ]
+    ],
+    "parameters": 133000
+   },
+   {
+    "block": "blocks.2",
+    "shape": [
+     [
+      16,
+      256,
+      128
+     ]
+    ],
+    "parameters": 133000
+   },
+   {
+    "block": "blocks.3",
+    "shape": [
+     [
+      16,
+      256,
+      128
+     ]
+    ],
+    "parameters": 133000
+   },
+   {
+    "block": "norm",
+    "shape": [
+     [
+      16,
+      256,
+      128
+     ]
+    ],
+    "parameters": 256
+   },
+   {
+    "block": "head",
+    "shape": [
+     [
+      16,
+      256,
+      5
+     ]
+    ],
+    "parameters": 17157
+   }
+  ]
+ },
+ "cnn": {
+  "config": {
+   "name": "grid_unet",
+   "grid": 128,
+   "blob": 0.15,
+   "channels": [
+    16,
+    32,
+    48,
+    64,
+    96
+   ],
+   "n_classes": 5,
+   "augment": true,
+   "tta": true
+  },
+  "total": 498309,
+  "output": [
+   16,
+   256,
+   5
+  ],
+  "blocks": [
+   {
+    "block": "enc.0",
+    "shape": [
+     [
+      16,
+      16,
+      128,
+      128
+     ]
+    ],
+    "parameters": 2688
+   },
+   {
+    "block": "pool",
+    "shape": [
+     [
+      16,
+      16,
+      64,
+      64
+     ]
+    ],
+    "parameters": 0
+   },
+   {
+    "block": "enc.1",
+    "shape": [
+     [
+      16,
+      32,
+      64,
+      64
+     ]
+    ],
+    "parameters": 14016
+   },
+   {
+    "block": "enc.2",
+    "shape": [
+     [
+      16,
+      48,
+      32,
+      32
+     ]
+    ],
+    "parameters": 34848
+   },
+   {
+    "block": "enc.3",
+    "shape": [
+     [
+      16,
+      64,
+      16,
+      16
+     ]
+    ],
+    "parameters": 64896
+   },
+   {
+    "block": "enc.4",
+    "shape": [
+     [
+      16,
+      96,
+      8,
+      8
+     ]
+    ],
+    "parameters": 138816
+   },
+   {
+    "block": "up",
+    "shape": [
+     [
+      16,
+      96,
+      16,
+      16
+     ]
+    ],
+    "parameters": 0
+   },
+   {
+    "block": "dec.0",
+    "shape": [
+     [
+      16,
+      64,
+      16,
+      16
+     ]
+    ],
+    "parameters": 129408
+   },
+   {
+    "block": "dec.1",
+    "shape": [
+     [
+      16,
+      48,
+      32,
+      32
+     ]
+    ],
+    "parameters": 69408
+   },
+   {
+    "block": "dec.2",
+    "shape": [
+     [
+      16,
+      32,
+      64,
+      64
+     ]
+    ],
+    "parameters": 32448
+   },
+   {
+    "block": "dec.3",
+    "shape": [
+     [
+      16,
+      16,
+      128,
+      128
+     ]
+    ],
+    "parameters": 9312
+   },
+   {
+    "block": "species",
+    "shape": [
+     [
+      16,
+      256,
+      16
+     ]
+    ],
+    "parameters": 32
+   },
+   {
+    "block": "head",
+    "shape": [
+     [
+      16,
+      256,
+      5
+     ]
+    ],
+    "parameters": 2437
+   }
+  ]
+ }
+}

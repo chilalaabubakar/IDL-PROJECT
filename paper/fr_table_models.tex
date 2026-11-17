@@ -1,0 +1,27 @@
+% Model description table of final_report.tex, laid out as Table 1 of Henderson et al.,
+% Nucleic Acids Research 2019: model, hidden layers, parameters and hyper-parameters tried.
+\begin{table}[t]
+\centering
+\caption{Deep learning models. The table shows the model architectures explored in this study, with the model name and hidden layers in columns 1 and 2. A repeated layer is written $N\times\{\text{layer}\}$, where $N$ is the number of repetitions; for example, $4\times\{\text{EGNN layer}\}$ means four EGNN layers in a row. Column 3 lists the parameters and hyper-parameters that were varied within each group, with the values tried in brackets; the value used for the final model is in bold. Fixed for all: 128 features, batches of 16 glasses, AdamW with learning rate $2\times10^{-4}$, gradient norm cut at 1, moving average of the weights 0.999. Output shapes and parameter counts are in Table~\ref{tab:shapes}.}
+\label{tab:models}
+\footnotesize\setlength{\tabcolsep}{4pt}
+\begin{tabularx}{\linewidth}{@{}l>{\raggedright\arraybackslash}X>{\raggedright\arraybackslash}p{2.05in}@{}}
+\toprule
+Model & Hidden layers & Parameters/hyper-parameters \\
+\midrule
+4layerEGNN\_Denoiser & $1\times\{$embedding$\}$, $4\times\{$EGNN layer$\}$, vector head & Noise level $\sigma_n\sim\mathcal U(0.001,1)$; updates (40,000) \\
+\addlinespace
+4layerEGNN\_Finder & $1\times\{$embedding$\}$, $\mathbf{4}\times\{$EGNN layer$\}$, $1\times\{$Dense 128, Dense 5$\}$ & Starting weights (\textbf{denoiser}, random) \\
+2layerEGNN\_Finder & $1\times\{$embedding$\}$, $2\times\{$EGNN layer$\}$, $1\times\{$Dense 128, Dense 5$\}$ & Class weights $w_c$ (\textbf{frequency}$^{\mathbf{-1/2}}$, none) \\
+1layerEGNN\_Finder & $1\times\{$embedding$\}$, $1\times\{$EGNN layer$\}$, $1\times\{$Dense 128, Dense 5$\}$ & Frenkel pairs in training (\textbf{all}, real only) \\
+ & & Updates (2,000, 20,000, \textbf{60,000}) \\
+ & & Learning rate after 20,000 updates ($2\times10^{-4}$, $\mathbf{1\times10^{-4}}$) \\
+ & & Calibration (none, \textbf{logit adjustment}); seeds (\textbf{0}, 1, 2) \\
+\addlinespace
+4layerTransformer\_Finder & $1\times\{$embedding$\}$, $4\times\{$attention with distance bias (8 heads), feed-forward$\}$, $1\times\{$Dense 128, Dense 5$\}$ & Starting weights (random); learning-rate warm-up (1,000 updates); updates (20,000); seeds (0, 1, 2) \\
+5levelUNet\_Finder & $1\times\{$draw glass as picture$\}$, $5\times\{$Conv, Conv, pooling$\}$, $4\times\{$upsample, Conv, Conv$\}$, $1\times\{$Dense 64, Dense 5$\}$ & Starting weights (random); training augmentation (8 turns and mirrors, random shift); test-time average over 8; updates (20,000); seeds (0, 1, 2) \\
+\addlinespace
+4layerEGNN\_Repair & as 4layerEGNN\_Denoiser & Weight of displaced atoms (1, \textbf{11}); noise level ($\mathcal U(0.001,0.5)$, \textbf{log-uniform (0.001, 0.3)}); updates ($2\times20{,}000$) \\
+\bottomrule
+\end{tabularx}
+\end{table}

@@ -1,4 +1,20 @@
-# The report
+# The reports
+
+`final_report.tex` / `final_report.pdf`: **the final course report** (11-785), organised by the
+course rubric: overview, related work, methodology, baselines and extensions, results and
+analysis, discussion, future directions, conclusions, contributions. Its model description
+table (`fr_table_models.tex`) follows the layout of Table 1 of Henderson et al., Nucleic
+Acids Research 2019. It uses the numbers and tables of the long report below and adds:
+
+```bash
+python scripts/pilots/final_report_analysis.py shapes        # output shapes, parameter counts
+python scripts/pilots/final_report_analysis.py splits        # training / validation / test
+python scripts/pilots/final_report_analysis.py features      # learned features (t-SNE)
+python scripts/pilots/final_report_analysis.py sensitivity   # shaken inputs (~25 min)
+python paper/make_final_numbers.py                           # fr_numbers.tex, fr_table_*.tex
+python paper/make_final_figures.py                           # figures/fr_fig_*
+cd paper && latexmk -pdf -outdir=build final_report.tex && cp build/final_report.pdf .
+```
 
 `point_defects_report.tex` / `point_defects_report.pdf`: **the report on the two-dimensional
 point-defect study** (finding and repairing vacancies, interstitials, Frenkel pairs and

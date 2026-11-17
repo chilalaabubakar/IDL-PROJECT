@@ -1,0 +1,12 @@
+{
+ "atoms": 4159,
+ "roles": {
+  "0": 3200,
+  "1": 719,
+  "2": 60,
+  "3": 60,
+  "4": 120
+ },
+ "denoiser_knn_balanced_accuracy": 0.312,
+ "finder_knn_balanced_accuracy": 0.431
+}
