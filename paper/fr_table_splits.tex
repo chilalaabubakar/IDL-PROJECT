@@ -1,0 +1,18 @@
+% written by make_final_numbers.py
+\begin{table}[t]
+\centering
+\caption{The finder of the main results on training, validation and test defects (real defects only). Loss: the class-weighted cross-entropy it was trained on, and the plain cross-entropy, per atom. Found (\%): calibrated, as everywhere in the results.}
+\label{tab:splits}
+\footnotesize\setlength{\tabcolsep}{4pt}
+\begin{tabular}{@{}lrcccccccc@{}}
+\toprule
+ & & \multicolumn{2}{c}{Loss} & \multicolumn{5}{c}{Found (\%)} \\
+\cmidrule(lr){3-4}\cmidrule(l){5-9}
+Defects & $n$ & weighted & plain & Vacancy & Interst. & Antisite & Frenkel & All \\
+\midrule
+Training (200 per type) & 800 & 0.396 & 0.111 & 64.5 & 44 & 50.5 & 43 & 50.5 \\
+Validation & 734 & 0.381 & 0.109 & 56.5 & 48.5 & 54.5 & 47.8 & 52.2 \\
+Test & 750 & 0.371 & 0.109 & 69.5 & 50 & 49 & 45.3 & 54 \\
+\bottomrule
+\end{tabular}
+\end{table}

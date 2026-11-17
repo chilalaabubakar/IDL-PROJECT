@@ -1,0 +1,34 @@
+% written by make_final_numbers.py
+\begin{table}[t]
+\centering
+\caption{Output shape and number of parameters of every block, for one batch of 16 glasses of 256 atoms (shapes: glasses $\times$ atoms $\times$ features; for the CNN: glasses $\times$ channels $\times$ pixels $\times$ pixels). The neighbour graph holds up to 64 neighbours per atom (about 22 are within the cutoff). Measured on the trained networks.}
+\label{tab:shapes}
+\scriptsize\setlength{\tabcolsep}{4pt}
+\begin{tabularx}{\linewidth}{@{}>{\raggedright\arraybackslash}Xlr@{}}
+\toprule
+Block & Output shape & Parameters \\
+\midrule
+\multicolumn{3}{@{}l}{\emph{EGNN finder} (the denoiser is the same with a noise-level input and the vector head)} \\
+Input: positions, species & $16\times256\times2$, $16\times256$ & 0 \\
+Neighbour graph and distance features (16 radial functions) & $16\times256\times64\times16$ & 0 \\
+Input embedding (denoiser: with noise level) & $16\times256\times128$ & 34,304 (59,136) \\
+$4\times$\{EGNN layer\}: features $h$, vector $v$ & $16\times256\times128$, $16\times256\times2$ & $4\times117,890$ \\
+Role head \{Dense 128, Dense 5\} (denoiser: vector head, sum of $v$) & $16\times256\times5$ ($16\times256\times2$) & 17,157 (0) \\
+\emph{Total} & & 523,021 (530,696) \\
+\addlinespace
+\multicolumn{3}{@{}l}{\emph{Transformer finder}} \\
+Embedding: species, and neighbours of each species by distance & $16\times256\times128$ & 20,992 \\
+Pair features from every distance (32 radial functions) & $16\times256\times256\times64$ & 6,272 \\
+$4\times$\{attention with distance bias (8 heads), feed-forward 256\} & $16\times256\times128$ & $4\times133,000$ \\
+Layer norm, role head \{Dense 128, Dense 5\} & $16\times256\times5$ & 17,413 \\
+\emph{Total} & & 576,677 \\
+\addlinespace
+\multicolumn{3}{@{}l}{\emph{CNN finder} (U-Net)} \\
+Glass drawn as a picture, one channel per species & $16\times2\times128\times128$ & 0 \\
+Encoder: $5\times$\{Conv $3\times3$, Conv $3\times3$\}, average pooling between levels & $16\times\{16, 32, 48, 64, 96\}\times\{128, 64, 32, 16, 8\}^2$ & 255,264 \\
+Decoder: $4\times$\{upsample, join skip, Conv $3\times3$, Conv $3\times3$\} & $16\times\{64, 48, 32, 16\}\times\{16, 32, 64, 128\}^2$ & 240,576 \\
+Read at each atom, add species; role head \{Dense 64, Dense 5\} & $16\times256\times5$ & 2,469 \\
+\emph{Total} & & 498,309 \\
+\bottomrule
+\end{tabularx}
+\end{table}
