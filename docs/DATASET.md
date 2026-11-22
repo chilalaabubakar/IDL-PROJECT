@@ -187,11 +187,11 @@ symmetry-ladder comparison has to be made at matching N.
 
 ---
 
-## 4. Tooling (verified in this session)
+## 4. Tooling
 
 * **LAMMPS 22 Jul 2025** installs with `pip install lammps mpich`. The wheel needs
   `libmpi.so.12`, which the `mpich` wheel provides. Add that library's directory to
-  `LD_LIBRARY_PATH` (here it was `/usr/local/lib`). The wheel includes the `VORONOI`,
+  `LD_LIBRARY_PATH` (for example `/usr/local/lib`). The wheel includes the `VORONOI`,
   `EXTRA-COMPUTE` and `OPENMP` packages. conda-forge `lammps` is an alternative.
 * Analysis uses `numpy` and `scipy` (Delaunay with periodic images; see `docs/pilot/pilot_ka2d.py`).
 * Evaluation uses our own **PyTorch KA energy + batched FIRE minimizer**
