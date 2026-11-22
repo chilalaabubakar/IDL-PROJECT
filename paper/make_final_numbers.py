@@ -103,7 +103,7 @@ def splits_table(sp: dict, num: dict) -> str:
         )
     return (
         "% written by make_final_numbers.py\n"
-        "\\begin{table}[t]\n\\centering\n"
+        "\\begin{table}[tb]\n\\centering\n"
         "\\caption{The finder of the main results on training, validation and test defects (real "
         "defects only). Loss: the class-weighted cross-entropy it was trained on, and the plain "
         "cross-entropy, per atom. Found (\\%): calibrated, as everywhere in the results.}\n"
@@ -116,8 +116,51 @@ def splits_table(sp: dict, num: dict) -> str:
     )
 
 
+def results_table() -> str:
+    """Found and restored in one table (the two tables of the long report, without repeats)."""
+    res = json.loads((ROOT / "paper/data/pd_report_results.json").read_text())["kinds"]
+    label = dict(vacancy="Vacancy", interstitial="Interstitial", antisite="Antisite", frenkel="Frenkel pair")  # fmt: skip
+    methods = ("finder", "geometry", "bonds", "energy")
+
+    def cell(d: dict, bold: bool, ci: bool) -> str:
+        r = pct(d["rate"])
+        r = f"\\textbf{{{r}}}" if bold else r
+        return f"{r} {{\\scriptsize[{100 * d['lo']:.0f}, {100 * d['hi']:.0f}]}}" if ci else r
+
+    rows = {"found": [], "restored": []}
+    for what in rows:
+        for k in KINDS:
+            r = res[k][what]
+            best = max(methods, key=lambda m: r[m]["rate"])
+            cells = [cell(r[m], m == best, ci=True) for m in methods]
+            last = pct(res[k]["chance"]) if what == "found" else cell(r["ceiling"], False, ci=True)
+            n = f"{res[k]['n']}" if what == "found" else ""
+            rows[what].append(f"{label[k]} & {n} & " + " & ".join(cells) + f" & {last} \\\\")
+    return (
+        "% written by make_final_numbers.py\n"
+        "\\begin{table}[t]\n\\centering\n"
+        "\\caption{Test results (\\%). Found: the flagged atom lies within $1.5\\sigma$ of the "
+        "defect (for a Frenkel pair, of either end; the finder flags the displaced atom itself in "
+        "\\pd{frenkel-exact-finder}\\%, the atom energy in \\pd{frenkel-exact-energy}\\%). "
+        "Restored: the original glass is recovered after correcting the atoms at the flagged atom "
+        "and minimising the energy. Brackets: 95\\% intervals. Bold: the best method. Only the atom "
+        "energy uses the potential to flag the atom; every repair ends with minimisation.}\n"
+        "\\label{tab:found}\\label{tab:restored}\n\\footnotesize\\setlength{\\tabcolsep}{3pt}\n"
+        "\\begin{tabular}{@{}lcccccc@{}}\n\\toprule\n"
+        "Defect & $n$ & Learned finder & Cell size & Unlike neighb. & Atom energy & Reference \\\\\n"
+        "\\midrule\n"
+        "\\multicolumn{6}{@{}l}{\\emph{Found}} & \\emph{random atom} \\\\\n"
+        + "\n".join(rows["found"])
+        + "\n\\addlinespace\n"
+        "\\multicolumn{6}{@{}l}{\\emph{Restored}} & \\emph{true location given} \\\\\n"
+        + "\n".join(rows["restored"])
+        + "\n\\bottomrule\n\\end{tabular}\n\\end{table}\n"
+    )
+
+
 def main() -> None:
     num: dict[str, str] = {}
+    (ROOT / "paper/fr_table_results.tex").write_text(results_table())
     sh = json.loads((RES / "shapes.json").read_text())
     (ROOT / "paper/fr_table_shapes.tex").write_text(shapes_table(sh))
     for name, key in (("finder (EGNN)", "egnn"), ("denoiser (EGNN)", "den"), ("transformer", "tr"), ("cnn", "cnn")):  # fmt: skip

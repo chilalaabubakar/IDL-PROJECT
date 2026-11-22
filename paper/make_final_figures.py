@@ -65,7 +65,7 @@ def fig_training() -> None:
             r["step"] += offset
             rows.append(r)
     step = np.array([r["step"] for r in rows])
-    fig, axes = plt.subplots(1, 3, figsize=(5.5, 1.85))
+    fig, axes = plt.subplots(1, 3, figsize=(5.5, 1.75))
     fig.subplots_adjust(left=0.075, right=0.995, bottom=0.21, top=0.83, wspace=0.42)
     # (a) denoiser: training loss (all noise levels) and validation loss at fixed noise levels
     ax = axes[0]
@@ -200,7 +200,7 @@ def fig_features() -> None:
     f = np.load(RES / "features.npz")
     info = json.loads((RES / "features.json").read_text())
     sens = json.loads((RES / "sensitivity.json").read_text())
-    fig = plt.figure(figsize=(5.5, 1.9))
+    fig = plt.figure(figsize=(5.5, 1.8))
     ax_d = fig.add_axes([0.0, 0.06, 0.27, 0.72])
     ax_f = fig.add_axes([0.285, 0.06, 0.27, 0.72])
     ax_s = fig.add_axes([0.66, 0.2, 0.335, 0.62])

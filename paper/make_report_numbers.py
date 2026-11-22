@@ -46,12 +46,12 @@ ABL = ROOT / "results/point_defects_ablations_20261112/ablations.json"
 SEEDS = ROOT / "results/point_defects_seeds_20261114/seeds.json"
 ARCH = ROOT / "results/point_defects_architectures_20261115/architectures.json"
 ABLATION_ROWS = (  # run, what changed, compared with
-    ("reference", "Reference: starts from the denoiser, 4 layers, class weights", None),
+    ("reference", "Reference: from denoiser, 4 layers, class weights", None),
     ("scratch", "Random starting weights", "reference"),
     ("layers2", "Random starting weights, 2 layers (reach $5\\sigma$)", "scratch"),
     ("layers1", "Random starting weights, 1 layer (reach $2.5\\sigma$)", "scratch"),
     ("no_weights", "No class weights", "reference"),
-    ("real_only", "Trained without the Frenkel pairs that undid themselves", "reference"),
+    ("real_only", "Without the Frenkel pairs that undid themselves", "reference"),
 )
 KINDS = ("vacancy", "interstitial", "antisite", "frenkel")  # the order of the tables
 LABEL = {
@@ -497,7 +497,7 @@ FINDER_ROWS = (  # model in architectures.json, key in the text, finder, start, 
     ("cnn", "cnn", "CNN", "random", "20,000"),
     ("egnn_scratch", "egnn", "EGNN", "random", "20,000"),
     ("egnn_pretrained", "pre", "EGNN", "denoiser", "20,000"),
-    ("egnn_pretrained_60k", "main", "EGNN, the finder of the main results", "denoiser", "60,000"),
+    ("egnn_pretrained_60k", "main", "EGNN, main finder", "denoiser", "60,000"),
 )
 
 
@@ -572,7 +572,7 @@ def finders() -> dict[str, str]:
     cells = [one(e["found"][k]["rate"]) for k in order]
     rows += [
         "\\addlinespace",
-        "Transformer and CNN together (all six runs) & random & 20,000 & 6 & -- & "
+        "Transformer + CNN, all six runs & random & 20,000 & 6 & -- & "
         + " & ".join(cells)
         + " \\\\",
     ]

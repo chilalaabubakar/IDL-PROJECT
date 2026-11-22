@@ -4,7 +4,9 @@
 course rubric: overview, related work, methodology, baselines and extensions, results and
 analysis, discussion, future directions, conclusions, contributions. Its model description
 table (`fr_table_models.tex`) follows the layout of Table 1 of Henderson et al., Nucleic
-Acids Research 2019. It uses the numbers and tables of the long report below and adds:
+Acids Research 2019. Appendix A answers the TA reviews of the midterm report, with numbers from
+the midterm study on the branch `main`. It uses the numbers and tables of the long report below
+and adds:
 
 ```bash
 python scripts/pilots/final_report_analysis.py shapes        # output shapes, parameter counts
