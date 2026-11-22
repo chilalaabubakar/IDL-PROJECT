@@ -38,37 +38,37 @@ when that file passes.
 
 | Ticket | Status |
 |---|---|
-| Foundations: `types.py`, `geometry.py`, `utils/` | ✅ done, tested |
-| **P-1** dataset generation (`md/lammps_quench.py`, `data/dataset.py`, `scripts/make_dataset.py`) | ✅ done; all four sets generated (DATASET.md §1.8) |
-| **P-2** KA potential | ✅ done; matches LAMMPS per-atom energies to 1e-5 |
-| **P-3** batched FIRE + `scripts/relax.py` | ✅ done; converges in ~1.5–3k steps; Verlet neighbour-list forces (3.3× faster than dense on CPU, identical results) |
-| **E-1** descriptors | ✅ done, tested |
-| **E-2** detectors + `scripts/freeze_thresholds.py` | ✅ done; thresholds frozen (`1c8714e00c26` for `ka2d_256`) |
-| **E-3** patch library + `scripts/build_patches.py` | ✅ done; 10,545 train patches |
-| **E-4** metrics, bootstrap, `scripts/evaluate.py` (incl. floor mode) | ✅ done; diversity/memorization use simple histogram descriptors (could be upgraded) |
-| **M-1** embeddings, **M-2** EGNN-PBC | ✅ done; symmetry tests pass (translation incl. wrap, 90° and arbitrary rotation, permutation) |
-| **M-3** noise/loss + `scripts/train.py` | ✅ done; CPU smoke run learns (val loss below the predict-zero baseline) |
-| **M-4** `RequestSampler` (centre / patch / host modes, CFG dropout) | ✅ done, tested |
-| **S-1** sampler, **S-2** clamp / noise patch, **S-3** RePaint, **S-4** pinned label + CFG | ✅ done, tested with an oracle denoiser |
-| **B-2** eval requests (Task A and Task B), hand insertion (`baselines.py`, `scripts/hand_insert.py`) | ✅ done |
-| **P-4** local melt-quench (`md/local_melt_quench.py`, `scripts/local_melt_quench.py`) | ✅ done; host atoms stay fixed to 1e-12 |
-| **M-5** MPNN, **M-6** flat MLP | ✅ done, tested (MPNN verified to lack rotation symmetry) |
-| **B-3** `scripts/aggregate_results.py` → summary CSV | ✅ done |
-| Figures: `glassdiff/viz.py`, `scripts/plot_samples.py` (glasses or run samples, defects ringed, target and pins marked) | ✅ done |
-| End-to-end pipeline test (`tests/test_pipeline.py`) | ✅ runs every script on a tiny synthetic dataset in CI |
-| **E-5** report tables (`eval/report.py`; `aggregate_results.py` also writes `summary.md`), training curves (`scripts/plot_training.py`) | ✅ done |
-| End-to-end smoke run on real data (CPU) | ✅ `results/cpu_smoke/`: B1, B2, B5, B6 and the floor for D2; a pipeline check, not results |
-| B-1 Stage 0b: DM2's pretrained a-SiO₂ model against its training glasses (`scripts/stage0_dm2_sanity.py`, runs on CPU) | ✅ done: `results/stage0/` (g(r) and local structure match; finer measures look like a 100 K/ps quench) |
-| B-1 Stage 0a: the course proof-of-concept notebook (`notebooks/stage0_poc.ipynb`, rerun by `scripts/stage0_poc.py`) | ✅ done: `results/stage0/poc/` (the proposal's Fig. 1 reproduces over 5 seeds; a bug in the notebook's antisite demo is documented with a fixed variant) |
+| Foundations: `types.py`, `geometry.py`, `utils/` | done, tested |
+| **P-1** dataset generation (`md/lammps_quench.py`, `data/dataset.py`, `scripts/make_dataset.py`) | done; all four sets generated (DATASET.md §1.8) |
+| **P-2** KA potential | done; matches LAMMPS per-atom energies to 1e-5 |
+| **P-3** batched FIRE + `scripts/relax.py` | done; converges in ~1.5–3k steps; Verlet neighbour-list forces (3.3× faster than dense on CPU, identical results) |
+| **E-1** descriptors | done, tested |
+| **E-2** detectors + `scripts/freeze_thresholds.py` | done; thresholds frozen (`1c8714e00c26` for `ka2d_256`) |
+| **E-3** patch library + `scripts/build_patches.py` | done; 10,545 train patches |
+| **E-4** metrics, bootstrap, `scripts/evaluate.py` (incl. floor mode) | done; diversity/memorization use simple histogram descriptors (could be upgraded) |
+| **M-1** embeddings, **M-2** EGNN-PBC | done; symmetry tests pass (translation incl. wrap, 90° and arbitrary rotation, permutation) |
+| **M-3** noise/loss + `scripts/train.py` | done; CPU smoke run learns (val loss below the predict-zero baseline) |
+| **M-4** `RequestSampler` (centre / patch / host modes, CFG dropout) | done, tested |
+| **S-1** sampler, **S-2** clamp / noise patch, **S-3** RePaint, **S-4** pinned label + CFG | done, tested with an oracle denoiser |
+| **B-2** eval requests (Task A and Task B), hand insertion (`baselines.py`, `scripts/hand_insert.py`) | done |
+| **P-4** local melt-quench (`md/local_melt_quench.py`, `scripts/local_melt_quench.py`) | done; host atoms stay fixed to 1e-12 |
+| **M-5** MPNN, **M-6** flat MLP | done, tested (MPNN verified to lack rotation symmetry) |
+| **B-3** `scripts/aggregate_results.py` → summary CSV | done |
+| Figures: `glassdiff/viz.py`, `scripts/plot_samples.py` (glasses or run samples, defects ringed, target and pins marked) | done |
+| End-to-end pipeline test (`tests/test_pipeline.py`) | runs every script on a tiny synthetic dataset in CI |
+| **E-5** report tables (`eval/report.py`; `aggregate_results.py` also writes `summary.md`), training curves (`scripts/plot_training.py`) | done |
+| End-to-end smoke run on real data (CPU) | `results/cpu_smoke/`: B1, B2, B5, B6 and the floor for D2; a pipeline check, not results |
+| B-1 Stage 0b: DM2's pretrained a-SiO₂ model against its training glasses (`scripts/stage0_dm2_sanity.py`, runs on CPU) | done: `results/stage0/` (g(r) and local structure match; finer measures look like a 100 K/ps quench) |
+| B-1 Stage 0a: the course proof-of-concept notebook (`notebooks/stage0_poc.ipynb`, rerun by `scripts/stage0_poc.py`) | done: `results/stage0/poc/` (the proposal's Fig. 1 reproduces over 5 seeds; a bug in the notebook's antisite demo is documented with a fixed variant) |
 | S-5 classifier guidance, M-7 NequIP-2D | ⏳ stretch |
-| Colab workflow (`notebooks/colab_train.ipynb`): speed test, resumable training (`train.py resume=<run>`, atomic checkpoints), experiment matrix, summary | ✅ ready |
-| **GPU training runs** (unconditional EGNN at full size, then conditional) and the first experiment matrix | ✅ done on Colab: `results/colab_20261004-2352Z/` (33 evaluations; analysis and next steps in its `ANALYSIS.md`) |
-| Diagnostics: `scripts/defect_stability.py` (natural defects under noise + relaxation), B–B contacts per B atom in the global metrics | ✅ done |
-| **Round 2** on Colab: sampler steps (100 / 300 / 900), guidance w sweep, RePaint U sweep, stability control | ✅ done: `results/colab_20261005-1006Z/` (analysis in its `ANALYSIS.md`); the sampler default becomes 100 steps |
-| `sample.py` clips σ at each checkpoint's own training σ_max; named floor runs (`evaluate.py name=...`) | ✅ done |
-| **Round 3** (run on Kaggle): retrain with σ_max = 1.0, main table at 100 steps (w = 2, 4, 6; all three defects), Stage 4 symmetry ladder at N = 64 | ✅ done: `results/kaggle_2026100*` / `kaggle_20261012-*`; analysis in `results/round3_ANALYSIS.md` |
-| Sensitivity checks: `scripts/sensitivity.py` re-scores a run with the defect cutoffs ±0.05, success radius ±0.1 and realism window ±0.5 (natural references relabelled to match); floors per setting in `results/sensitivity/`; `notebooks/kaggle_sensitivity.ipynb` makes the samples and varies R_out (3 / 4 / 5) | ✅ done: `results/sensitivity/README.md` (ranking holds under every setting; absolute success moves by up to ~0.1; two realism statements qualified; R_out = 5 improves D2 realism) |
-| Seeds for publication: both conditional models retrained with seeds 1 and 2 and the five headline rows repeated (`notebooks/kaggle_seeds.ipynb`), plus a new sampler seed for the seed-0 models | ✅ done: `results/seeds/README.md` (D1− and Task A stable across seeds; D2 varies, sd 0.08–0.11; the method beats both baselines for every seed) |
+| Colab workflow (`notebooks/colab_train.ipynb`): speed test, resumable training (`train.py resume=<run>`, atomic checkpoints), experiment matrix, summary | ready |
+| **GPU training runs** (unconditional EGNN at full size, then conditional) and the first experiment matrix | done on Colab: `results/colab_20261004-2352Z/` (33 evaluations; analysis and next steps in its `ANALYSIS.md`) |
+| Diagnostics: `scripts/defect_stability.py` (natural defects under noise + relaxation), B–B contacts per B atom in the global metrics | done |
+| **Round 2** on Colab: sampler steps (100 / 300 / 900), guidance w sweep, RePaint U sweep, stability control | done: `results/colab_20261005-1006Z/` (analysis in its `ANALYSIS.md`); the sampler default becomes 100 steps |
+| `sample.py` clips σ at each checkpoint's own training σ_max; named floor runs (`evaluate.py name=...`) | done |
+| **Round 3** (run on Kaggle): retrain with σ_max = 1.0, main table at 100 steps (w = 2, 4, 6; all three defects), Stage 4 symmetry ladder at N = 64 | done: `results/kaggle_2026100*` / `kaggle_20261012-*`; analysis in `results/round3_ANALYSIS.md` |
+| Sensitivity checks: `scripts/sensitivity.py` re-scores a run with the defect cutoffs ±0.05, success radius ±0.1 and realism window ±0.5 (natural references relabelled to match); floors per setting in `results/sensitivity/`; `notebooks/kaggle_sensitivity.ipynb` makes the samples and varies R_out (3 / 4 / 5) | done: `results/sensitivity/README.md` (ranking holds under every setting; absolute success moves by up to ~0.1; two realism statements qualified; R_out = 5 improves D2 realism) |
+| Seeds for publication: both conditional models retrained with seeds 1 and 2 and the five headline rows repeated (`notebooks/kaggle_seeds.ipynb`), plus a new sampler seed for the seed-0 models | done: `results/seeds/README.md` (D1− and Task A stable across seeds; D2 varies, sd 0.08–0.11; the method beats both baselines for every seed) |
 
 Install and check:
 
