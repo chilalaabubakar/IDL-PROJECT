@@ -1,0 +1,35 @@
+{
+  "name": "ka2d_256_fresh",
+  "n_atoms": 256,
+  "protocol": {
+    "rho": 1.2,
+    "frac_a": 0.65,
+    "t_melt": 2.0,
+    "melt_steps": 20000,
+    "t_final": 0.01,
+    "rate": 0.01,
+    "dt": 0.005,
+    "tdamp": 0.1,
+    "min_ftol": 1e-08
+  },
+  "quality": {
+    "max_global_psi6": 0.3,
+    "min_pair_dist": 0.56,
+    "pe_max_z": 5.0
+  },
+  "lammps_version": 20250722,
+  "git": "93f2b25f9a3f6065c1edb24ba5c19cf1f676a736",
+  "splits": {
+    "test": {
+      "n": 200,
+      "seeds": [
+        30000,
+        30199
+      ],
+      "pe_atom_mean": -3.679992207607662,
+      "pe_atom_sd": 0.012898992433636913,
+      "rejected": [],
+      "wall_seconds": 125.6
+    }
+  }
+}

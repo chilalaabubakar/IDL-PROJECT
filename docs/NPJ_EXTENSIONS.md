@@ -39,7 +39,12 @@ Owners follow the team's workstreams and are only a suggestion.
 results had been seen (manuscript, Discussion). A new test set and repeated training remove
 both objections.
 
-**Data (ready).** Two configs are on this branch and were checked on two glasses:
+**Data (made on 24 November 2026, not yet scored).** 200 glasses (none rejected; energy
+per atom -3.680 ± 0.013, as the training glasses) and 400 defects of each type, all relaxed
+below a largest force of 10⁻⁸. 117 Frenkel pairs undid themselves (29%, against 25% in the
+original test set), which leaves 1,483 real test defects: 400 vacancies, 400 interstitials,
+400 antisites and 283 Frenkel pairs. SHA256: glasses `eca8525e...`, defects `0af9d167...`
+(full values in the two `meta.json` files). They were made with:
 
 ```bash
 python scripts/make_dataset.py --config configs/data/ka2d_256_fresh.yaml        # 200 glasses, seeds from 30000
@@ -49,9 +54,8 @@ python scripts/make_point_defects.py --config configs/data/ka2d_256_point_defect
 The first makes 200 new test glasses by the same recipe, with seeds never used before (train
 0-, validation 10000-, test 20000-). The second makes 2 defects of each type per glass, with
 new sites (seed 1), so 400 per type before the undone Frenkel pairs are removed. Twice the
-glasses of the old test set narrows the intervals from about ±7 to about ±5 points. Commit
-`data/ka2d_256_fresh/` and `data/ka2d_256_point_defects_fresh/` with their `meta.json`
-(SHA256 of each file) before any model is scored on them.
+glasses of the old test set narrows the intervals from about ±7 to about ±5 points. Before
+scoring, check that the files still match the SHA256 in `meta.json`.
 
 **Training.** The main finder is two stages: `configs/train/detect_point_defects.yaml`
 (20,000 updates from the denoiser, seed 0), then `configs/train/detect_point_defects_v2.yaml`

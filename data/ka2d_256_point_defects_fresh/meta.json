@@ -1,0 +1,80 @@
+{
+  "config": {
+    "name": "ka2d_256_point_defects_fresh",
+    "source": "data/ka2d_256_fresh",
+    "out_dir": "data/ka2d_256_point_defects_fresh",
+    "seed": 1,
+    "workers": 4,
+    "sites_per_glass": {
+      "train": 8,
+      "val": 2,
+      "test": 2
+    },
+    "kinds": [
+      "vacancy",
+      "interstitial",
+      "frenkel",
+      "antisite"
+    ],
+    "interstitial_species": 1,
+    "interstitial_search": 2.0,
+    "frenkel_hop": [
+      1.2,
+      3.0
+    ],
+    "vacancy_insert_search": 1.0,
+    "shell_factor": 1.4,
+    "recombined_tol": 0.3,
+    "min_pair_dist": 0.56,
+    "ftol": 1e-08,
+    "splits": [
+      "test"
+    ]
+  },
+  "git": "93f2b25f9a3f6065c1edb24ba5c19cf1f676a736 (dirty)",
+  "splits": {
+    "test": {
+      "source": "data/ka2d_256_fresh/test.npz",
+      "source_sha256": "eca8525ec20aa2f53f6950cc70c0d4856da11e717de8275300d003f31a1e6761",
+      "n_glasses": 200,
+      "kinds": [
+        "vacancy",
+        "interstitial",
+        "frenkel",
+        "antisite"
+      ],
+      "split": "test",
+      "file_sha256": "0af9d167a244b543f94d89dd57e3f43d51af804ecfc19a3b13c5cec19105f707",
+      "kinds_summary": {
+        "vacancy": {
+          "examples": 400,
+          "valid": 400,
+          "atoms": 255,
+          "max_force": 4.444255859159529e-09,
+          "seconds": 27.8
+        },
+        "interstitial": {
+          "examples": 400,
+          "valid": 400,
+          "atoms": 257,
+          "max_force": 5.228724980765875e-09,
+          "seconds": 54.7
+        },
+        "frenkel": {
+          "examples": 400,
+          "valid": 400,
+          "atoms": 256,
+          "max_force": 4.1941772138676114e-09,
+          "seconds": 90.7
+        },
+        "antisite": {
+          "examples": 400,
+          "valid": 400,
+          "atoms": 256,
+          "max_force": 4.666621068738497e-09,
+          "seconds": 20.4
+        }
+      }
+    }
+  }
+}
