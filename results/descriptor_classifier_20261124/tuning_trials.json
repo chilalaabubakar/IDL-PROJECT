@@ -1,0 +1,29 @@
+[
+ {
+  "version": "A",
+  "cfg": {
+   "learning_rate": 0.1,
+   "max_leaf_nodes": 63,
+   "min_samples_leaf": 40,
+   "weighting": "none"
+  },
+  "iterations": 212,
+  "found": {
+   "prob": {
+    "vacancy": 0.5938,
+    "interstitial": 0.335,
+    "frenkel": 0.208,
+    "antisite": 0.385,
+    "all": 0.3933
+   },
+   "odds": {
+    "vacancy": 0.595,
+    "interstitial": 0.3713,
+    "frenkel": 0.3744,
+    "antisite": 0.4062,
+    "all": 0.4414
+   }
+  },
+  "seconds": 45
+ }
+]
