@@ -23,6 +23,21 @@ glasses; "shell" = neighbours closer than 1.4 sigma_ab, the dataset's neighbour 
        minimum and maximum (25 inputs). Needs the potential.
     C  A plus the species-resolved radial density within 2.5 sigma in 16 Gaussian bins, the
        input the transformer finder starts from (49 inputs). Positions and species only.
+    D  C plus the local hexatic order |psi_6| of the shell and its shell mean, minimum and
+       maximum, and the mean, minimum and maximum of the four base measures over the second
+       ring (atoms beyond the shell and within 2.5 sigma) (65 inputs). Positions and species only.
+    E  D plus atom energy and virial with their shell and second-ring statistics (79 inputs).
+       Needs the potential.
+
+Tuning (docs/NPJ_EXTENSIONS.md, item 2):
+
+    python scripts/pilots/descriptor_classifier.py tune --out results/descriptor_classifier_<date>
+        holds out every 8th training glass (100 glasses, about 3,100 real defects), fits the
+        trees on the other 700 with each setting of a small grid, and keeps the setting that
+        finds the most held-out defects (writes tuning.json); the validation glasses are not used
+    python scripts/pilots/descriptor_classifier.py run --out <same dir> --params <dir>/tuning.json --tag tuned
+        refits every version on all 800 training glasses, tuned settings where tuning.json has
+        them, and scores once on the validation glasses (validation_tuned.json, summary_tuned.md)
 
 Model: gradient-boosted trees (sklearn HistGradientBoostingClassifier), five roles as the
 finder (intact, next to an empty site, extra atom, displaced atom, wrong species), trained on
@@ -76,9 +91,20 @@ DATA = ROOT / "data/ka2d_256_point_defects"
 CACHE = DATA / ".cache"  # git-ignored
 FINDER = ROOT / "results/kaggle_pd_20261110-1042Z/training/pd_detect_v2/ema.pt"
 KINDS = ("vacancy", "interstitial", "frenkel", "antisite")
-VERSIONS = ("A", "B", "C")
+VERSIONS = ("A", "B", "C", "D", "E")
+POSITIONS_ONLY = ("A", "C", "D")  # no potential: the fair match to the finder
+HOLD_OUT = 8  # tuning holds out the training glasses whose index is a multiple of this
 SHELL, ENV_CUTOFF, N_ENV = 1.4, 2.5, 16
 INTACT_FRACTION = 0.1
+DEFAULT_TREES = dict(learning_rate=0.1, max_leaf_nodes=63, min_samples_leaf=40, weighting="none")
+# tuning grid: 24 settings for version D; E is fitted with the 4 best of them
+GRID = [
+    dict(learning_rate=lr, max_leaf_nodes=leaves, min_samples_leaf=leaf, weighting=w)
+    for lr in (0.05, 0.1)
+    for leaves in (31, 127, 255)
+    for leaf in (20, 200)
+    for w in ("none", "sqrt")
+]
 SIGMA = np.asarray(KA_SIGMA)
 # single measures of the manuscript: the rule chosen on validation glasses for each kind
 # (scripts/pilots/baseline_routes.py, scripts/pilots/structural_signatures.py)
@@ -165,18 +191,25 @@ def shell_stats(values: np.ndarray, shell: np.ndarray) -> np.ndarray:
 
 
 def glass_inputs(args) -> dict[str, np.ndarray]:
-    """Inputs A, B, C of every atom of one glass."""
+    """Inputs A to E of every atom of one glass."""
     pos, types, box, pot, stats = args
     t = types
     base = (geometry(pos, types, box) - stats["geometry_mu"][t]) / stats["geometry_sd"][t]
     pz = (pot - stats["potential_mu"][t]) / stats["potential_sd"][t]
-    dist = np.linalg.norm(wrap(pos[:, None] - pos[None], box), axis=-1)
+    vec = wrap(pos[:, None] - pos[None], box)
+    dist = np.linalg.norm(vec, axis=-1)
     np.fill_diagonal(dist, np.inf)
     shell = dist < SHELL * SIGMA[types[:, None], types[None]]
+    ring = ~shell & (dist < ENV_CUTOFF)  # the second ring, beyond the shell
     a = np.concatenate([types[:, None].astype(float), base, shell_stats(base, shell)], axis=1)
     b = np.concatenate([a, pz, shell_stats(pz, shell)], axis=1)
     c = np.concatenate([a, radial_density(pos, types, box)], axis=1)
-    return {"A": a.astype(np.float32), "B": b.astype(np.float32), "C": c.astype(np.float32)}
+    angle = np.arctan2(vec[..., 1], vec[..., 0])
+    psi6 = np.abs((shell * np.exp(6j * angle)).sum(1)) / np.maximum(shell.sum(1), 1)
+    psi6 = psi6[:, None]
+    d = np.concatenate([c, psi6, shell_stats(psi6, shell), shell_stats(base, ring)], axis=1)
+    e = np.concatenate([d, pz, shell_stats(pz, shell), shell_stats(pz, ring)], axis=1)
+    return {k: v.astype(np.float32) for k, v in zip(VERSIONS, (a, b, c, d, e))}
 
 
 def set_inputs(d, stats, workers: int) -> dict[str, np.ndarray]:
@@ -191,13 +224,13 @@ def set_inputs(d, stats, workers: int) -> dict[str, np.ndarray]:
 
 def training_rows(stats, workers: int, seed: int = 0) -> dict:
     """Inputs and roles of every defect-role atom and a random tenth of the intact atoms."""
-    path = CACHE / "descriptor_train.npz"
+    path = CACHE / f"descriptor_train_{''.join(VERSIONS)}.npz"
     if path.exists():
         z = np.load(path)
         return {k: z[k] for k in z.files}
     data = load_point_defects(DATA / "train.npz")
     rng = np.random.default_rng(seed)
-    parts: dict[str, list] = {v: [] for v in VERSIONS} | {"role": [], "kind": []}
+    parts: dict[str, list] = {v: [] for v in VERSIONS} | {"role": [], "kind": [], "glass": []}
     for k, name in enumerate(KINDS):
         d = data[name]
         t0 = time.time()
@@ -208,17 +241,34 @@ def training_rows(stats, workers: int, seed: int = 0) -> dict:
             parts[v].append(x[v][keep])
         parts["role"].append(role[keep])
         parts["kind"].append(np.full(int(keep.sum()), k))
+        parts["glass"].append(np.broadcast_to(d.glass.numpy()[:, None], role.shape)[keep])
         print(f"train {name}: {len(d)} glasses, {int(keep.sum())} rows, {time.time() - t0:.0f}s", flush=True)  # fmt: skip
     out = {k: np.concatenate(v) for k, v in parts.items()}
-    np.savez_compressed(path, **out)
+    np.savez(path, **out)
     return out
 
 
 # ----------------------------------------------------------------------------- models
 
 
-def fit_models(rows: dict, seed: int = 0) -> dict:
+def fit_trees(x: np.ndarray, role: np.ndarray, cfg: dict, seed: int = 0):
+    """Gradient-boosted trees with one setting; early stopping on a tenth of the rows."""
     from sklearn.ensemble import HistGradientBoostingClassifier
+
+    m = HistGradientBoostingClassifier(
+        learning_rate=cfg["learning_rate"], max_leaf_nodes=cfg["max_leaf_nodes"],
+        min_samples_leaf=cfg["min_samples_leaf"], max_iter=1000, early_stopping=True,
+        validation_fraction=0.1, n_iter_no_change=20, random_state=seed,
+    )  # fmt: skip
+    weight = None
+    if cfg.get("weighting", "none") == "sqrt":  # as the finder: (n_c / n_intact)^-1/2
+        count = np.bincount(role, minlength=5).astype(float)
+        weight = (count / count[0])[role] ** -0.5
+    m.fit(x, role, sample_weight=weight)
+    return m
+
+
+def fit_models(rows: dict, params: dict | None = None, seed: int = 0) -> dict:
     from sklearn.linear_model import LogisticRegression
     from sklearn.pipeline import make_pipeline
     from sklearn.preprocessing import StandardScaler
@@ -226,13 +276,10 @@ def fit_models(rows: dict, seed: int = 0) -> dict:
     models = {}
     for v in VERSIONS:
         t0 = time.time()
-        m = HistGradientBoostingClassifier(
-            learning_rate=0.1, max_iter=500, max_leaf_nodes=63, min_samples_leaf=40,
-            early_stopping=True, validation_fraction=0.1, n_iter_no_change=20, random_state=seed,
-        )  # fmt: skip
-        m.fit(rows[v], rows["role"])
+        cfg = (params or {}).get(v, DEFAULT_TREES)
+        m = fit_trees(rows[v], rows["role"], cfg, seed)
         models[f"trees {v}"] = m
-        print(f"fit trees {v}: {m.n_iter_} iterations, {time.time() - t0:.0f}s", flush=True)
+        print(f"fit trees {v} {cfg}: {m.n_iter_} iterations, {time.time() - t0:.0f}s", flush=True)
     t0 = time.time()
     lr = make_pipeline(StandardScaler(), LogisticRegression(max_iter=2000))
     lr.fit(rows["A"], rows["role"])
@@ -380,22 +427,100 @@ def restored(data_path: Path, model, version: str, how: str, stats, workers: int
     return res
 
 
+# ----------------------------------------------------------------------------- tuning
+
+
+def held_out_found(model, inner: dict, version: str) -> dict:
+    """Share of held-out defects found, per kind and for all, ranking by prob and by odds."""
+    res: dict = {}
+    for how in ("prob", "odds"):
+        each = {}
+        for name, (d, x) in inner.items():
+            role = int(ev.REPAIR_ROLE[PointDefect[name.upper()]])
+            each[name] = found_each(role_scores(model, x[version], role)[how], d)
+        res[how] = {k: round(float(v.mean()), 4) for k, v in each.items()}
+        res[how]["all"] = round(float(np.concatenate(list(each.values())).mean()), 4)
+    return res
+
+
+def tune(stats, workers: int, out: Path, seed: int = 0) -> dict:
+    """Choose the tree settings on held-out training glasses (never the validation glasses)."""
+    t0 = time.time()
+    rows = training_rows(stats, workers)
+    held = rows["glass"] % HOLD_OUT == 0
+    fit_rows = {k: v[~held] for k, v in rows.items()}
+    data = load_point_defects(DATA / "train.npz")
+    inner = {}
+    for name in KINDS:
+        d = data[name]
+        d = d.subset(torch.from_numpy(d.glass.numpy() % HOLD_OUT == 0))
+        d = real_defects({name: d})[name]
+        x = set_inputs(d, stats, workers)
+        inner[name] = (d, {v: x[v] for v in ("A", "C", "D", "E")})
+    sizes = {k: len(v[0]) for k, v in inner.items()}
+    print(f"held out: {int(held.sum())} training rows; defects {sizes}; {time.time() - t0:.0f}s", flush=True)  # fmt: skip
+    trials = []
+
+    def trial(version: str, cfg: dict) -> None:
+        t1 = time.time()
+        m = fit_trees(fit_rows[version], fit_rows["role"], cfg, seed)
+        res = held_out_found(m, inner, version)
+        trials.append(dict(version=version, cfg=cfg, iterations=int(m.n_iter_), found=res,
+                           seconds=round(time.time() - t1)))  # fmt: skip
+        best = max(res, key=lambda h: res[h]["all"])
+        print(f"{version} {cfg}: {m.n_iter_} it, {time.time() - t1:.0f}s, held-out found "
+              f"{res[best]['all']:.4f} ({best}) {json.dumps(res[best])}", flush=True)  # fmt: skip
+        (out / "tuning_trials.json").write_text(json.dumps(trials, indent=1) + "\n")
+
+    def best_of(version: str) -> tuple[dict, str, float]:
+        cands = [(t["cfg"], h, t["found"][h]["all"]) for t in trials if t["version"] == version
+                 for h in ("prob", "odds")]  # fmt: skip
+        return max(cands, key=lambda c: c[2])
+
+    for v in ("A", "C", "D"):  # the settings of the first run, for reference
+        trial(v, DEFAULT_TREES)
+    for cfg in GRID:
+        if cfg != DEFAULT_TREES:
+            trial("D", cfg)
+    ranked = sorted({json.dumps(t["cfg"], sort_keys=True): max(t["found"][h]["all"] for h in ("prob", "odds"))
+                     for t in trials if t["version"] == "D"}.items(), key=lambda kv: -kv[1])  # fmt: skip
+    for cfg_text, _ in ranked[:4]:  # E with the 4 best settings of D
+        trial("E", json.loads(cfg_text))
+    for v in ("A", "C"):  # the best setting of D for the smaller versions too
+        if best_of("D")[0] != DEFAULT_TREES:
+            trial(v, best_of("D")[0])
+    result = {"hold_out": f"training glasses with index % {HOLD_OUT} == 0", "defects": sizes,
+              "params": {}, "choice": {}, "held_out_found": {}}  # fmt: skip
+    for v in ("A", "C", "D", "E"):
+        cfg, how, found = best_of(v)
+        result["params"][v], result["choice"][f"trees {v}"] = cfg, how
+        result["held_out_found"][v] = found
+    result["seconds"] = round(time.time() - t0)
+    (out / "tuning.json").write_text(json.dumps(result, indent=1) + "\n")
+    print("chosen:", json.dumps(result["params"]), json.dumps(result["held_out_found"]), flush=True)
+    return result
+
+
 # ----------------------------------------------------------------------------- report
 
 
-def summary(val: dict, out: Path) -> None:
+def summary(val: dict, out: Path, tag: str = "") -> None:
     choice = val["choice"]
     rows = [("Learned finder (EGNN, calibrated)", "finder")]
-    rows += [(f"Trees on {v} ({choice[f'trees {v}']})", f"trees {v}, {choice[f'trees {v}']}") for v in VERSIONS]  # fmt: skip
-    rows += [(f"Logistic regression on A ({choice['logistic A']})", f"logistic A, {choice['logistic A']}")]  # fmt: skip
+    for mname, how in choice.items():
+        label = (
+            f"Trees on {mname.split()[-1]}"
+            if mname.startswith("trees")
+            else "Logistic regression on A"
+        )
+        rows.append((f"{label} ({how})", f"{mname}, {how}"))
     rows += [(name, name) for name in RULES]
     lines = [
-        "# Classifier on classical inputs: validation",
+        f"# Classifier on classical inputs: validation{' (' + tag + ')' if tag else ''}",
         "",
         "Defects found (%), real validation defects, flagged atom within 1.5 sigma of the defect.",
-        "A: positions and species only; B: A plus atom energy and local pressure (needs the",
-        "potential); C: A plus radial densities (positions and species only). Made by",
-        "`scripts/pilots/descriptor_classifier.py run`.",
+        "A, C, D: positions and species only; B, E: also atom energy and local pressure (need the",
+        "potential). See the docstring of `scripts/pilots/descriptor_classifier.py`.",
         "",
         "| Method | " + " | ".join(KINDS) + " | all |",
         "|---|" + "---|" * (len(KINDS) + 1),
@@ -411,13 +536,13 @@ def summary(val: dict, out: Path) -> None:
                 f"{k} {v['p']:.3g}" if v["p"] >= 0.001 else f"{k} <0.001" for k, v in per.items()
             )
         )
-    (out / "summary.md").write_text("\n".join(lines) + "\n")
+    (out / f"summary{'_' + tag if tag else ''}.md").write_text("\n".join(lines) + "\n")
     print("\n".join(lines))
 
 
 def main() -> None:
     ap = argparse.ArgumentParser(description=__doc__.split("\n\n")[0])
-    ap.add_argument("what", choices=["run", "score"])
+    ap.add_argument("what", choices=["run", "tune", "score"])
     ap.add_argument("--out", type=Path, required=True)
     ap.add_argument(
         "--data", type=Path, default=DATA / "val.npz", help="score: the defects to score"
@@ -426,34 +551,47 @@ def main() -> None:
     ap.add_argument("--workers", type=int, default=4)
     ap.add_argument("--no-finder", action="store_true", help="do not score the learned finder")
     ap.add_argument("--finder", type=Path, default=FINDER, help="finder checkpoint to compare with")
+    ap.add_argument("--params", type=Path, help="run: tuning.json with the tree settings")
+    ap.add_argument("--tag", default="", help="run, score: suffix of the output files")
     args = ap.parse_args()
     args.out.mkdir(parents=True, exist_ok=True)
     torch.set_num_threads(4)
     t0 = time.time()
     stats = reference_stats()
     finder = None if args.no_finder else args.finder.resolve()
-    if args.what == "run":
+    sfx = f"_{args.tag}" if args.tag else ""
+    if args.what == "tune":
+        tune(stats, args.workers, args.out)
+    elif args.what == "run":
         rows = training_rows(stats, args.workers)
         print({k: v.shape for k, v in rows.items()}, flush=True)
-        models = fit_models(rows)
-        with open(args.out / "models.pkl", "wb") as fh:
+        tuned = json.loads(args.params.read_text()) if args.params else {}
+        models = fit_models(rows, tuned.get("params"))
+        with open(args.out / f"models{sfx}.pkl", "wb") as fh:
             pickle.dump(models, fh)
-        val = score(DATA / "val.npz", models, stats, args.workers, finder)
+        # ranking (prob or odds): as chosen on the held-out training glasses when tuned
+        choice = {m: tuned["choice"].get(m, "odds") for m in models} if tuned else None
+        val = score(DATA / "val.npz", models, stats, args.workers, finder, choice)
         val["seconds"] = round(time.time() - t0)
         val["training_rows"] = {"rows": int(len(rows["role"])), "intact_fraction": INTACT_FRACTION,
                                 "per_role": np.bincount(rows["role"], minlength=5).tolist()}  # fmt: skip
-        (args.out / "validation.json").write_text(json.dumps(val, indent=1) + "\n")
-        summary(val, args.out)
+        if tuned:
+            val["params"] = tuned["params"]
+        (args.out / f"validation{sfx}.json").write_text(json.dumps(val, indent=1) + "\n")
+        summary(val, args.out, args.tag)
     else:
-        with open(args.out / "models.pkl", "rb") as fh:
+        with open(args.out / f"models{sfx}.pkl", "rb") as fh:
             models = pickle.load(fh)
-        choice = json.loads((args.out / "validation.json").read_text())["choice"]
+        choice = json.loads((args.out / f"validation{sfx}.json").read_text())["choice"]
         res = score(args.data.resolve(), models, stats, args.workers, finder, choice)
-        name = args.data.parent.name + "_" + args.data.stem
+        name = args.data.parent.name + "_" + args.data.stem + sfx
         (args.out / f"score_{name}.json").write_text(json.dumps(res, indent=1) + "\n")
         if args.restored:
-            # the better of the two versions that use positions and species only (A, C)
-            best = max(("A", "C"), key=lambda v: res["all"][f"trees {v}, {choice[f'trees {v}']}"])
+            # the best version that uses positions and species only
+            best = max(
+                (v for v in POSITIONS_ONLY if f"trees {v}" in models),
+                key=lambda v: res["all"][f"trees {v}, {choice[f'trees {v}']}"],
+            )
             restored(args.data.resolve(), models[f"trees {best}"], best, choice[f"trees {best}"],
                      stats, args.workers, args.out / f"restored_{name}_trees_{best}.json")  # fmt: skip
     print(f"done in {time.time() - t0:.0f}s")
