@@ -1,0 +1,48 @@
+{
+ "hold_out": "training glasses with index % 8 == 0",
+ "defects": {
+  "vacancy": 800,
+  "interstitial": 800,
+  "frenkel": 577,
+  "antisite": 800
+ },
+ "params": {
+  "A": {
+   "learning_rate": 0.05,
+   "max_leaf_nodes": 31,
+   "min_samples_leaf": 20,
+   "weighting": "sqrt"
+  },
+  "C": {
+   "learning_rate": 0.05,
+   "max_leaf_nodes": 31,
+   "min_samples_leaf": 20,
+   "weighting": "sqrt"
+  },
+  "D": {
+   "learning_rate": 0.05,
+   "max_leaf_nodes": 31,
+   "min_samples_leaf": 20,
+   "weighting": "sqrt"
+  },
+  "E": {
+   "learning_rate": 0.05,
+   "max_leaf_nodes": 31,
+   "min_samples_leaf": 200,
+   "weighting": "sqrt"
+  }
+ },
+ "choice": {
+  "trees A": "odds",
+  "trees C": "odds",
+  "trees D": "odds",
+  "trees E": "odds"
+ },
+ "held_out_found": {
+  "A": 0.4619,
+  "C": 0.4978,
+  "D": 0.5029,
+  "E": 0.5089
+ },
+ "seconds": 4291
+}
