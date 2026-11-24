@@ -151,6 +151,12 @@ evaluation), the tuned trees of item 2 retrained on displaced inputs
 `scripts/pilots/displaced_inputs.py` (every method against the size of the displacement,
 validation glasses). Thermal snapshots are not started.
 
+**First result (validation, `results/displaced_inputs_20261124/`).** Every model trained on
+relaxed glasses breaks down: at 0.02σ the main finder finds 39.5% (52.2% without shifts)
+and at 0.05σ 16.5%. Trees trained on displaced inputs lose 1-4 points without shifts but
+keep 44.7-46.2% at 0.02σ and about 40.5% at 0.05σ. The finder trained on displaced inputs
+(Kaggle) is scored next to them with the same shifts.
+
 ## 4. Presence and type of defect
 
 **Why.** The finder is told the type of defect and assumes there is one. On a mix of

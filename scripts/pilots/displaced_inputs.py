@@ -71,9 +71,9 @@ def summary(res: dict, out: Path) -> None:
         cells = [f"{100 * res['found'][str(ref)][m][k]:.1f}" for k in dc.KINDS]
         lines.append(f"| {m} | " + " | ".join(cells) + " |")
     if res.get("paired"):
-        lines += ["", "McNemar p over all defects (exact, not corrected for multiple tests):", ""]
+        lines += ["", "McNemar p over all defects, by displacement in sigma (exact, not corrected for multiple tests):", ""]  # fmt: skip
         for pair, per in res["paired"].items():
-            lines.append(f"- {pair}: " + ", ".join(f"{s} {p:.3g}" if p >= 0.001 else f"{s} <0.001" for s, p in per.items()))  # fmt: skip
+            lines.append(f"- {pair}: " + ", ".join(f"at {s}: p = {p:.3g}" if p >= 0.001 else f"at {s}: p < 0.001" for s, p in per.items()))  # fmt: skip
     (out / "summary.md").write_text("\n".join(lines) + "\n")
     print("\n".join(lines))
 
