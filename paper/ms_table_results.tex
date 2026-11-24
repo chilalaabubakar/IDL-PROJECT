@@ -1,0 +1,25 @@
+% copy of fr_table_results.tex written by make_manuscript_tables.py
+% written by make_final_numbers.py
+\begin{table}[t]
+\centering
+\caption{\textbf{Finding and restoring the test defects.} Shares in \%. Found: the flagged atom lies within $1.5\sigma$ of the defect (for a Frenkel pair, of either end; the finder flags the displaced atom itself in \pd{frenkel-exact-finder}\%, the atom energy in \pd{frenkel-exact-energy}\%). Restored: the original glass is recovered after correcting the atoms at the flagged atom and minimising the energy. Brackets: 95\% intervals. Bold: the best method. Only the atom energy uses the potential to flag the atom; every repair ends with minimisation.}
+\label{tab:found}\label{tab:restored}
+\footnotesize\setlength{\tabcolsep}{3pt}
+\begin{tabular}{@{}lcccccc@{}}
+\toprule
+Defect & $n$ & Learned finder & Cell size & Unlike neighb. & Atom energy & Reference \\
+\midrule
+\multicolumn{6}{@{}l}{\emph{Found}} & \emph{random atom} \\
+Vacancy & 200 & \textbf{69.5} {\scriptsize[62, 76]} & 47.5 {\scriptsize[40, 55]} & 29 {\scriptsize[22, 36]} & 29.5 {\scriptsize[23, 36]} & 2.9 \\
+Interstitial & 200 & \textbf{50} {\scriptsize[42, 57]} & 15 {\scriptsize[10, 20]} & 28 {\scriptsize[22, 34]} & 28 {\scriptsize[22, 34]} & 3 \\
+Antisite & 200 & \textbf{49} {\scriptsize[42, 56]} & 16.5 {\scriptsize[12, 22]} & 31.5 {\scriptsize[25, 38]} & 29 {\scriptsize[23, 35]} & 4 \\
+Frenkel pair & 150 & \textbf{45.3} {\scriptsize[38, 53]} & 26.7 {\scriptsize[20, 33]} & 27.3 {\scriptsize[21, 34]} & 32.7 {\scriptsize[25, 40]} & 5.4 \\
+\addlinespace
+\multicolumn{6}{@{}l}{\emph{Restored}} & \emph{true location given} \\
+Vacancy &  & \textbf{53.5} {\scriptsize[46, 61]} & 40.5 {\scriptsize[34, 48]} & 22 {\scriptsize[16, 28]} & 26 {\scriptsize[20, 32]} & 67 {\scriptsize[60, 74]} \\
+Interstitial &  & \textbf{38} {\scriptsize[31, 46]} & 8.5 {\scriptsize[4, 13]} & 21.5 {\scriptsize[16, 27]} & 21 {\scriptsize[16, 26]} & 80 {\scriptsize[74, 86]} \\
+Antisite &  & \textbf{30} {\scriptsize[24, 36]} & 1.5 {\scriptsize[0, 4]} & 7.5 {\scriptsize[4, 11]} & 8 {\scriptsize[4, 12]} & 68.5 {\scriptsize[62, 74]} \\
+Frenkel pair &  & \textbf{12.7} {\scriptsize[8, 18]} & 0 {\scriptsize[0, 2]} & 1.3 {\scriptsize[0, 3]} & 7.3 {\scriptsize[3, 11]} & 42 {\scriptsize[34, 50]} \\
+\bottomrule
+\end{tabular}
+\end{table}

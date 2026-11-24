@@ -25,6 +25,8 @@ and compare the network with classical measures on the same unseen defects.
 - [Final report](paper/final_report.pdf): 10 pages, organised by the course rubric, with an
   appendix that answers the teaching assistants' reviews of the midterm report.
 - [Full report](paper/point_defects_report.pdf) (25 pages): every detail of the study.
+- [Journal manuscript](paper/npj_manuscript.pdf) for npj Computational Materials, with its
+  [Supplementary Information](paper/npj_supplementary.pdf).
 - [Plain-language summary](docs/Point_Defects_Study_Summary.docx) (Word), for readers new to
   materials science or to deep learning.
 - [Method and results in detail](docs/POINT_DEFECTS.md) and

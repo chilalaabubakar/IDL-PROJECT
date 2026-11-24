@@ -18,6 +18,19 @@ python paper/make_final_figures.py                           # figures/fr_fig_*
 cd paper && latexmk -pdf -outdir=build final_report.tex && cp build/final_report.pdf .
 ```
 
+`npj_manuscript.tex` / `npj_manuscript.pdf` and `npj_supplementary.tex` /
+`npj_supplementary.pdf`: **the journal manuscript** for npj Computational Materials (Article:
+abstract, introduction, results, discussion, methods; four figures and two tables in the main
+text) and its Supplementary Information. It uses the numbers of the two reports above and
+below, plus the tables and numbers written by `make_manuscript_tables.py` (`ms_*.tex`). Build
+the supplementary file first, because the manuscript cites its table and figure numbers:
+
+```bash
+python paper/make_manuscript_tables.py   # ms_numbers.tex, ms_table_*.tex, ms_si_*.tex
+cd paper && latexmk -pdf -outdir=build npj_supplementary.tex npj_manuscript.tex
+cp build/npj_supplementary.pdf build/npj_manuscript.pdf .
+```
+
 `point_defects_report.tex` / `point_defects_report.pdf`: **the report on the two-dimensional
 point-defect study** (finding and repairing vacancies, interstitials, Frenkel pairs and
 antisites), written after Prof. Dabo's review. Every number in it is read from

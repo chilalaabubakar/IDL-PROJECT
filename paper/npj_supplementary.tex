@@ -1,0 +1,131 @@
+\documentclass[11pt]{article}
+% Supplementary Information of npj_manuscript.tex. Numbers marked \pd{...} come from
+% pd_numbers.tex, fr_numbers.tex and ms_numbers.tex; tables from the same scripts.
+\usepackage[letterpaper,margin=1in]{geometry}
+\usepackage[T1]{fontenc}
+\usepackage[utf8]{inputenc}
+\usepackage{mathptmx}
+\usepackage{amsmath,amssymb,bm}
+\usepackage{microtype}
+\usepackage{booktabs}
+\usepackage{graphicx}
+\usepackage{xcolor}
+\usepackage{tabularx}
+\usepackage[labelfont=bf,labelsep=period,font=small]{caption}
+\usepackage[colorlinks=true,linkcolor=black,urlcolor=blue!50!black]{hyperref}
+\hypersetup{pdftitle={Supplementary Information: Finding point defects in a model glass from atomic positions with neural networks},pdfauthor={Stacy Cheruto, Nicholaus Ladislaus, Abubakar Chilala, Gentille Uwera, Michel Sangwa, Boniface Godwin}}
+\renewcommand{\figurename}{Supplementary Fig.}
+\renewcommand{\tablename}{Supplementary Table}
+\setlength{\textfloatsep}{12pt plus 2pt minus 2pt}
+\makeatletter
+\newcommand{\pd}[1]{\@ifundefined{pd@#1}{\textcolor{red}{[#1]}}{\csname pd@#1\endcsname}}
+\newcommand{\pdset}[2]{\expandafter\gdef\csname pd@#1\endcsname{#2}}
+\makeatother
+\IfFileExists{pd_numbers.tex}{\input{pd_numbers}}{}
+\IfFileExists{fr_numbers.tex}{\input{fr_numbers}}{}
+\IfFileExists{ms_numbers.tex}{\input{ms_numbers}}{}
+\newcommand{\ci}[1]{{\scriptsize[\pd{#1-lo}, \pd{#1-hi}]}}
+
+\begin{document}
+\begin{center}
+{\Large\bfseries Supplementary Information\par}
+\vspace{6pt}
+{\large Finding point defects in a model glass from atomic positions with neural networks\par}
+\vspace{6pt}
+Stacy Cheruto, Nicholaus Ladislaus, Abubakar Chilala, Gentille Uwera, Michel Sangwa and Boniface Godwin
+\end{center}
+
+\noindent All numbers are computed from the result files in the repository (\url{https://github.com/chilalaabubakar/IDL-PROJECT}, branch \texttt{dabo-point-defects}). Shares are in \%, with 95\% bootstrap intervals over the test glasses in brackets where given.
+
+\section*{Supplementary Figures}
+
+\begin{figure}[h]
+\centering
+\includegraphics[width=0.95\linewidth]{figures/pd_fig2_pipeline.pdf}
+\caption{\textbf{Finding and repairing one test vacancy.} \textbf{a} The relaxed glass; the dotted circle marks where the atom was removed, which the methods are not told. \textbf{b} The finder's probability that each atom is next to an empty site; the flagged atom is ringed. \textbf{c} An atom of the missing species is put at the most open point near the flagged atom. \textbf{d} After energy minimisation every atom sits on its position in the original glass (dots); in \textbf{c} the atoms around the defect are still off theirs.}
+\label{fig:pipeline}
+\end{figure}
+
+\begin{figure}[h]
+\centering
+\includegraphics[width=\linewidth]{figures/fr_fig_baselines.pdf}
+\caption{\textbf{Output of every method on the same test vacancy.} The dotted circle marks where the atom was removed (not shown to the methods). Atoms are coloured by how suspicious each method finds them (rank within the glass, dark = most); the ringed atom is the one flagged. In this typical example three of the four measures also find the defect; local pressure flags an atom $7.6\sigma$ away.}
+\label{fig:baselines}
+\end{figure}
+
+\begin{figure}[h]
+\centering
+\includegraphics[width=0.9\linewidth]{figures/pd_fig3_results.pdf}
+\caption{\textbf{Test results by method.} \textbf{a} Defects found: the flagged atom is within $1.5\sigma$ of the defect. Grey lines: a randomly chosen atom. \textbf{b} Original glasses restored after correcting the atoms at the flagged atom and minimising the energy. Grey lines: the same with the true location given. Whiskers: 95\% intervals. The first three methods use no potential to flag the atom. The values are those of Table~1 of the main text.}
+\label{fig:results}
+\end{figure}
+
+\begin{figure}[h]
+\centering
+\includegraphics[width=\linewidth]{figures/fr_fig_training.pdf}
+\caption{\textbf{Training and validation.} \textbf{a} Denoiser: training loss (averaged over all noise levels, so it stays near the noise floor) and validation loss at three fixed noise levels. \textbf{b} Finder: class-weighted training loss, mean over 1,000 updates. \textbf{c} Finder: share of validation defects found (first 200 per type, uncalibrated, including the Frenkel pairs that undid themselves).}
+\label{fig:training}
+\end{figure}
+
+\clearpage
+\section*{Supplementary Tables}
+
+\input{ms_si_physics}
+\input{ms_si_occupancy}
+\input{ms_si_models}
+\input{fr_table_shapes}
+
+\begin{table}[h]
+\centering
+\caption{\textbf{Paired comparisons of the finder with each classical measure.} McNemar's exact test on the same test defects; $p$ values after Holm's correction over the 12 comparisons of each family (found, restored).}
+\label{tab:pvalues}
+\footnotesize
+\begin{tabular}{@{}lcccccc@{}}
+\toprule
+ & \multicolumn{3}{c}{Found: finder against} & \multicolumn{3}{c}{Restored: finder against} \\
+\cmidrule(lr){2-4}\cmidrule(l){5-7}
+Defect & cell size & unlike neighb. & atom energy & cell size & unlike neighb. & atom energy \\
+\midrule
+Vacancy & $\pd{p-found-geometry-vacancy}$ & $\pd{p-found-bonds-vacancy}$ & $\pd{p-found-energy-vacancy}$ & $\pd{p-restored-geometry-vacancy}$ & $\pd{p-restored-bonds-vacancy}$ & $\pd{p-restored-energy-vacancy}$ \\
+Interstitial & $\pd{p-found-geometry-interstitial}$ & $\pd{p-found-bonds-interstitial}$ & $\pd{p-found-energy-interstitial}$ & $\pd{p-restored-geometry-interstitial}$ & $\pd{p-restored-bonds-interstitial}$ & $\pd{p-restored-energy-interstitial}$ \\
+Antisite & $\pd{p-found-geometry-antisite}$ & $\pd{p-found-bonds-antisite}$ & $\pd{p-found-energy-antisite}$ & $\pd{p-restored-geometry-antisite}$ & $\pd{p-restored-bonds-antisite}$ & $\pd{p-restored-energy-antisite}$ \\
+Frenkel pair & $\pd{p-found-geometry-frenkel}$ & $\pd{p-found-bonds-frenkel}$ & $\pd{p-found-energy-frenkel}$ & $\pd{p-restored-geometry-frenkel}$ & $\pd{p-restored-bonds-frenkel}$ & $\pd{p-restored-energy-frenkel}$ \\
+\bottomrule
+\end{tabular}
+\end{table}
+
+\begin{table}[h]
+\centering
+\caption{\textbf{Subsets of the test defects and local pressure.} Top: vacancies by the species of the removed atom, and Frenkel pairs by whether the site-occupancy rule still finds a separated pair after relaxation. True loc.: restored with the true location given. Bottom: defects found by local pressure, with the rule chosen on the validation glasses (lowest value, or most unusual value relative to the species).}
+\label{tab:species}
+\footnotesize\setlength{\tabcolsep}{3.5pt}
+\begin{tabular}{@{}lcccccccccc@{}}
+\toprule
+ & & \multicolumn{4}{c}{Found} & \multicolumn{5}{c}{Restored} \\
+\cmidrule(lr){3-6}\cmidrule(l){7-11}
+Subset & $n$ & Finder & Cell & Unlike & Energy & Finder & Cell & Unlike & Energy & True loc. \\
+\midrule
+Vacancy, A atom removed & \pd{vacA-n} & \pd{vacA-found-finder} & \pd{vacA-found-geometry} & \pd{vacA-found-bonds} & \pd{vacA-found-energy} & \pd{vacA-restored-finder} & \pd{vacA-restored-geometry} & \pd{vacA-restored-bonds} & \pd{vacA-restored-energy} & \pd{vacA-restored-ceiling} \\
+Vacancy, B atom removed & \pd{vacB-n} & \pd{vacB-found-finder} & \pd{vacB-found-geometry} & \pd{vacB-found-bonds} & \pd{vacB-found-energy} & \pd{vacB-restored-finder} & \pd{vacB-restored-geometry} & \pd{vacB-restored-bonds} & \pd{vacB-restored-energy} & \pd{vacB-restored-ceiling} \\
+Frenkel, still a pair & \pd{fpair-n} & \pd{fpair-found-finder} & \pd{fpair-found-geometry} & \pd{fpair-found-bonds} & \pd{fpair-found-energy} & \pd{fpair-restored-finder} & \pd{fpair-restored-geometry} & \pd{fpair-restored-bonds} & \pd{fpair-restored-energy} & \pd{fpair-restored-ceiling} \\
+Frenkel, other classes & \pd{fother-n} & \pd{fother-found-finder} & \pd{fother-found-geometry} & \pd{fother-found-bonds} & \pd{fother-found-energy} & \pd{fother-restored-finder} & \pd{fother-restored-geometry} & \pd{fother-restored-bonds} & \pd{fother-restored-energy} & \pd{fother-restored-ceiling} \\
+\bottomrule
+\end{tabular}
+
+\vspace{8pt}
+\begin{tabular}{@{}lccl@{}}
+\toprule
+Defect & $n$ & Found by local pressure & Rule \\
+\midrule
+Vacancy & \pd{n-vacancy} & \pd{press-vacancy} \ci{press-vacancy} & \pd{press-vacancy-rule} \\
+Interstitial & \pd{n-interstitial} & \pd{press-interstitial} \ci{press-interstitial} & \pd{press-interstitial-rule} \\
+Antisite & \pd{n-antisite} & \pd{press-antisite} \ci{press-antisite} & \pd{press-antisite-rule} \\
+Frenkel pair & \pd{n-frenkel} & \pd{press-frenkel} \ci{press-frenkel} & \pd{press-frenkel-rule} \\
+\bottomrule
+\end{tabular}
+\end{table}
+
+\input{fr_table_splits}
+\input{pd_table_stability}
+
+\end{document}

@@ -1,0 +1,28 @@
+% written by make_manuscript_tables.py
+\begin{table}[h]
+\centering
+\caption{\textbf{Site-occupancy check.} Top: share of defects of known kind that the occupancy rule classifies as expected (\%; last column: Frenkel pairs that undid themselves classified as no defect). Bottom: classes of the 150 real test Frenkel pairs.}
+\label{tab:occupancy}
+\footnotesize
+\begin{tabular}{@{}lcccc@{}}
+\toprule
+Split & Vacancy & Interstitial & Antisite & Undone Frenkel pairs \\
+\midrule
+Test & 93.0 & 95.5 & 71.0 & 50/50 \\
+Validation & 91.5 & 94.0 & 67.5 & 65/65 \\
+\bottomrule
+\end{tabular}
+
+\vspace{6pt}
+\begin{tabular}{@{}lc@{}}
+\toprule
+Class of the relaxed Frenkel pair & Test defects \\
+\midrule
+Frenkel pair & 66 \\
+Close pair & 27 \\
+Antisite-like & 35 \\
+Complex & 19 \\
+No defect & 3 \\
+\bottomrule
+\end{tabular}
+\end{table}
