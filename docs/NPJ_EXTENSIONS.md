@@ -59,10 +59,10 @@ scoring, check that the files still match the SHA256 in `meta.json`.
 
 **Training.** The main finder is two stages: `configs/train/detect_point_defects.yaml`
 (20,000 updates from the denoiser, seed 0), then `configs/train/detect_point_defects_v2.yaml`
-(40,000 at half the learning rate, starting from stage 1). Train seeds 1 and 2 of both stages
-(`seed=1`, `seed=2`, with `init_from` of stage 2 pointing at the matching stage 1), on Kaggle
-with `notebooks/kaggle_point_defects.ipynb` (stage 1) and `notebooks/kaggle_point_defects_finder.ipynb`
-(stage 2), changing the seed and the run name. Do the
+(40,000 at half the learning rate, starting from stage 1). Train two more runs of both stages,
+with new seeds and `init_from` of stage 2 pointing at the matching stage 1. The notebook
+`notebooks/kaggle_finder_seeds.ipynb` does both stages for runs 2 and 3 (seeds 4-5 and
+6-7; the first run used 0 and 1) and pushes `results/kaggle_seeds_<date>/`. Do the
 same for the transformer and the CNN if they stay in the paper (their three seeds exist; only
 the scoring on the fresh set is new).
 
@@ -97,7 +97,8 @@ validation set only. Subsample intact atoms in training if memory is short.
 `species_stats`, and `evaluate`, which also runs the repair), `scripts/pilots/structural_signatures.py`
 (local pressure), `src/glassdiff/physics/ka_potential.py` (`ka_virial`, per-atom energy).
 
-**New.** `scripts/pilots/descriptor_classifier.py`, writing `results/descriptor_classifier_<date>/`.
+**New.** `scripts/pilots/descriptor_classifier.py`, writing `results/descriptor_classifier_<date>/`;
+on Kaggle, `notebooks/kaggle_descriptor_classifier.ipynb`.
 
 **Success test.** If version A comes within 5 points of the finder for a defect type (on the
 fresh test set, mean over seeds), the manuscript drops the claim that learning beats

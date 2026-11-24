@@ -4,6 +4,20 @@ The notebooks of the point-defect study. Each one clones this branch, runs on Ka
 Colab, and pushes its results back to `dabo-point-defects` (GitHub token in the platform's
 secrets, never in the notebook). The notebooks of the first study are on the branch `main`.
 
+**Extension work** (branch `npj-extensions`, `docs/NPJ_EXTENSIONS.md`; these push to
+`npj-extensions`):
+
+- `kaggle_finder_seeds.ipynb`: trains the main finder twice more with the same two-stage
+  recipe and new seeds (runs 2 and 3; 3.5-5 h per run on a T4, both usually in one
+  session) and pushes `results/kaggle_seeds_<date>/`. No test scoring: the fresh test set
+  is scored once, at the end. Item 1.
+- `kaggle_descriptor_classifier.ipynb`: the classifier on classical inputs
+  (`scripts/pilots/descriptor_classifier.py`) on 4 CPU cores: training split, fit,
+  validation (~1.5-2.5 h); with `SCORE_FRESH_TEST = True`, the fresh test set with repair
+  and minimisation. Pushes `results/descriptor_classifier_kaggle_<date>/`. Item 2.
+
+**The final study:**
+
 - `kaggle_point_defects.ipynb`: makes the training split, trains the first repair network
   and the finder (one per GPU), evaluates them and pushes the results (~4 h on T4 x2).
   First run: `results/point_defects_trained_20261107/`.
