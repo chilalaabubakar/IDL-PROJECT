@@ -470,7 +470,8 @@ def tune(stats, workers: int, out: Path, seed: int = 0) -> dict:
         best = max(res, key=lambda h: res[h]["all"])
         print(f"{version} {cfg}: {m.n_iter_} it, {time.time() - t1:.0f}s, held-out found "
               f"{res[best]['all']:.4f} ({best}) {json.dumps(res[best])}", flush=True)  # fmt: skip
-        (out / "tuning_trials.json").write_text(json.dumps(trials, indent=1) + "\n")
+        # running log in the git-ignored cache; the full list goes to out/ at the end
+        (CACHE / "tuning_trials_running.json").write_text(json.dumps(trials, indent=1) + "\n")
 
     def best_of(version: str) -> tuple[dict, str, float]:
         cands = [(t["cfg"], h, t["found"][h]["all"]) for t in trials if t["version"] == version
@@ -496,6 +497,7 @@ def tune(stats, workers: int, out: Path, seed: int = 0) -> dict:
         result["params"][v], result["choice"][f"trees {v}"] = cfg, how
         result["held_out_found"][v] = found
     result["seconds"] = round(time.time() - t0)
+    (out / "tuning_trials.json").write_text(json.dumps(trials, indent=1) + "\n")
     (out / "tuning.json").write_text(json.dumps(result, indent=1) + "\n")
     print("chosen:", json.dumps(result["params"]), json.dumps(result["held_out_found"]), flush=True)
     return result
