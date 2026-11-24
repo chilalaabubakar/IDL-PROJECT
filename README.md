@@ -4,10 +4,14 @@ Course project for 11-785 Introduction to Deep Learning, College of Engineering,
 Mellon University Africa. Stacy Cheruto, Nicholaus Ladislaus, Abubakar Chilala, Gentille
 Uwera and Michel Sangwa; supervised by teaching assistant Boniface Godwin.
 
-This branch (`dabo-point-defects`) holds the final study. The earlier study, in which a
-diffusion model placed self-defined defects (midterm report), is on the branch
-[`main`](https://github.com/chilalaabubakar/IDL-PROJECT/tree/main). The two branches are
-kept apart.
+This branch (`npj-extensions`) extends the final study for the journal manuscript: a fresh
+test set and repeated training, a trained classifier on classical inputs, displaced and
+finite-temperature glasses, finding whether and which defect, and the move to three dimensions
+and silica. The plan and the rules of the work are in
+[`docs/NPJ_EXTENSIONS.md`](docs/NPJ_EXTENSIONS.md). The final study as reported is on
+[`dabo-point-defects`](https://github.com/chilalaabubakar/IDL-PROJECT/tree/dabo-point-defects);
+the earlier study, in which a diffusion model placed self-defined defects (midterm report),
+is on [`main`](https://github.com/chilalaabubakar/IDL-PROJECT/tree/main).
 
 ## The question
 

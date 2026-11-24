@@ -1,0 +1,24 @@
+# Fresh test glasses for the extension work (docs/NPJ_EXTENSIONS.md, item 1). Same recipe as
+# ka2d_256.yaml, seeds never used before (train 0-, val 10000-, test 20000-). Make once,
+# record the SHA256 in meta.json, and score on it only at the end.
+#   python scripts/make_dataset.py --config configs/data/ka2d_256_fresh.yaml
+name: ka2d_256_fresh
+n_atoms: 256
+out_dir: data/ka2d_256_fresh
+splits:
+  test: {n: 200, seed0: 30000}
+protocol:
+  rho: 1.2
+  frac_a: 0.65
+  t_melt: 2.0
+  melt_steps: 20000
+  t_final: 0.01
+  rate: 1.0e-2
+  dt: 0.005
+  tdamp: 0.1
+  min_ftol: 1.0e-8
+save_thermal: true
+quality:
+  max_global_psi6: 0.3
+  min_pair_dist: 0.56
+  pe_max_z: 5.0
