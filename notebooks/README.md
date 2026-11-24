@@ -23,7 +23,7 @@
 - `kaggle_silica_train.ipynb`: 3D silica training on DM2's glasses
   (`docs/SILICA_QUICKSTART.md`).
 
-- `stage0_poc.ipynb`: the course proof-of-concept notebook, as provided (unchanged, with its
+- `stage0_poc.ipynb`: the course proof-of-concept notebook, as provided (with its
   Colab outputs): MLP denoisers on a 3×3 jittered grid, plus Frenkel-pair and antisite demos
   by naive clamping. `scripts/stage0_poc.py` reruns its cells and reproduces the proposal's
   Fig. 1 (`results/stage0/`).

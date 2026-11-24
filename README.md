@@ -1,176 +1,162 @@
-# Controlled Defect Generation in Amorphous Materials via Conditional Diffusion
+# Placing Defects at Chosen Sites in a Model Glass with a Diffusion Model
 
-IDL group project (CMU LTI): S. Cheruto, N. Ladislaus, A. Chilala, G. Uwera, M. Sangwa.
+Course project for 11-785 Introduction to Deep Learning, College of Engineering, Carnegie
+Mellon University Africa. Stacy Cheruto, Nicholaus Ladislaus, Abubakar Chilala, Gentille
+Uwera and Michel Sangwa; supervised by teaching assistant Boniface Godwin.
 
-We ask a diffusion model for a specific defect at a chosen location in a 2D binary glass
-(Kob–Andersen 65:35) and check, after physical relaxation, whether it is really there and
-whether its surroundings look like naturally formed ones. The work builds on DM2
+This branch (`main`) holds the first study, reported in the midterm report. The final study,
+which finds and repairs standard point defects, is on the branch
+[`dabo-point-defects`](https://github.com/chilalaabubakar/IDL-PROJECT/tree/dabo-point-defects).
+The two branches are kept apart.
+
+## The question
+
+A defect in a glass is a small group of atoms arranged differently from the rest. It decides
+how a glass breaks, ages or absorbs light, so studies need many realistic copies of the same
+defect at chosen places. Today one either waits for it in a slow melt-and-cool simulation or
+inserts it by hand, which can leave unnatural surroundings.
+
+We train a diffusion model to rebuild a small region of an existing glass with a requested
+defect at its centre, like image inpainting, and check after relaxation whether the defect is
+really there and whether its surroundings look natural. The work builds on DM2
 ([Yang & Schwalbe-Koda, npj Comput. Mater. 2026](https://doi.org/10.1038/s41524-025-01901-1);
 [code](https://github.com/digital-synthesis-lab/DM2)).
 
-> **Two studies, two branches.** This branch (`main`) holds the first study: placing defects
-> at chosen sites with a conditional diffusion model. A later study, made after a review by
-> Prof. Ismaila Dabo (finding and repairing standard point defects with a denoising network),
-> lives on the branch
-> [`dabo-point-defects`](https://github.com/chilalaabubakar/IDL-PROJECT/tree/dabo-point-defects).
-> The two branches are kept separate and are not merged into each other.
+## Reports
 
-## Documents
-- [Project plan](docs/PROJECT_PLAN.md): research questions, method, evaluation, stages, timeline, risks
-- [Implementation plan](docs/IMPLEMENTATION_PLAN.md): conventions, tickets per workstream, dependencies, MVP definition
-- [Dataset plan](docs/DATASET.md): the 2D KA dataset we generate, defect definitions, external datasets
-- [Feasibility pilot](docs/pilot/): LAMMPS script and measured outputs
-- [Team summary](docs/Project_Summary.docx) (Word): plain-language summary of what was done, the data, models, training runs, results, next steps and compute
-- [Workshop paper](paper/main.pdf) (about 8.5 pages, plain language; LaTeX source in `paper/`)
-- [3D silica extension plan](docs/SILICA_3D_PLAN.md): the next step toward a materials-journal paper (defects in amorphous SiO₂, physical validation)
-- [3D silica quickstart](docs/SILICA_QUICKSTART.md): data, defect labels, the conditional 3D model and how to start training it (Kaggle or PSC Bridges-2)
-- [Compute estimate](docs/compute/README.md): GPU-hours, CPU core-hours and ACCESS credits for the rest of the project, from measured timings
+- [Midterm report](paper/midterm_report.pdf): the study in the format of the course rubric.
+- [Workshop paper](paper/main.pdf): an 8-page write-up of the 2D results.
+- [Team summary](docs/Project_Summary.docx) (Word), in plain language.
+- Plans: [project](docs/PROJECT_PLAN.md), [implementation](docs/IMPLEMENTATION_PLAN.md),
+  [dataset](docs/DATASET.md), [3D silica](docs/SILICA_3D_PLAN.md) and its
+  [quickstart](docs/SILICA_QUICKSTART.md), [compute estimate](docs/compute/README.md).
 
-## Status
+## Data
 
-The MVP pipeline is implemented and tested (67 tests, including an end-to-end run of
-every script). It covers dataset generation, defect labelling, the periodic EGNN and
-the MPNN/MLP ablations, training, the DM2 sampler with clamping, RePaint and CFG
-conditioning, both baselines (hand insertion, local melt-quench), relaxation and
-metrics with bootstrap CIs. See
-[`docs/IMPLEMENTATION_PLAN.md`](docs/IMPLEMENTATION_PLAN.md) §2 for the ticket-by-ticket
-status.
+- **Glass.** The two-dimensional Kob–Andersen mixture: 65% large A and 35% small B atoms with
+  Lennard-Jones forces in a periodic box. Each glass is melted, cooled and relaxed with LAMMPS:
+  800 training, 100 validation and 100 test glasses of 256 atoms; 2,000 glasses of 64 atoms
+  for a symmetry test; and test sets of 1,024 atoms and of slower cooling for generalisation
+  ([`data/`](data/README.md)).
+- **Defects,** defined by counting neighbours with rules fixed on the training glasses:
+  **D1−** an A atom with at most 5 neighbours (1.7 per glass), **D1+** an A atom with at
+  least 8 (1.4 per glass), **D2** a B atom with at least two B neighbours within 1.2σ
+  (10 per glass). A library of 10,545 natural defects from the training glasses is used for
+  hand insertion.
 
-**Results** (round 1: [`results/colab_20261004-2352Z/ANALYSIS.md`](results/colab_20261004-2352Z/ANALYSIS.md),
-round 2: [`results/colab_20261005-1006Z/ANALYSIS.md`](results/colab_20261005-1006Z/ANALYSIS.md),
-round 3: [`results/round3_ANALYSIS.md`](results/round3_ANALYSIS.md); training seeds:
-[`results/seeds/`](results/seeds/README.md)): averaged over three training runs, the
-conditional EGNN places D2 defects inside existing glasses 1.5–2.4× as often as hand
-insertion (0.45 ± 0.11 at guidance w = 2, 0.71 ± 0.08 at w = 6, vs 0.30), with surroundings
-closer on the original all-request local-energy metric, and D1− defects 3.5× as often (0.22 ± 0.02 vs 0.06); local
-melt-quench almost never succeeds. In the whole-box task it reaches D2 success 0.58 ± 0.03
-with pooled local-energy W1 near its finite-sample natural reference. D1+ fails for every method. D2 success varies
-between training runs more than the evaluation noise (each run ends with a different
-effective guidance strength). The DM2
-sampler's step count acts like a cooling rate (100 steps give the natural energy), and in
-the N = 64 symmetry ladder the EGNN makes the most natural glasses while a flat MLP does
-not learn. Stage 0 ([`results/stage0/`](results/stage0/README.md)): DM2's own pretrained
-a-SiO₂ model, rerun on CPU, reproduces its training glasses' g(r) and tetrahedral structure,
-with somewhat more disorder (like a 100× faster quench); the course proof-of-concept
-notebook reproduces the proposal's Fig. 1. Sensitivity checks
-([`results/sensitivity/`](results/sensitivity/README.md)): the method ranking holds when the
-defect cutoffs, success radius, realism window and regenerated-disk size are varied; the
-absolute success rates move by up to about 0.1.
+## Model and baselines
 
-## Physical credibility: scope of the claim
+- **Model.** A periodic EGNN denoiser trained as in DM2, with four additions: a defect label
+  at the requested site, held atoms outside the region, the noise level as an input, and
+  classifier-free guidance of strength *w*. Sampling uses DM2's sampler with 100 steps.
+- **Baselines.** *Hand insertion*: paste a natural defect with its neighbours within 1.5σ,
+  then relax. *Local melt-quench*: melt and cool only the region in LAMMPS. *Chance*: fill the
+  region with the model without a label.
+- **Experiments.** 13 trained models: two unlabelled, three seeds for each of two noise
+  ranges, three for a symmetry test (EGNN, MPNN, flat MLP) and two with a range of region
+  sizes.
+- **Metrics.** *Success*: after relaxation, an atom of the requested type within 0.5σ of the
+  site carries the requested label. *Local W1*: distance between the atom energies within 3σ
+  of the site and those around natural defects; natural against natural gives the floor.
+  95% bootstrap intervals over 256 requests.
 
-[Host-aware structure and finite-temperature follow-up](results/credibility_followup_20261018/README.md)
-shows that successful D2 placements remain structurally different from natural defects.
-For the tested radius-6 setting, host-aware successful-only energy W1 is 0.029 versus a
-count-matched natural median of 0.012, and outer-host displacement is larger than for
-hand insertion. At T=0.01 after 50 LJ time units, the tracked D2 persists in 80/96
-velocity trajectories for generated defects, 90/96 for successful hand insertions and
-96/96 for natural defects (32 independent hosts per group). These observations support
-short-term persistence for many generated defects; they do not establish natural-equivalent
-surroundings or long-term stability. The new matched seed/sham repeat has only eight
-requests per model so far. Historical tables average energy realism over successes and
-failures unless explicitly labelled successful-only.
+## Results
 
-Full matched replication and longer stability checks: see the
-[completion workflow](docs/GAP1_COMPLETION.md) and
-[Kaggle notebook](notebooks/kaggle_gap1_completion.ipynb).
+Rebuilding a region inside an existing glass. Model rows: mean ± standard deviation over three
+training runs (D1+: one run).
 
-## Generalization study (gap 2)
+| Method | D2 success | D2 local W1 | D1− success | D1− local W1 | D1+ success |
+|---|---|---|---|---|---|
+| Chance (no label) | 0.03 | 0.062 | 0.02 | 0.053 | 0.00 |
+| Local melt-quench | 0.05 | 0.065 | 0.00 | 0.024 | 0.01 |
+| Hand insertion | 0.30 | 0.087 | 0.06 | 0.032 | 0.02 |
+| Model, w = 2 | 0.45 ± 0.11 | **0.051** | **0.22** | **0.022** | 0.03 |
+| Model, w = 6 | 0.71 ± 0.08 | 0.072 | 0.21 | 0.038 | 0.04 |
+| Model, w chosen per model | **0.74 ± 0.04** | 0.076 | | | |
+| Natural floor | | 0.013 | | 0.016 | |
 
-For the two missing 1024-atom conditions on Colab, use the
-[Colab notebook](notebooks/colab_gap2_1024.ipynb) and
-[CPU/GPU phase guide](docs/GAP2_COLAB.md) to conserve compute units.
+- The model places D2 defects 1.5–2.4 times as often as hand insertion and D1− defects 3.5
+  times as often, with surroundings closer to natural ones.
+- Stronger guidance places more D2 defects but makes their surroundings less natural.
+  Choosing *w* for each trained model on validation glasses halves the spread between runs.
+- No method places D1+. A natural D1+ moved into another glass with its 47 nearest atoms
+  disappears 97% of the time: it is held in place by glass more than 3.5σ away.
+- Successful D2 placements survive 250 time units of molecular dynamics in 87% of cases
+  (hand insertion 91%, natural defects 95%). On 100 new glasses D2 success is 0.36–0.51
+  (hand insertion 0.23).
+- The EGNN makes more natural glasses than the MPNN; the flat MLP does not learn. DM2's own
+  silica model, rerun by us, reproduces its published structure.
 
+Analyses: [round 1](results/colab_20261004-2352Z/ANALYSIS.md),
+[round 2](results/colab_20261005-1006Z/ANALYSIS.md), [round 3](results/round3_ANALYSIS.md),
+[training seeds](results/seeds/README.md), [sensitivity checks](results/sensitivity/README.md),
+[physical checks](results/credibility_followup_20261018/README.md),
+[DM2 reproduction](results/stage0/README.md).
 
-For parallel Kaggle/PSC execution, use the [Bridges-2 guide](docs/GAP2_BRIDGES2.md).
-The updated notebook defaults to `kaggle_remaining`, reserving 1024-standard/fast for PSC.
+## What came next
 
-
-Run the dedicated [Kaggle generalization notebook](notebooks/kaggle_gap2_generalization.ipynb)
-for fresh 256/1024-atom hosts at three cooling rates, all three frozen training seeds,
-and matched controls. See the [protocol and resume instructions](docs/GAP2_GENERALIZATION.md).
-The preparation checks are complete; production placement-transfer results require running
-this notebook. It supports checkpointing across multiple Kaggle sessions.
-
-## Run on Colab (GPU)
-
-Open [`notebooks/colab_train.ipynb`](notebooks/colab_train.ipynb) in Colab:
-<https://colab.research.google.com/github/chilalaabubakar/IDL-PROJECT/blob/main/notebooks/colab_train.ipynb>
-
-For the current experiment round only, use the shorter
-[`notebooks/colab_round3.ipynb`](notebooks/colab_round3.ipynb):
-<https://colab.research.google.com/github/chilalaabubakar/IDL-PROJECT/blob/main/notebooks/colab_round3.ipynb>
-(setup, round 3, summary and push; it reuses the models and results of rounds 1–2 in Drive).
-Out of Colab compute? [`notebooks/kaggle_round3.ipynb`](notebooks/kaggle_round3.ipynb) runs
-the same round on Kaggle without Drive: it loads earlier models and results from this
-repository and pushes its progress back every 45 minutes, so it can continue across Kaggle
-sessions.
-The sensitivity checks run in [`notebooks/kaggle_sensitivity.ipynb`](notebooks/kaggle_sensitivity.ipynb)
-(one Kaggle session, ~4 h; analysis in `results/sensitivity/`), and the training seeds in
-[`notebooks/kaggle_seeds.ipynb`](notebooks/kaggle_seeds.ipynb) (one session on T4 x2, ~10–11 h).
-
-The full notebook checks the GPU, measures training speed, trains the unconditional and
-conditional EGNN (resuming automatically after a disconnect), runs every experiment and
-baseline, and builds the summary table. Runs and results are kept in Google Drive (`MyDrive/idl-project/`);
-the last cell pushes a compact copy (summary, metrics, figures, trained weights) to
-`results/colab_<date>/` in this repository, using a GitHub token stored in Colab Secrets.
-
-## Quickstart (any GPU machine)
-
-```bash
-pip install torch                       # CUDA build
-pip install -e ".[dev,md]"
-export LD_LIBRARY_PATH=/usr/local/lib:$LD_LIBRARY_PATH   # directory holding libmpi.so.12
-# 1. data: already committed in data/. To regenerate (~30 CPU-minutes on 4 cores, bit-identical):
-python scripts/make_dataset.py      --config configs/data/ka2d_256.yaml
-python scripts/freeze_thresholds.py --config configs/defects/v0.yaml data=data/ka2d_256
-python scripts/build_patches.py     --config configs/defects/v0.yaml data=data/ka2d_256
-# 2. train (unconditional, then conditional)
-python scripts/train.py --config configs/train/uncond.yaml
-python scripts/train.py --config configs/train/cond.yaml
-# 3. sample -> relax -> evaluate (repeat per method, defect, task)
-python scripts/sample.py   --config configs/sampler/cfg.yaml ckpt=runs/<cond>/ckpt.pt data=data/ka2d_256 defect=D2 request.mode=host
-python scripts/relax.py    --config configs/eval/default.yaml run=runs/<sample-run>
-python scripts/evaluate.py --config configs/eval/default.yaml run=runs/<sample-run> data=data/ka2d_256
-python scripts/plot_samples.py --config configs/eval/default.yaml run=runs/<sample-run> data=data/ka2d_256
-python scripts/aggregate_results.py --config configs/eval/default.yaml runs_dir=runs
-```
-
-More commands (baselines, floor row, the other datasets): `docs/IMPLEMENTATION_PLAN.md` §6
-and `docs/DATASET.md` §4.
-
-## Layout
-```
-configs/        YAML configs: data, defects, model, train, sampler, eval
-data/           generated datasets (committed, ~20 MB; see data/README.md)
-docs/           plans and the feasibility pilot
-notebooks/      Stage 0 notebook, figures, Kaggle training notebooks
-results/        small summary tables and figures that go in the report
-runs/           training / sampling / evaluation run directories (gitignored)
-scripts/        command-line entry points (one per pipeline step); scripts/silica/ for 3D
-slurm/          PSC Bridges-2 jobs (2D generalization and 3D silica)
-src/glassdiff/
-  types.py      Structures, Request, label conventions
-  geometry.py   periodic minimum-image vectors, neighbour lists
-  md/           LAMMPS melt-quench generation, local melt-quench baseline
-  physics/      Kob–Andersen potential and batched FIRE relaxation (PyTorch)
-  analysis/     descriptors, defect detectors, structure statistics
-  data/         dataset I/O, training/eval requests, patch library
-  models/       denoisers: EGNN-PBC (main), MPNN, MLP
-  diffusion/    noise and loss, DM2 score-dynamics sampler, clamp/RePaint/CFG
-  eval/         success, realism, diversity, cost metrics; bootstrap CIs
-  baselines.py  hand insertion (B2)
-  viz.py        configuration plots
-  silica/       3D silica: data, defect detectors, requests, conditional NequIP, LAMMPS
-  utils/        configs, seeding, run directories
-tests/          unit, acceptance and end-to-end pipeline tests (CPU, ~30 s)
-```
+After the midterm, Prof. Ismaila Dabo reviewed the project. He pointed out that these defect
+types follow no standard concept in materials science and that defects can be made without a
+learned model. The final study therefore makes the four standard point defects with physics
+and uses deep learning to *find* them; it is on the branch `dabo-point-defects`.
 
 ## Setup
+
 ```bash
 pip install torch --index-url https://download.pytorch.org/whl/cpu   # or a CUDA build
 pip install -e ".[dev]"          # add ",md" for LAMMPS, ",silica" for the 3D model
 ruff check src tests scripts && pytest -q
 ```
-LAMMPS via pip needs `libmpi.so.12`. The `mpich` wheel provides it; put its directory on
-`LD_LIBRARY_PATH` (see docs/DATASET.md §4).
+
+LAMMPS from pip needs `libmpi.so.12`, which the `mpich` wheel provides; put its directory on
+`LD_LIBRARY_PATH` ([`docs/DATASET.md`](docs/DATASET.md), section 4).
+
+## Run
+
+```bash
+# data: committed in data/; to regenerate (about 30 CPU-minutes on 4 cores, identical result)
+python scripts/make_dataset.py      --config configs/data/ka2d_256.yaml
+python scripts/freeze_thresholds.py --config configs/defects/v0.yaml data=data/ka2d_256
+python scripts/build_patches.py     --config configs/defects/v0.yaml data=data/ka2d_256
+# train: without labels, then with labels
+python scripts/train.py --config configs/train/uncond.yaml
+python scripts/train.py --config configs/train/cond.yaml
+# sample, relax, evaluate (once per method, defect and task)
+python scripts/sample.py   --config configs/sampler/cfg.yaml ckpt=runs/<cond>/ckpt.pt data=data/ka2d_256 defect=D2 request.mode=host
+python scripts/relax.py    --config configs/eval/default.yaml run=runs/<sample-run>
+python scripts/evaluate.py --config configs/eval/default.yaml run=runs/<sample-run> data=data/ka2d_256
+python scripts/aggregate_results.py --config configs/eval/default.yaml runs_dir=runs
+```
+
+The GPU runs were made on Colab and Kaggle; [`notebooks/`](notebooks/README.md) lists each
+notebook and what it runs. The generalisation runs on larger and differently cooled glasses
+are described in [`docs/GAP2_GENERALIZATION.md`](docs/GAP2_GENERALIZATION.md) (Kaggle),
+[`docs/GAP2_COLAB.md`](docs/GAP2_COLAB.md) and [`docs/GAP2_BRIDGES2.md`](docs/GAP2_BRIDGES2.md).
+
+## Layout
+
+```
+configs/        data, defects, model, training, sampler and evaluation settings
+data/           the generated glasses and DM2's silica glasses (see data/README.md)
+docs/           plans, the feasibility pilot, the team summary
+notebooks/      Colab and Kaggle notebooks, the course proof-of-concept notebook
+paper/          midterm report and workshop paper: LaTeX, figures, figure scripts
+results/        tables, figures and analyses of every experiment round
+scripts/        one command per pipeline step; scripts/silica/ for 3D
+slurm/          PSC Bridges-2 jobs
+src/glassdiff/  the library: periodic EGNN, MPNN, MLP, DM2 sampler with clamping,
+                RePaint and guidance, Kob-Andersen potential, FIRE relaxation,
+                defect detectors, metrics, hand insertion, 3D silica
+tests/          unit, acceptance and end-to-end tests (CPU)
+```
+
+## Team
+
+| Workstream | Member |
+|---|---|
+| Data and physics | Nicholaus Ladislaus |
+| Defects and evaluation | Stacy Cheruto |
+| Models and training | Abubakar Chilala |
+| Sampling and conditioning | Gentille Uwera |
+| Baselines and writing | Michel Sangwa |
+| Supervision | Boniface Godwin |
