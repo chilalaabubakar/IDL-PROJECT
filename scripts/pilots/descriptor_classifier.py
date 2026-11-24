@@ -38,6 +38,11 @@ Tuning (docs/NPJ_EXTENSIONS.md, item 2):
     python scripts/pilots/descriptor_classifier.py run --out <same dir> --params <dir>/tuning.json --tag tuned
         refits every version on all 800 training glasses, tuned settings where tuning.json has
         them, and scores once on the validation glasses (validation_tuned.json, summary_tuned.md)
+    python scripts/pilots/descriptor_classifier.py run --out <same dir> --params <dir>/tuning.json \
+        --tag displaced --input-noise 0.1
+        the same, with every training glass displaced by Gaussian noise of a size drawn
+        uniformly in [0, 0.1 sigma] (docs/NPJ_EXTENSIONS.md, item 3; scored against the size of
+        the displacement by scripts/pilots/displaced_inputs.py)
 
 Model: gradient-boosted trees (sklearn HistGradientBoostingClassifier), five roles as the
 finder (intact, next to an empty site, extra atom, displaced atom, wrong species), trained on
@@ -58,6 +63,7 @@ manuscript (cell size, unlike neighbours, atom energy, local pressure) with thei
 from __future__ import annotations
 
 import argparse
+import dataclasses
 import importlib.util
 import json
 import multiprocessing as mp
@@ -222,18 +228,33 @@ def set_inputs(d, stats, workers: int) -> dict[str, np.ndarray]:
     return {v: np.stack([r[v] for r in rows]) for v in VERSIONS}
 
 
-def training_rows(stats, workers: int, seed: int = 0) -> dict:
-    """Inputs and roles of every defect-role atom and a random tenth of the intact atoms."""
-    path = CACHE / f"descriptor_train_{''.join(VERSIONS)}.npz"
+def displaced(d, size, rng: np.random.Generator):
+    """d with every atom shifted by Gaussian noise (sigma) of size[e] for example e, in the box."""
+    pos, box = d.pos.numpy().astype(np.float64), d.box.numpy().astype(np.float64)
+    size = np.broadcast_to(np.asarray(size, dtype=np.float64), (len(pos),))
+    new = np.mod(pos + size[:, None, None] * rng.standard_normal(pos.shape), box[:, None, :])
+    return dataclasses.replace(d, pos=torch.from_numpy(new))
+
+
+def training_rows(stats, workers: int, seed: int = 0, input_noise: float = 0.0) -> dict:
+    """Inputs and roles of every defect-role atom and a random tenth of the intact atoms.
+
+    input_noise > 0: the input atoms of each training glass are first shifted by Gaussian
+    noise of a size drawn uniformly in [0, input_noise] (as the finder of item 3)."""
+    tag = f"_d{input_noise:g}" if input_noise else ""
+    path = CACHE / f"descriptor_train_{''.join(VERSIONS)}{tag}.npz"
     if path.exists():
         z = np.load(path)
         return {k: z[k] for k in z.files}
     data = load_point_defects(DATA / "train.npz")
     rng = np.random.default_rng(seed)
+    shake = np.random.default_rng([seed, 1])  # separate, so the sampled rows do not change
     parts: dict[str, list] = {v: [] for v in VERSIONS} | {"role": [], "kind": [], "glass": []}
     for k, name in enumerate(KINDS):
         d = data[name]
         t0 = time.time()
+        if input_noise:
+            d = displaced(d, input_noise * shake.random(len(d)), shake)
         x = set_inputs(d, stats, workers)
         role = d.role.numpy()
         keep = (role != AtomRole.INTACT) | (rng.random(role.shape) < INTACT_FRACTION)
@@ -555,6 +576,12 @@ def main() -> None:
     ap.add_argument("--finder", type=Path, default=FINDER, help="finder checkpoint to compare with")
     ap.add_argument("--params", type=Path, help="run: tuning.json with the tree settings")
     ap.add_argument("--tag", default="", help="run, score: suffix of the output files")
+    ap.add_argument(
+        "--input-noise",
+        type=float,
+        default=0.0,
+        help="run: train on inputs displaced by up to this (sigma, uniform per glass)",
+    )
     args = ap.parse_args()
     args.out.mkdir(parents=True, exist_ok=True)
     torch.set_num_threads(4)
@@ -565,7 +592,7 @@ def main() -> None:
     if args.what == "tune":
         tune(stats, args.workers, args.out)
     elif args.what == "run":
-        rows = training_rows(stats, args.workers)
+        rows = training_rows(stats, args.workers, input_noise=args.input_noise)
         print({k: v.shape for k, v in rows.items()}, flush=True)
         tuned = json.loads(args.params.read_text()) if args.params else {}
         models = fit_models(rows, tuned.get("params"))
@@ -577,6 +604,7 @@ def main() -> None:
         val["seconds"] = round(time.time() - t0)
         val["training_rows"] = {"rows": int(len(rows["role"])), "intact_fraction": INTACT_FRACTION,
                                 "per_role": np.bincount(rows["role"], minlength=5).tolist()}  # fmt: skip
+        val["input_noise"] = args.input_noise
         if tuned:
             val["params"] = tuned["params"]
         (args.out / f"validation{sfx}.json").write_text(json.dumps(val, indent=1) + "\n")

@@ -142,6 +142,15 @@ needs the potential, but shows how much is lost by reading vibrating atoms direc
 **Success test.** At 0.02σ the trained finder loses at most 5 points; at the thermal
 temperatures it still leads the best classical measure, scored on the same inputs.
 
+**Status (24 November 2026).** Displaced inputs are in place: `input_noise` and
+`val_input_noise` in `scripts/train_point_defects.py` (tested),
+`configs/train/detect_point_defects_displaced.yaml` (continues the main finder, up to
+0.1σ), `notebooks/kaggle_finder_displaced.ipynb` (three runs on a GPU, then the
+evaluation), the tuned trees of item 2 retrained on displaced inputs
+(`descriptor_classifier.py run --input-noise 0.1 --tag displaced`) and
+`scripts/pilots/displaced_inputs.py` (every method against the size of the displacement,
+validation glasses). Thermal snapshots are not started.
+
 ## 4. Presence and type of defect
 
 **Why.** The finder is told the type of defect and assumes there is one. On a mix of

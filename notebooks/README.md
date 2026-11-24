@@ -13,8 +13,13 @@ secrets, never in the notebook). The notebooks of the first study are on the bra
   is scored once, at the end. Item 1.
 - `kaggle_descriptor_classifier.ipynb`: the classifier on classical inputs
   (`scripts/pilots/descriptor_classifier.py`) on 4 CPU cores: training split, fit,
-  validation (~1.5-2.5 h); with `SCORE_FRESH_TEST = True`, the fresh test set with repair
-  and minimisation. Pushes `results/descriptor_classifier_kaggle_<date>/`. Item 2.
+  tuning and validation (~2.5 h); with `SCORE_FRESH_TEST = True`, the fresh test set with
+  repair and minimisation. Pushes `results/descriptor_classifier_kaggle_<date>/`. Item 2.
+- `kaggle_finder_displaced.ipynb`: continues the main finder with every input atom
+  shifted at random by up to 0.1 sigma (`configs/train/detect_point_defects_displaced.yaml`),
+  three runs (~1.5 h each on a T4), then scores every method against the size of the
+  displacement on the validation glasses (`scripts/pilots/displaced_inputs.py`). Pushes
+  `results/kaggle_displaced_<date>/`. Item 3.
 
 **The final study:**
 

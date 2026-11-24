@@ -29,6 +29,11 @@ task: detect. The EGNN classifier gives every atom of a relaxed defected glass a
     (intact, next to an empty site, extra atom, displaced atom, wrong species);
     class-weighted cross-entropy, weights (class frequency)^-class_weight_power. A fraction
     p_clean of the batches are defect-free glasses, all atoms intact.
+    input_noise (optional, docs/NPJ_EXTENSIONS.md item 3): {max: 0.1} shifts every atom of
+    the input by Gaussian noise whose standard deviation is drawn for each glass uniformly in
+    [0, max] (sigma), as thermal vibration or measurement error would; the labels do not
+    change. val_input_noise: [0, 0.02, ...] adds validation at fixed displacements (keys
+    <kind>_hit_d<size>; 0 gives the usual keys).
 
 Each batch holds one defect kind, drawn with kind_probs (vacancy and interstitial glasses
 have 255 and 257 atoms). init_from loads matching weights from another checkpoint, e.g. the
@@ -108,8 +113,17 @@ def open_step_log(path: Path, start_step: int):
     return path.open("a")
 
 
-def make_batch(task, d: PointDefectSet, idx, clean: bool, sigma, gen, device):
-    """Model input and target for examples idx of one kind."""
+def displace(s: Structures, sd: torch.Tensor | None, gen) -> Structures:
+    """Shift every atom by Gaussian noise of standard deviation sd[b] (sigma), in the box."""
+    if sd is None:
+        return s
+    eps = torch.randn(s.pos.shape, generator=gen, dtype=s.pos.dtype)
+    pos = torch.remainder(s.pos + sd.to(s.pos.dtype)[:, None, None] * eps, s.box[:, None, :])
+    return Structures(pos, s.types, s.box)
+
+
+def make_batch(task, d: PointDefectSet, idx, clean: bool, sigma, gen, device, input_sd=None):
+    """Model input and target for examples idx of one kind (detect: input_sd shifts the atoms)."""
     box = d.box[idx]
     if task == "heal":
         base = d.orig_pos[idx] if clean else d.heal_pos[idx]
@@ -124,7 +138,7 @@ def make_batch(task, d: PointDefectSet, idx, clean: bool, sigma, gen, device):
     else:
         s = Structures(d.pos[idx], d.types[idx], box)
         role = d.role[idx]
-    return s.to(device), role.to(device)
+    return displace(s, input_sd, gen).to(device), role.to(device)
 
 
 def defect_atoms(d: PointDefectSet, idx, clean: bool, tol: float) -> torch.Tensor:
@@ -176,6 +190,17 @@ def validate(task, model, val: dict[str, PointDefectSet], cfg, device) -> dict[s
                     v = v.mean().sqrt() if key.endswith("rms") else v.mean()
                     out[f"{name}_{key}_s{sig:g}"] = round(float(v), 5)
         else:
+            for size in cfg.get("val_input_noise", [0.0]):
+                if float(size) > 0:
+                    gen = torch.Generator().manual_seed(4321)
+                    sd = torch.full((len(d),), float(size))
+                    hits = []
+                    for i in range(0, len(d), bs):
+                        idx = torch.arange(i, min(i + bs, len(d)))
+                        s, _ = make_batch("detect", d, idx, False, None, gen, device, sd[idx])
+                        prob = defect_probability(model(to_float(s))).cpu()
+                        hits.append(detection_hits(prob, d.pos[idx], d.sites[idx], d.box[idx]))
+                    out[f"{name}_hit_d{float(size):g}"] = round(float(torch.cat(hits).double().mean()), 4)  # fmt: skip
             hits, correct, count = [], torch.zeros(N_ROLES), torch.zeros(N_ROLES)
             for i in range(0, len(d), bs):
                 idx = torch.arange(i, min(i + bs, len(d)))
@@ -303,6 +328,7 @@ def main() -> None:
     print("training examples: " + ", ".join(f"{k} {len(v)}" for k, v in train.items()), flush=True)
     weights = class_weights(train, float(cfg.get("class_weight_power", 0.5))).to(device)
     noise = cfg.get("noise", {})
+    input_noise = float(cfg.get("input_noise", {}).get("max", 0.0)) if task == "detect" else 0.0
     defect_weight = float(cfg.get("defect_weight", 0.0))  # extra loss weight, defect atoms
     defect_tol = float(cfg.get("defect_tol", 0.1))  # moved more than this by the defect
     bs, n_updates = int(opt_cfg["batch_size"]), int(opt_cfg["n_updates"])
@@ -343,7 +369,8 @@ def main() -> None:
         clean = bool(torch.rand(1, generator=gen) < p_clean)
         idx = torch.randint(len(d), (bs,), generator=gen)
         sigma = sample_sigma(bs, noise, gen) if task == "heal" else None
-        s, target = make_batch(task, d, idx, clean, sigma, gen, device)
+        input_sd = input_noise * torch.rand(bs, generator=gen, dtype=torch.float64) if input_noise else None  # fmt: skip
+        s, target = make_batch(task, d, idx, clean, sigma, gen, device, input_sd)
         if task == "heal":
             pred = model(to_float(s), sigma.float().to(device))
             sq = ((pred - target) ** 2).sum(-1)  # [B, N]
@@ -367,7 +394,10 @@ def main() -> None:
         loss_value = loss.item()
         running, n_running = running + loss_value, n_running + 1
         if steps_file is not None:
-            mean_sigma = f"{float(sigma.mean()):.4g}" if sigma is not None else ""
+            shown = (
+                sigma if sigma is not None else input_sd
+            )  # heal: noise level; detect: displacement
+            mean_sigma = f"{float(shown.mean()):.4g}" if shown is not None else ""
             steps_file.write(
                 f"{step},{kind},{int(clean)},{loss_value:.6g},{float(grad_norm):.6g},{mean_sigma}\n"
             )

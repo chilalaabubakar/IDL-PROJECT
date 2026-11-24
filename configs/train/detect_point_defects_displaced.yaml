@@ -1,0 +1,36 @@
+# Finder trained on displaced inputs (docs/NPJ_EXTENSIONS.md, item 3): scripts/train_point_defects.py
+# The main finder loses a third of its defects when every atom is shifted at random by 0.02
+# sigma (manuscript, Fig. 4c). This continues it from its weights with every input atom
+# shifted by Gaussian noise whose size is drawn per glass uniformly in [0, 0.1 sigma], the
+# range of thermal vibration in a glass well below its glass transition. Labels unchanged.
+# Same data, model, class weights and learning rate as the main finder's second stage.
+# Evaluate with --calibrate; scripts/pilots/displaced_inputs.py scores every method against
+# the size of the displacement on the validation glasses.
+name: pd_detect_displaced
+task: detect
+seed: 10
+data: data/ka2d_256_point_defects
+model:
+  name: egnn_classifier
+  hidden: 128
+  n_layers: 4
+  cutoff: 2.5
+  k_max: 64
+  n_classes: 5
+init_from: results/kaggle_pd_20261110-1042Z/training/pd_detect_v2/ema.pt   # the main finder
+kind_probs: {vacancy: 0.25, interstitial: 0.25, frenkel: 0.25, antisite: 0.25}
+p_clean: 0.2
+class_weight_power: 0.5
+input_noise: {max: 0.1}      # sigma; per glass, uniform in [0, max]
+val_input_noise: [0.0, 0.02, 0.05]
+optim:
+  lr: 1.0e-4
+  weight_decay: 0.0
+  batch_size: 16
+  n_updates: 20000            # about 1.5 h on a T4
+  grad_clip: 1.0
+  ema: 0.999
+n_val: 200
+log_every: 100
+val_every: 2000
+ckpt_every: 2000

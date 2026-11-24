@@ -286,6 +286,22 @@ def test_step_log_drops_updates_repeated_after_a_resume(tmp_path):
     assert rows[-1].split(",")[1] == "antisite"
 
 
+def test_displace_shifts_atoms_by_the_given_size_inside_the_box():
+    """train_point_defects.displace: Gaussian shifts of the given size per glass, wrapped."""
+    displace = _script("train_point_defects").displace
+    from glassdiff.types import Structures
+
+    pos = torch.rand(3, 5000, 2, dtype=torch.float64) * 10
+    box = torch.full((3, 2), 10.0, dtype=torch.float64)
+    s = Structures(pos, torch.zeros(3, 5000, dtype=torch.long), box)
+    out = displace(s, torch.tensor([0.0, 0.05, 0.1]), torch.Generator().manual_seed(0))
+    shift = out.pos - pos
+    shift = shift - 10 * torch.round(shift / 10)  # minimum image
+    assert torch.allclose(shift.std(dim=(1, 2)), torch.tensor([0.0, 0.05, 0.1], dtype=torch.float64), rtol=0.03)  # fmt: skip
+    assert bool(((out.pos >= 0) & (out.pos < 10)).all())
+    assert displace(s, None, None) is s
+
+
 def test_spike_detection_ignores_differences_between_batch_types(tmp_path):
     """scripts/pilots/finder_seeds.py: a loss three times its usual level for the same batch
     type is a spike; defect-free batches with a far lower loss than defected ones are not."""
@@ -378,6 +394,10 @@ def test_training_and_evaluation_smoke(tmp_path, monkeypatch, make_lattice):
     detect_run, rows = _train(tmp_path, monkeypatch, pd, "detect")
     assert "vacancy_hit" in rows[-1] and "clean_false_alarm" in rows[-1]
     assert load_denoiser(detect_run / "ckpt.pt").n_classes == 5
+    # displaced inputs: validation at fixed displacements, the displacement in steps.csv
+    disp_run, rows = _train(tmp_path, monkeypatch, pd, "detect", "detect_point_defects_displaced")
+    assert {"vacancy_hit", "vacancy_hit_d0.02", "antisite_hit_d0.05"} <= set(rows[-1])
+    assert 0 <= float((disp_run / "steps.csv").read_text().splitlines()[-1].split(",")[-1]) <= 0.1
     for run, task in ((heal_run, "heal"), (detect_run, "detect")):  # one row per update
         steps = (run / "steps.csv").read_text().splitlines()
         assert steps[0] == "step,kind,clean,loss,grad_norm,sigma" and len(steps) == 3
