@@ -25,5 +25,32 @@
    }
   },
   "seconds": 45
+ },
+ {
+  "version": "C",
+  "cfg": {
+   "learning_rate": 0.1,
+   "max_leaf_nodes": 63,
+   "min_samples_leaf": 40,
+   "weighting": "none"
+  },
+  "iterations": 21,
+  "found": {
+   "prob": {
+    "vacancy": 0.6038,
+    "interstitial": 0.3463,
+    "frenkel": 0.2166,
+    "antisite": 0.4288,
+    "all": 0.4125
+   },
+   "odds": {
+    "vacancy": 0.5988,
+    "interstitial": 0.395,
+    "frenkel": 0.3293,
+    "antisite": 0.4537,
+    "all": 0.4528
+   }
+  },
+  "seconds": 12
  }
 ]
