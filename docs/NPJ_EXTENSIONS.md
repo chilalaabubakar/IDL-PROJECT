@@ -107,10 +107,11 @@ features instead. If the finder still leads by 10 points or more, the main claim
 it is much stronger than now.
 
 **Status (24 November 2026), validation only:** `results/descriptor_classifier_20261124/`.
-Trees on positions and species find 48.0% of all validation defects, the finder 52.2%, the
-best single measure 30.5%. No difference for vacancies; the finder leads by 5-10 points for
-the other three types, significant only for interstitials against version A. Next: tune the
-trees on validation before the final test.
+Trees tuned on 100 held-out training glasses find 50.0% of the validation defects from
+positions and species alone and 52.2% with energy and pressure; the finder finds 52.2% and
+the best single measure 30.5%. No difference is significant for any defect type. The
+finder's lead in the manuscript comes from training on labelled defects, not from the graph
+network. The fresh test set decides at the end.
 
 ## 3. Displaced and finite-temperature glasses
 

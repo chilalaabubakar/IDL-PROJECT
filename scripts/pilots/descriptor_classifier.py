@@ -589,10 +589,18 @@ def main() -> None:
         name = args.data.parent.name + "_" + args.data.stem + sfx
         (args.out / f"score_{name}.json").write_text(json.dumps(res, indent=1) + "\n")
         if args.restored:
-            # the best version that uses positions and species only
+            # the version that uses positions and species only and was best before this test:
+            # on the held-out training glasses when tuned, else on the validation glasses
+            tuning = args.out / "tuning.json"
+            if args.tag == "tuned" and tuning.exists():
+                ref = json.loads(tuning.read_text())["held_out_found"]
+                ref = {f"trees {v}": f for v, f in ref.items()}
+            else:
+                val = json.loads((args.out / f"validation{sfx}.json").read_text())["all"]
+                ref = {m: val[f"{m}, {choice[m]}"] for m in choice}
             best = max(
-                (v for v in POSITIONS_ONLY if f"trees {v}" in models),
-                key=lambda v: res["all"][f"trees {v}, {choice[f'trees {v}']}"],
+                (v for v in POSITIONS_ONLY if f"trees {v}" in models and f"trees {v}" in ref),
+                key=lambda v: ref[f"trees {v}"],
             )
             restored(args.data.resolve(), models[f"trees {best}"], best, choice[f"trees {best}"],
                      stats, args.workers, args.out / f"restored_{name}_trees_{best}.json")  # fmt: skip
