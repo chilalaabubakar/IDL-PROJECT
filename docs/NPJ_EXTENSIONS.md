@@ -106,6 +106,12 @@ classical measures for that type and reports the comparison of learned and hand-
 features instead. If the finder still leads by 10 points or more, the main claim stands, and
 it is much stronger than now.
 
+**Status (24 November 2026), validation only:** `results/descriptor_classifier_20261124/`.
+Trees on positions and species find 48.0% of all validation defects, the finder 52.2%, the
+best single measure 30.5%. No difference for vacancies; the finder leads by 5-10 points for
+the other three types, significant only for interstitials against version A. Next: tune the
+trees on validation before the final test.
+
 ## 3. Displaced and finite-temperature glasses
 
 **Why.** A random displacement of 0.02σ lowers the finder from 54% to 38% of defects found

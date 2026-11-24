@@ -403,9 +403,14 @@ def summary(val: dict, out: Path) -> None:
     for label, key in rows:
         cells = [f"{100 * val['kinds'][k]['found'][key]:.1f}" for k in KINDS]
         lines.append(f"| {label} | " + " | ".join(cells) + f" | {100 * val['all'][key]:.1f} |")
-    lines += ["", "McNemar p, finder against each (per defect type):", ""]
+    lines += ["", "McNemar p (exact, not corrected for multiple tests), finder against each:", ""]
     for mname, per in val.get("finder_vs", {}).items():
-        lines.append(f"- {mname}: " + ", ".join(f"{k} {v['p']:.3g}" for k, v in per.items()))
+        lines.append(
+            f"- {mname}: "
+            + ", ".join(
+                f"{k} {v['p']:.3g}" if v["p"] >= 0.001 else f"{k} <0.001" for k, v in per.items()
+            )
+        )
     (out / "summary.md").write_text("\n".join(lines) + "\n")
     print("\n".join(lines))
 
