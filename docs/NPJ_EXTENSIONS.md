@@ -223,6 +223,24 @@ answers in the measured images, report what is found and compare with what the a
 identified. This is the result that would interest the editors most, but it depends on data
 access, so start (a) or (b) while that is settled.
 
+**Data sources found (25 November 2026).**
+- Huang et al., Nano Lett. 12, 1081 (2012), TEM on graphene (Cornell): no coordinate file is
+  public; the journal's supplement page could not be read automatically. Sadjadi et al.,
+  Phys. Rev. B 96, 201405(R) (2017) refined the coordinates of its large sample (9,492 Si and
+  19,330 O atoms, 270 x 270 Å², 1,811 rings): "refined coordinates ... (available upon
+  request)"; they thank "Berlin and Cornell groups for the coordinates of their networks".
+  Ask the Cornell group for the coordinates and images, and the authors of the 2017 paper for
+  the refined set.
+- Lichtenstein, Heyde, Freund, J. Phys. Chem. C (2012) and Phys. Rev. Lett. (2012), STM on
+  Ru(0001) (Berlin): according to Dirindin and Coslovich (arXiv:2410.10500, 2024), the
+  supplements list atom coordinates of three bilayer samples (82, 67 and 290 rings; Tables S3,
+  S4 and S2). Public now; download the supplements and check.
+- Kumar et al., J. Phys.: Condens. Matter (2014): two larger samples on graphene shown only as
+  ring figures (444 and 449 rings), digitized by Dirindin and Coslovich, who state their data
+  will be on Materials Cloud.
+These are real structures without exact defect labels: they can test whether a finder trained
+on simulated silica flags what the authors identify, not score it against an exact answer.
+
 ## When an item is finished
 
 Add its numbers to `paper/make_manuscript_tables.py`, update the manuscript and the
