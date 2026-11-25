@@ -161,7 +161,14 @@ keep 44.7-46.2% at 0.02σ and about 40.5% at 0.05σ. The finder trained on displ
 defects without shifts, 47.0% at 0.02σ, 43.1% at 0.05σ, 33.6% at 0.1σ (main finder: 52.2,
 39.5, 16.5, 8.2). It leads the trees trained on the same inputs by 1-2 points at 0.02σ (not
 significant), 2.5 at 0.05σ and 4-5 at 0.1σ (significant in every run). Success test passed
-for independent shifts; thermal snapshots still open.
+for independent shifts; thermal snapshots below.
+
+**Thermal snapshots (25 November 2026, validation, `results/thermal_snapshots_20261125/`).**
+Molecular dynamics at T = 0.02, 0.05, 0.1 and 0.2 for 10 time units; 87%, 75%, 61% and 43% of
+the defects survive. The finder trained on displaced inputs finds 45.4%, 43.4%, 40.9% and
+28.7% of the surviving defects (main finder 46.4, 41.2, 34.5, 22.9) and leads trees trained on
+the same inputs by about 3, 4, 6 and 1 points (significant in every run at T = 0.1). Thermal
+motion is where the learned network gains most on hand-made inputs.
 
 ## 4. Presence and type of defect
 
