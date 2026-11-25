@@ -58,5 +58,5 @@ outcome is in `found.json`.
   the atom energy falls with temperature.
 
 **Limits.** Validation glasses only; one snapshot per defect, after 10 time units; the
-surviving defects differ between temperatures. The glass transition of this mixture lies
-above the temperatures used; at T = 0.2 defects already move within 10 time units.
+surviving defects differ between temperatures. At T = 0.2 defects already move within 10
+time units.
