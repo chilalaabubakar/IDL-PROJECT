@@ -53,3 +53,40 @@ at every size, or matches them as on relaxed glasses (item 2).
 **Limits.** Validation glasses only, 200 defects per type. Independent Gaussian shifts are
 not thermal vibration, where neighbouring atoms move together; thermal snapshots are the next
 part of item 3. The training range (up to 0.1σ) was set in advance, not tuned.
+
+## Second part: the finder trained on displaced inputs (25 November 2026)
+
+Three runs, trained on Kaggle with `notebooks/kaggle_finder_displaced.ipynb`: the main finder
+continued for 20,000 updates with every input atom shifted by Gaussian noise of a size drawn
+per glass uniformly in [0, 0.1σ] (`configs/train/detect_point_defects_displaced.yaml`; seeds
+10, 11, 12). Weights and logs: `results/kaggle_displaced_20261125-*/training/`. The notebook
+scored every method with the same shifts as above: `results/kaggle_displaced_20261125-0556Z/displaced_inputs/`
+(its numbers for the main finder and the trees equal those of the first part exactly, on a
+GPU and with Kaggle's software, so the evaluation reproduces).
+
+Share of the 734 real validation defects found (%), all types:
+
+| Method | s = 0 | 0.01σ | 0.02σ | 0.05σ | 0.1σ |
+|---|---|---|---|---|---|
+| Finder trained on displaced inputs (mean ± spread, 3 runs) | 49.2 ± 0.2 | 50.0 ± 0.6 | 47.0 ± 0.6 | 43.1 ± 0.2 | 33.6 ± 0.6 |
+| Main finder (trained on relaxed glasses) | 52.2 | 50.1 | 39.5 | 16.5 | 8.2 |
+| Trees D trained on displaced inputs (positions only) | 48.8 | 46.7 | 44.7 | 40.6 | 30.0 |
+| Trees E trained on displaced inputs (with potential) | 48.4 | 48.5 | 46.2 | 40.5 | 28.5 |
+| Unlike neighbours | 29.0 | 29.3 | 28.7 | 27.9 | 10.0 |
+
+**What it shows.**
+
+- Training on displaced inputs works for the finder too. It costs 3 points on relaxed glasses
+  (49.2% against 52.2%) and keeps 47.0% at 0.02σ (main finder 39.5%), 43.1% at 0.05σ
+  (16.5%) and 33.6% at 0.1σ (8.2%). The three runs agree within 1.2 points at every size.
+- By the test written in the plan, it passes: at 0.02σ it loses 2 points against its own
+  result without shifts (at most 5 allowed), and it leads the best single measure by 18 points.
+- Against the trees trained on the same displaced inputs, the finder leads by 1-2 points at
+  0.02σ (not significant in any run: p = 0.07-0.92), by 2.5 points at 0.05σ (p = 0.06-0.16),
+  and by 4-5 points at 0.1σ (p < 0.001 to 0.04, significant in every run). The learned network gains on
+  hand-made inputs only when the displacement is large.
+
+Training was stable: no non-finite update, 0-8 gradient spikes per run.
+
+**Still open in item 3.** Thermal snapshots (neighbouring atoms moving together) instead of
+independent shifts; the fresh test set at the end.

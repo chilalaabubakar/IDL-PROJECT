@@ -157,6 +157,12 @@ and at 0.05σ 16.5%. Trees trained on displaced inputs lose 1-4 points without s
 keep 44.7-46.2% at 0.02σ and about 40.5% at 0.05σ. The finder trained on displaced inputs
 (Kaggle) is scored next to them with the same shifts.
 
+**Finder trained on displaced inputs (25 November 2026, validation).** Three runs: 49.2% of
+defects without shifts, 47.0% at 0.02σ, 43.1% at 0.05σ, 33.6% at 0.1σ (main finder: 52.2,
+39.5, 16.5, 8.2). It leads the trees trained on the same inputs by 1-2 points at 0.02σ (not
+significant), 2.5 at 0.05σ and 4-5 at 0.1σ (significant in every run). Success test passed
+for independent shifts; thermal snapshots still open.
+
 ## 4. Presence and type of defect
 
 **Why.** The finder is told the type of defect and assumes there is one. On a mix of
