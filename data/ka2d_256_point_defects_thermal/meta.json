@@ -1,0 +1,140 @@
+{
+ "source": "data/ka2d_256_point_defects/val.npz",
+ "source_sha256": "7721094e242285bcb66ecfaa40186698c6d9801c5a724c3b3cc8951fee4932fa",
+ "file": "val.npz",
+ "file_sha256": "e31f446cdd0b44ee9b36278d1232209e73a474fbe12e989c624d374662b9a6c7",
+ "temperatures": [
+  0.02,
+  0.05,
+  0.1,
+  0.2
+ ],
+ "steps": 2000,
+ "timestep": 0.005,
+ "thermostat": "Nose-Hoover, tdamp 0.1",
+ "seed": 1,
+ "git": "a18d91c3e45dabb0ebb14d5ce46966669c8152f1",
+ "summary": {
+  "0.02": {
+   "vacancy": {
+    "defects": 200,
+    "survived": 168,
+    "same_minimum": 131,
+    "rms_median": 0.0205,
+    "temperature_mean": 0.0199
+   },
+   "interstitial": {
+    "defects": 200,
+    "survived": 180,
+    "same_minimum": 149,
+    "rms_median": 0.0192,
+    "temperature_mean": 0.0201
+   },
+   "frenkel": {
+    "defects": 134,
+    "survived": 117,
+    "same_minimum": 91,
+    "rms_median": 0.0207,
+    "temperature_mean": 0.02
+   },
+   "antisite": {
+    "defects": 200,
+    "survived": 173,
+    "same_minimum": 145,
+    "rms_median": 0.0195,
+    "temperature_mean": 0.0201
+   }
+  },
+  "0.05": {
+   "vacancy": {
+    "defects": 200,
+    "survived": 136,
+    "same_minimum": 89,
+    "rms_median": 0.039,
+    "temperature_mean": 0.0501
+   },
+   "interstitial": {
+    "defects": 200,
+    "survived": 163,
+    "same_minimum": 119,
+    "rms_median": 0.031,
+    "temperature_mean": 0.0499
+   },
+   "frenkel": {
+    "defects": 134,
+    "survived": 96,
+    "same_minimum": 69,
+    "rms_median": 0.0371,
+    "temperature_mean": 0.0501
+   },
+   "antisite": {
+    "defects": 200,
+    "survived": 159,
+    "same_minimum": 106,
+    "rms_median": 0.0336,
+    "temperature_mean": 0.05
+   }
+  },
+  "0.1": {
+   "vacancy": {
+    "defects": 200,
+    "survived": 106,
+    "same_minimum": 59,
+    "rms_median": 0.0611,
+    "temperature_mean": 0.1
+   },
+   "interstitial": {
+    "defects": 200,
+    "survived": 131,
+    "same_minimum": 90,
+    "rms_median": 0.0502,
+    "temperature_mean": 0.1003
+   },
+   "frenkel": {
+    "defects": 134,
+    "survived": 78,
+    "same_minimum": 44,
+    "rms_median": 0.0646,
+    "temperature_mean": 0.0996
+   },
+   "antisite": {
+    "defects": 200,
+    "survived": 134,
+    "same_minimum": 70,
+    "rms_median": 0.0544,
+    "temperature_mean": 0.1003
+   }
+  },
+  "0.2": {
+   "vacancy": {
+    "defects": 200,
+    "survived": 61,
+    "same_minimum": 31,
+    "rms_median": 0.0987,
+    "temperature_mean": 0.2007
+   },
+   "interstitial": {
+    "defects": 200,
+    "survived": 97,
+    "same_minimum": 51,
+    "rms_median": 0.0851,
+    "temperature_mean": 0.2008
+   },
+   "frenkel": {
+    "defects": 134,
+    "survived": 49,
+    "same_minimum": 30,
+    "rms_median": 0.0979,
+    "temperature_mean": 0.2003
+   },
+   "antisite": {
+    "defects": 200,
+    "survived": 107,
+    "same_minimum": 45,
+    "rms_median": 0.0831,
+    "temperature_mean": 0.2014
+   }
+  }
+ },
+ "seconds": 202
+}

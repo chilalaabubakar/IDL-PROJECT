@@ -30,6 +30,7 @@ from glassdiff.data.point_defects import (
     make_defect,
     real_defects,
     return_displaced_atom,
+    same_structure,
     save_point_defects,
     site_occupancy,
     wrap,
@@ -482,6 +483,34 @@ def test_lammps_minimize_matches_fire(glass):
     assert np.abs(out - made["pos"]).max() < 3.0  # returned in the input frame, not wrapped
     again = minimize_many([(made["pos"], types, box)] * 2, workers=2)
     assert np.allclose(again[0][0], out) and np.allclose(again[1][0], out)
+
+
+@pytest.mark.lammps
+def test_thermal_snapshot_vibrates_around_the_minimum():
+    """glassdiff.md.thermal: the run reaches the temperature, the atoms vibrate by a small
+    amount, and minimising the snapshot of a glass at low temperature gives it back."""
+    pytest.importorskip("lammps")
+    from glassdiff.data.dataset import load_split
+    from glassdiff.md.thermal import lammps_thermal_snapshot, thermal_snapshots_many
+
+    path = ROOT / "data/ka2d_256/val.npz"  # a real glass: a minimum of the potential
+    if not path.exists():
+        pytest.skip("data/ka2d_256/val.npz is not here")
+    s = load_split(path).structures
+    relaxed, types, box = s.pos[0].double().numpy(), s.types[0].numpy(), s.box[0].double().numpy()
+    try:
+        snap, mini, temp, fmax = lammps_thermal_snapshot(relaxed, types, box, 0.01, 400, seed=3)
+    except OSError as exc:  # the LAMMPS library cannot be loaded here
+        pytest.skip(str(exc))
+    shift = wrap(snap - relaxed, box)
+    rms = np.sqrt(((shift - shift.mean(0)) ** 2).mean())
+    assert snap.shape == mini.shape == relaxed.shape and fmax < 1e-6
+    assert 0.002 < rms < 0.05 and 0.005 < temp < 0.02
+    assert same_structure(np.mod(mini, box), types, np.mod(relaxed, box), types, box)
+    with pytest.raises(ValueError):
+        lammps_thermal_snapshot(relaxed, types, box, 0.01, 10, seed=0)
+    again = thermal_snapshots_many([(relaxed, types, box, 0.01, 400, 3)] * 2, workers=2)
+    assert np.allclose(again[0][0], snap) and np.allclose(again[1][0], snap)  # same seed, same run
 
 
 def test_site_occupancy_names_each_defect(make_lattice):
