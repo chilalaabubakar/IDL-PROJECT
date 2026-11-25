@@ -1,0 +1,66 @@
+{
+ "S1": {
+  "figure": "1b",
+  "region": "interface",
+  "file": "table_s1_interface",
+  "si": 717,
+  "o": 1075,
+  "width_nm": 12.323,
+  "height_nm": 6.948,
+  "si_nn_mean_nm": 0.2798,
+  "si_nn_sd_nm": 0.0179,
+  "bonds": 1032,
+  "bond_length_mean_nm": 0.3038,
+  "bond_length_sd_nm": 0.0264,
+  "o_at_a_bond_midpoint": 0.96,
+  "si_coordination": {
+   "0": 0,
+   "1": 9,
+   "2": 69,
+   "3": 639
+  },
+  "under_coordinated_si_within_0_5nm_of_edge": 1.0,
+  "o_not_at_a_midpoint": 43,
+  "o_not_at_a_midpoint_within_0_5nm_of_edge": 1.0,
+  "rings": {
+   "4": 7,
+   "5": 29,
+   "6": 248,
+   "7": 24,
+   "8": 6,
+   "9": 2
+  }
+ },
+ "S2": {
+  "figure": "S1b",
+  "region": "vitreous",
+  "file": "table_s2_vitreous",
+  "si": 664,
+  "o": 998,
+  "width_nm": 12.243,
+  "height_nm": 6.558,
+  "si_nn_mean_nm": 0.2849,
+  "si_nn_sd_nm": 0.0145,
+  "bonds": 946,
+  "bond_length_mean_nm": 0.3034,
+  "bond_length_sd_nm": 0.0216,
+  "o_at_a_bond_midpoint": 0.9479,
+  "si_coordination": {
+   "0": 4,
+   "1": 13,
+   "2": 62,
+   "3": 585
+  },
+  "under_coordinated_si_within_0_5nm_of_edge": 1.0,
+  "o_not_at_a_midpoint": 52,
+  "o_not_at_a_midpoint_within_0_5nm_of_edge": 1.0,
+  "rings": {
+   "4": 11,
+   "5": 80,
+   "6": 127,
+   "7": 46,
+   "8": 21,
+   "9": 2
+  }
+ }
+}

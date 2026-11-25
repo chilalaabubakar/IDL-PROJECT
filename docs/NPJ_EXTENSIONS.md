@@ -241,6 +241,13 @@ access, so start (a) or (b) while that is settled.
 These are real structures without exact defect labels: they can test whether a finder trained
 on simulated silica flags what the authors identify, not score it against an exact answer.
 
+**Lichtenstein et al. 2012 read (25 November 2026).** The supplement of Phys. Rev. Lett. 109,
+106101 gives two regions (664 and 717 Si); `scripts/silica/extract_lichtenstein2012.py`
+reads them and checks them against the paper (`results/silica2d_lichtenstein2012_20261125/`).
+Inside both images every Si has three Si neighbours: no point defects, the disorder is in the
+ring sizes (4- to 9-rings). Coordinates are kept out of the repository until the team decides
+whether the journal's terms allow it.
+
 ## When an item is finished
 
 Add its numbers to `paper/make_manuscript_tables.py`, update the manuscript and the
