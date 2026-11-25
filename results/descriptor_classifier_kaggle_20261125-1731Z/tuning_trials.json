@@ -1,0 +1,893 @@
+[
+ {
+  "version": "A",
+  "cfg": {
+   "learning_rate": 0.1,
+   "max_leaf_nodes": 63,
+   "min_samples_leaf": 40,
+   "weighting": "none"
+  },
+  "iterations": 212,
+  "found": {
+   "prob": {
+    "vacancy": 0.5938,
+    "interstitial": 0.335,
+    "frenkel": 0.208,
+    "antisite": 0.385,
+    "all": 0.3933
+   },
+   "odds": {
+    "vacancy": 0.595,
+    "interstitial": 0.3713,
+    "frenkel": 0.3744,
+    "antisite": 0.4062,
+    "all": 0.4414
+   }
+  },
+  "seconds": 87
+ },
+ {
+  "version": "C",
+  "cfg": {
+   "learning_rate": 0.1,
+   "max_leaf_nodes": 63,
+   "min_samples_leaf": 40,
+   "weighting": "none"
+  },
+  "iterations": 21,
+  "found": {
+   "prob": {
+    "vacancy": 0.6038,
+    "interstitial": 0.3463,
+    "frenkel": 0.2166,
+    "antisite": 0.4288,
+    "all": 0.4125
+   },
+   "odds": {
+    "vacancy": 0.5988,
+    "interstitial": 0.395,
+    "frenkel": 0.3293,
+    "antisite": 0.4537,
+    "all": 0.4528
+   }
+  },
+  "seconds": 23
+ },
+ {
+  "version": "D",
+  "cfg": {
+   "learning_rate": 0.1,
+   "max_leaf_nodes": 63,
+   "min_samples_leaf": 40,
+   "weighting": "none"
+  },
+  "iterations": 44,
+  "found": {
+   "prob": {
+    "vacancy": 0.6138,
+    "interstitial": 0.3425,
+    "frenkel": 0.2842,
+    "antisite": 0.4338,
+    "all": 0.4286
+   },
+   "odds": {
+    "vacancy": 0.6125,
+    "interstitial": 0.39,
+    "frenkel": 0.3449,
+    "antisite": 0.455,
+    "all": 0.4585
+   }
+  },
+  "seconds": 52
+ },
+ {
+  "version": "D",
+  "cfg": {
+   "learning_rate": 0.05,
+   "max_leaf_nodes": 31,
+   "min_samples_leaf": 20,
+   "weighting": "none"
+  },
+  "iterations": 899,
+  "found": {
+   "prob": {
+    "vacancy": 0.6288,
+    "interstitial": 0.425,
+    "frenkel": 0.2721,
+    "antisite": 0.4537,
+    "all": 0.4578
+   },
+   "odds": {
+    "vacancy": 0.6288,
+    "interstitial": 0.4625,
+    "frenkel": 0.3917,
+    "antisite": 0.4813,
+    "all": 0.4985
+   }
+  },
+  "seconds": 727
+ },
+ {
+  "version": "D",
+  "cfg": {
+   "learning_rate": 0.05,
+   "max_leaf_nodes": 31,
+   "min_samples_leaf": 20,
+   "weighting": "sqrt"
+  },
+  "iterations": 580,
+  "found": {
+   "prob": {
+    "vacancy": 0.625,
+    "interstitial": 0.3975,
+    "frenkel": 0.2114,
+    "antisite": 0.435,
+    "all": 0.4327
+   },
+   "odds": {
+    "vacancy": 0.625,
+    "interstitial": 0.4738,
+    "frenkel": 0.383,
+    "antisite": 0.4963,
+    "all": 0.5029
+   }
+  },
+  "seconds": 487
+ },
+ {
+  "version": "D",
+  "cfg": {
+   "learning_rate": 0.05,
+   "max_leaf_nodes": 31,
+   "min_samples_leaf": 200,
+   "weighting": "none"
+  },
+  "iterations": 982,
+  "found": {
+   "prob": {
+    "vacancy": 0.6238,
+    "interstitial": 0.4425,
+    "frenkel": 0.279,
+    "antisite": 0.4375,
+    "all": 0.4582
+   },
+   "odds": {
+    "vacancy": 0.6238,
+    "interstitial": 0.4738,
+    "frenkel": 0.4055,
+    "antisite": 0.4713,
+    "all": 0.5002
+   }
+  },
+  "seconds": 814
+ },
+ {
+  "version": "D",
+  "cfg": {
+   "learning_rate": 0.05,
+   "max_leaf_nodes": 31,
+   "min_samples_leaf": 200,
+   "weighting": "sqrt"
+  },
+  "iterations": 399,
+  "found": {
+   "prob": {
+    "vacancy": 0.6138,
+    "interstitial": 0.3962,
+    "frenkel": 0.2166,
+    "antisite": 0.4275,
+    "all": 0.4283
+   },
+   "odds": {
+    "vacancy": 0.6175,
+    "interstitial": 0.4788,
+    "frenkel": 0.3934,
+    "antisite": 0.4813,
+    "all": 0.5002
+   }
+  },
+  "seconds": 354
+ },
+ {
+  "version": "D",
+  "cfg": {
+   "learning_rate": 0.05,
+   "max_leaf_nodes": 127,
+   "min_samples_leaf": 20,
+   "weighting": "none"
+  },
+  "iterations": 289,
+  "found": {
+   "prob": {
+    "vacancy": 0.6062,
+    "interstitial": 0.4188,
+    "frenkel": 0.2548,
+    "antisite": 0.4475,
+    "all": 0.4451
+   },
+   "odds": {
+    "vacancy": 0.6125,
+    "interstitial": 0.4412,
+    "frenkel": 0.3778,
+    "antisite": 0.4713,
+    "all": 0.483
+   }
+  },
+  "seconds": 322
+ },
+ {
+  "version": "D",
+  "cfg": {
+   "learning_rate": 0.05,
+   "max_leaf_nodes": 127,
+   "min_samples_leaf": 20,
+   "weighting": "sqrt"
+  },
+  "iterations": 168,
+  "found": {
+   "prob": {
+    "vacancy": 0.6188,
+    "interstitial": 0.4088,
+    "frenkel": 0.2097,
+    "antisite": 0.43,
+    "all": 0.4323
+   },
+   "odds": {
+    "vacancy": 0.6212,
+    "interstitial": 0.4713,
+    "frenkel": 0.3951,
+    "antisite": 0.4788,
+    "all": 0.4988
+   }
+  },
+  "seconds": 204
+ },
+ {
+  "version": "D",
+  "cfg": {
+   "learning_rate": 0.05,
+   "max_leaf_nodes": 127,
+   "min_samples_leaf": 200,
+   "weighting": "none"
+  },
+  "iterations": 299,
+  "found": {
+   "prob": {
+    "vacancy": 0.6212,
+    "interstitial": 0.4313,
+    "frenkel": 0.2877,
+    "antisite": 0.4675,
+    "all": 0.4642
+   },
+   "odds": {
+    "vacancy": 0.6175,
+    "interstitial": 0.4625,
+    "frenkel": 0.3795,
+    "antisite": 0.4813,
+    "all": 0.4931
+   }
+  },
+  "seconds": 342
+ },
+ {
+  "version": "D",
+  "cfg": {
+   "learning_rate": 0.05,
+   "max_leaf_nodes": 127,
+   "min_samples_leaf": 200,
+   "weighting": "sqrt"
+  },
+  "iterations": 164,
+  "found": {
+   "prob": {
+    "vacancy": 0.6125,
+    "interstitial": 0.3925,
+    "frenkel": 0.2132,
+    "antisite": 0.4462,
+    "all": 0.4313
+   },
+   "odds": {
+    "vacancy": 0.6112,
+    "interstitial": 0.4662,
+    "frenkel": 0.3657,
+    "antisite": 0.4813,
+    "all": 0.4898
+   }
+  },
+  "seconds": 220
+ },
+ {
+  "version": "D",
+  "cfg": {
+   "learning_rate": 0.05,
+   "max_leaf_nodes": 255,
+   "min_samples_leaf": 20,
+   "weighting": "none"
+  },
+  "iterations": 164,
+  "found": {
+   "prob": {
+    "vacancy": 0.6212,
+    "interstitial": 0.395,
+    "frenkel": 0.2444,
+    "antisite": 0.4575,
+    "all": 0.4434
+   },
+   "odds": {
+    "vacancy": 0.6238,
+    "interstitial": 0.4188,
+    "frenkel": 0.3432,
+    "antisite": 0.4825,
+    "all": 0.4763
+   }
+  },
+  "seconds": 249
+ },
+ {
+  "version": "D",
+  "cfg": {
+   "learning_rate": 0.05,
+   "max_leaf_nodes": 255,
+   "min_samples_leaf": 20,
+   "weighting": "sqrt"
+  },
+  "iterations": 99,
+  "found": {
+   "prob": {
+    "vacancy": 0.5962,
+    "interstitial": 0.4062,
+    "frenkel": 0.1958,
+    "antisite": 0.425,
+    "all": 0.4216
+   },
+   "odds": {
+    "vacancy": 0.6088,
+    "interstitial": 0.465,
+    "frenkel": 0.364,
+    "antisite": 0.4625,
+    "all": 0.4834
+   }
+  },
+  "seconds": 168
+ },
+ {
+  "version": "D",
+  "cfg": {
+   "learning_rate": 0.05,
+   "max_leaf_nodes": 255,
+   "min_samples_leaf": 200,
+   "weighting": "none"
+  },
+  "iterations": 173,
+  "found": {
+   "prob": {
+    "vacancy": 0.6212,
+    "interstitial": 0.4375,
+    "frenkel": 0.2704,
+    "antisite": 0.4512,
+    "all": 0.4582
+   },
+   "odds": {
+    "vacancy": 0.6225,
+    "interstitial": 0.4587,
+    "frenkel": 0.4003,
+    "antisite": 0.4838,
+    "all": 0.4982
+   }
+  },
+  "seconds": 268
+ },
+ {
+  "version": "D",
+  "cfg": {
+   "learning_rate": 0.05,
+   "max_leaf_nodes": 255,
+   "min_samples_leaf": 200,
+   "weighting": "sqrt"
+  },
+  "iterations": 105,
+  "found": {
+   "prob": {
+    "vacancy": 0.6188,
+    "interstitial": 0.4125,
+    "frenkel": 0.1924,
+    "antisite": 0.4213,
+    "all": 0.4276
+   },
+   "odds": {
+    "vacancy": 0.6212,
+    "interstitial": 0.4725,
+    "frenkel": 0.3726,
+    "antisite": 0.4713,
+    "all": 0.4928
+   }
+  },
+  "seconds": 178
+ },
+ {
+  "version": "D",
+  "cfg": {
+   "learning_rate": 0.1,
+   "max_leaf_nodes": 31,
+   "min_samples_leaf": 20,
+   "weighting": "none"
+  },
+  "iterations": 61,
+  "found": {
+   "prob": {
+    "vacancy": 0.6075,
+    "interstitial": 0.3625,
+    "frenkel": 0.1889,
+    "antisite": 0.4188,
+    "all": 0.4098
+   },
+   "odds": {
+    "vacancy": 0.6012,
+    "interstitial": 0.4062,
+    "frenkel": 0.2704,
+    "antisite": 0.4412,
+    "all": 0.4417
+   }
+  },
+  "seconds": 60
+ },
+ {
+  "version": "D",
+  "cfg": {
+   "learning_rate": 0.1,
+   "max_leaf_nodes": 31,
+   "min_samples_leaf": 20,
+   "weighting": "sqrt"
+  },
+  "iterations": 260,
+  "found": {
+   "prob": {
+    "vacancy": 0.6238,
+    "interstitial": 0.3875,
+    "frenkel": 0.1976,
+    "antisite": 0.4138,
+    "all": 0.4212
+   },
+   "odds": {
+    "vacancy": 0.625,
+    "interstitial": 0.4738,
+    "frenkel": 0.383,
+    "antisite": 0.4813,
+    "all": 0.4988
+   }
+  },
+  "seconds": 218
+ },
+ {
+  "version": "D",
+  "cfg": {
+   "learning_rate": 0.1,
+   "max_leaf_nodes": 31,
+   "min_samples_leaf": 200,
+   "weighting": "none"
+  },
+  "iterations": 22,
+  "found": {
+   "prob": {
+    "vacancy": 0.5962,
+    "interstitial": 0.4213,
+    "frenkel": 0.305,
+    "antisite": 0.4213,
+    "all": 0.4458
+   },
+   "odds": {
+    "vacancy": 0.595,
+    "interstitial": 0.46,
+    "frenkel": 0.3484,
+    "antisite": 0.4275,
+    "all": 0.4659
+   }
+  },
+  "seconds": 25
+ },
+ {
+  "version": "D",
+  "cfg": {
+   "learning_rate": 0.1,
+   "max_leaf_nodes": 31,
+   "min_samples_leaf": 200,
+   "weighting": "sqrt"
+  },
+  "iterations": 199,
+  "found": {
+   "prob": {
+    "vacancy": 0.6112,
+    "interstitial": 0.3912,
+    "frenkel": 0.2201,
+    "antisite": 0.4288,
+    "all": 0.4273
+   },
+   "odds": {
+    "vacancy": 0.62,
+    "interstitial": 0.465,
+    "frenkel": 0.3917,
+    "antisite": 0.4788,
+    "all": 0.4961
+   }
+  },
+  "seconds": 173
+ },
+ {
+  "version": "D",
+  "cfg": {
+   "learning_rate": 0.1,
+   "max_leaf_nodes": 127,
+   "min_samples_leaf": 20,
+   "weighting": "none"
+  },
+  "iterations": 87,
+  "found": {
+   "prob": {
+    "vacancy": 0.5887,
+    "interstitial": 0.3275,
+    "frenkel": 0.1906,
+    "antisite": 0.41,
+    "all": 0.3933
+   },
+   "odds": {
+    "vacancy": 0.5887,
+    "interstitial": 0.3625,
+    "frenkel": 0.2652,
+    "antisite": 0.4375,
+    "all": 0.4246
+   }
+  },
+  "seconds": 99
+ },
+ {
+  "version": "D",
+  "cfg": {
+   "learning_rate": 0.1,
+   "max_leaf_nodes": 127,
+   "min_samples_leaf": 20,
+   "weighting": "sqrt"
+  },
+  "iterations": 86,
+  "found": {
+   "prob": {
+    "vacancy": 0.6175,
+    "interstitial": 0.4188,
+    "frenkel": 0.1924,
+    "antisite": 0.4263,
+    "all": 0.4303
+   },
+   "odds": {
+    "vacancy": 0.6262,
+    "interstitial": 0.4813,
+    "frenkel": 0.3778,
+    "antisite": 0.4725,
+    "all": 0.4978
+   }
+  },
+  "seconds": 103
+ },
+ {
+  "version": "D",
+  "cfg": {
+   "learning_rate": 0.1,
+   "max_leaf_nodes": 127,
+   "min_samples_leaf": 200,
+   "weighting": "none"
+  },
+  "iterations": 42,
+  "found": {
+   "prob": {
+    "vacancy": 0.6112,
+    "interstitial": 0.3663,
+    "frenkel": 0.2409,
+    "antisite": 0.4188,
+    "all": 0.4219
+   },
+   "odds": {
+    "vacancy": 0.61,
+    "interstitial": 0.4188,
+    "frenkel": 0.3622,
+    "antisite": 0.4562,
+    "all": 0.4693
+   }
+  },
+  "seconds": 57
+ },
+ {
+  "version": "D",
+  "cfg": {
+   "learning_rate": 0.1,
+   "max_leaf_nodes": 127,
+   "min_samples_leaf": 200,
+   "weighting": "sqrt"
+  },
+  "iterations": 91,
+  "found": {
+   "prob": {
+    "vacancy": 0.6112,
+    "interstitial": 0.3925,
+    "frenkel": 0.1993,
+    "antisite": 0.425,
+    "all": 0.4226
+   },
+   "odds": {
+    "vacancy": 0.6138,
+    "interstitial": 0.4662,
+    "frenkel": 0.3726,
+    "antisite": 0.475,
+    "all": 0.4901
+   }
+  },
+  "seconds": 112
+ },
+ {
+  "version": "D",
+  "cfg": {
+   "learning_rate": 0.1,
+   "max_leaf_nodes": 255,
+   "min_samples_leaf": 20,
+   "weighting": "none"
+  },
+  "iterations": 54,
+  "found": {
+   "prob": {
+    "vacancy": 0.6062,
+    "interstitial": 0.3137,
+    "frenkel": 0.1889,
+    "antisite": 0.4213,
+    "all": 0.397
+   },
+   "odds": {
+    "vacancy": 0.6012,
+    "interstitial": 0.3575,
+    "frenkel": 0.2478,
+    "antisite": 0.4475,
+    "all": 0.4259
+   }
+  },
+  "seconds": 81
+ },
+ {
+  "version": "D",
+  "cfg": {
+   "learning_rate": 0.1,
+   "max_leaf_nodes": 255,
+   "min_samples_leaf": 20,
+   "weighting": "sqrt"
+  },
+  "iterations": 60,
+  "found": {
+   "prob": {
+    "vacancy": 0.605,
+    "interstitial": 0.4,
+    "frenkel": 0.1993,
+    "antisite": 0.41,
+    "all": 0.4189
+   },
+   "odds": {
+    "vacancy": 0.6012,
+    "interstitial": 0.4688,
+    "frenkel": 0.3553,
+    "antisite": 0.465,
+    "all": 0.4814
+   }
+  },
+  "seconds": 95
+ },
+ {
+  "version": "D",
+  "cfg": {
+   "learning_rate": 0.1,
+   "max_leaf_nodes": 255,
+   "min_samples_leaf": 200,
+   "weighting": "none"
+  },
+  "iterations": 79,
+  "found": {
+   "prob": {
+    "vacancy": 0.6288,
+    "interstitial": 0.3837,
+    "frenkel": 0.253,
+    "antisite": 0.4225,
+    "all": 0.4347
+   },
+   "odds": {
+    "vacancy": 0.6262,
+    "interstitial": 0.42,
+    "frenkel": 0.3432,
+    "antisite": 0.4437,
+    "all": 0.4669
+   }
+  },
+  "seconds": 119
+ },
+ {
+  "version": "D",
+  "cfg": {
+   "learning_rate": 0.1,
+   "max_leaf_nodes": 255,
+   "min_samples_leaf": 200,
+   "weighting": "sqrt"
+  },
+  "iterations": 65,
+  "found": {
+   "prob": {
+    "vacancy": 0.6112,
+    "interstitial": 0.4075,
+    "frenkel": 0.1941,
+    "antisite": 0.4288,
+    "all": 0.4266
+   },
+   "odds": {
+    "vacancy": 0.6138,
+    "interstitial": 0.4662,
+    "frenkel": 0.3899,
+    "antisite": 0.4875,
+    "all": 0.4968
+   }
+  },
+  "seconds": 105
+ },
+ {
+  "version": "E",
+  "cfg": {
+   "learning_rate": 0.05,
+   "max_leaf_nodes": 31,
+   "min_samples_leaf": 20,
+   "weighting": "sqrt"
+  },
+  "iterations": 416,
+  "found": {
+   "prob": {
+    "vacancy": 0.6062,
+    "interstitial": 0.4012,
+    "frenkel": 0.2236,
+    "antisite": 0.4525,
+    "all": 0.4357
+   },
+   "odds": {
+    "vacancy": 0.61,
+    "interstitial": 0.4713,
+    "frenkel": 0.4107,
+    "antisite": 0.4888,
+    "all": 0.5015
+   }
+  },
+  "seconds": 395
+ },
+ {
+  "version": "E",
+  "cfg": {
+   "learning_rate": 0.05,
+   "max_leaf_nodes": 31,
+   "min_samples_leaf": 200,
+   "weighting": "none"
+  },
+  "iterations": 824,
+  "found": {
+   "prob": {
+    "vacancy": 0.6125,
+    "interstitial": 0.4375,
+    "frenkel": 0.2756,
+    "antisite": 0.4713,
+    "all": 0.4622
+   },
+   "odds": {
+    "vacancy": 0.6162,
+    "interstitial": 0.4537,
+    "frenkel": 0.409,
+    "antisite": 0.4875,
+    "all": 0.4978
+   }
+  },
+  "seconds": 745
+ },
+ {
+  "version": "E",
+  "cfg": {
+   "learning_rate": 0.05,
+   "max_leaf_nodes": 31,
+   "min_samples_leaf": 200,
+   "weighting": "sqrt"
+  },
+  "iterations": 505,
+  "found": {
+   "prob": {
+    "vacancy": 0.6075,
+    "interstitial": 0.4062,
+    "frenkel": 0.2062,
+    "antisite": 0.4412,
+    "all": 0.431
+   },
+   "odds": {
+    "vacancy": 0.6188,
+    "interstitial": 0.4875,
+    "frenkel": 0.4159,
+    "antisite": 0.4875,
+    "all": 0.5089
+   }
+  },
+  "seconds": 496
+ },
+ {
+  "version": "E",
+  "cfg": {
+   "learning_rate": 0.05,
+   "max_leaf_nodes": 127,
+   "min_samples_leaf": 20,
+   "weighting": "sqrt"
+  },
+  "iterations": 164,
+  "found": {
+   "prob": {
+    "vacancy": 0.61,
+    "interstitial": 0.4175,
+    "frenkel": 0.208,
+    "antisite": 0.4475,
+    "all": 0.4367
+   },
+   "odds": {
+    "vacancy": 0.6188,
+    "interstitial": 0.48,
+    "frenkel": 0.4038,
+    "antisite": 0.4875,
+    "all": 0.5045
+   }
+  },
+  "seconds": 226
+ },
+ {
+  "version": "A",
+  "cfg": {
+   "learning_rate": 0.05,
+   "max_leaf_nodes": 31,
+   "min_samples_leaf": 20,
+   "weighting": "sqrt"
+  },
+  "iterations": 571,
+  "found": {
+   "prob": {
+    "vacancy": 0.58,
+    "interstitial": 0.3113,
+    "frenkel": 0.1612,
+    "antisite": 0.3887,
+    "all": 0.3752
+   },
+   "odds": {
+    "vacancy": 0.5962,
+    "interstitial": 0.4025,
+    "frenkel": 0.3865,
+    "antisite": 0.4412,
+    "all": 0.4619
+   }
+  },
+  "seconds": 173
+ },
+ {
+  "version": "C",
+  "cfg": {
+   "learning_rate": 0.05,
+   "max_leaf_nodes": 31,
+   "min_samples_leaf": 20,
+   "weighting": "sqrt"
+  },
+  "iterations": 505,
+  "found": {
+   "prob": {
+    "vacancy": 0.6225,
+    "interstitial": 0.3987,
+    "frenkel": 0.1681,
+    "antisite": 0.435,
+    "all": 0.4239
+   },
+   "odds": {
+    "vacancy": 0.63,
+    "interstitial": 0.465,
+    "frenkel": 0.3951,
+    "antisite": 0.4725,
+    "all": 0.4978
+   }
+  },
+  "seconds": 328
+ }
+]
