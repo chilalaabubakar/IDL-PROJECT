@@ -62,6 +62,15 @@ Tuning took 72 minutes and the refit and validation 11 minutes, on 4 CPU cores.
 - The final comparison is on the fresh test set with three finder runs (item 1). Run
   `score --tag tuned --restored` there once, at the end (`notebooks/kaggle_descriptor_classifier.ipynb`, step F).
 
+## Reproduced on Kaggle (25 November 2026)
+
+`notebooks/kaggle_descriptor_classifier.ipynb` redid the tuning and the validation from
+scratch on Kaggle (`results/descriptor_classifier_kaggle_20261125-1731Z/`). It chose the same
+settings, found the same share of held-out defects for every version (A 46.19%, C 49.78%,
+D 50.29%, E 50.89%) and the same validation result, defect by defect, for every tree
+version and single measure. Only the logistic regression, a reference, differs by 0.1
+points, from rounding in its solver.
+
 ## First run, untuned (kept for the record)
 
 `summary.md`, `validation.json`, `models.pkl`: the same trees with the first settings
